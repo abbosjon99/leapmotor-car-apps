@@ -325,30 +325,13 @@
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
 
-    # Kid mode: switch + PIN
-    const-string v2, "Kid mode"
+    # Child mode: entering/leaving is done from the grid; here you only set the PIN
+    const-string v2, "Child mode"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
-    const-string v2, "Kid mode: passenger grid shows only apps ticked \"Kids\"; Close apps and Swap are off"
-    const-string v3, "kid"
-    const/4 v4, 0x0
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
-    move-result-object v5
-    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->kid:Z
-    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
-    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
-    # numberPassword (TYPE_CLASS_NUMBER | TYPE_NUMBER_VARIATION_PASSWORD)
-    new-instance v5, Landroid/widget/EditText;
-    invoke-direct {v5, p0}, Landroid/widget/EditText;-><init>(Landroid/content/Context;)V
-    const/16 v2, 0x12
-    invoke-virtual {v5, v2}, Landroid/widget/EditText;->setInputType(I)V
-    const-string v2, "PIN to leave kid mode (at least 4 digits)"
-    invoke-virtual {v5, v2}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
-    iget-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->storedPin:Ljava/lang/String;
-    invoke-virtual {v5, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v2, 0x41d00000
-    invoke-virtual {v5, v2}, Landroid/widget/EditText;->setTextSize(F)V
-    invoke-virtual {v1, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
-    iput-object v5, p0, Luz/carhelper/passenger/SettingsActivity;->pinEdit:Landroid/widget/EditText;
+    const-string v2, "Set password"
+    const-string v3, "#setpin"
+    const v4, -0xe1771b
+    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
 
     # Apps shown on the passenger screen
     const-string v2, "Apps shown on the passenger screen"
@@ -459,8 +442,8 @@
     :end
     invoke-virtual {p0, v0}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
 
-    # kid mode on: ask the PIN before anything can be changed
-    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->kid:Z
+    # gate removed: child mode is unlocked from the grid with the PIN pad
+    const/4 v2, 0x0
     if-eqz v2, :no_gate
     iget-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->storedPin:Ljava/lang/String;
     invoke-virtual {v2}, Ljava/lang/String;->isEmpty()Z
@@ -596,29 +579,18 @@
     .locals 4
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
+    const-string v1, "#setpin"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_setpin
+    const-string v1, "set"
+    invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
+    return-void
+    :not_setpin
     const-string v1, "#save"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :leave
-    # kid mode needs a PIN of 4+ digits, otherwise stay on the page
-    iget-object v1, p0, Luz/carhelper/passenger/SettingsActivity;->pinEdit:Landroid/widget/EditText;
-    invoke-virtual {v1}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
-    move-result-object v1
-    invoke-virtual {v1}, Ljava/lang/Object;->toString()Ljava/lang/String;
-    move-result-object v0
-    iget-boolean v1, p0, Luz/carhelper/passenger/SettingsActivity;->kid:Z
-    if-eqz v1, :pin_ok
-    invoke-virtual {v0}, Ljava/lang/String;->length()I
-    move-result v1
-    const/4 v2, 0x4
-    if-ge v1, v2, :pin_ok
-    const-string v2, "Kid mode needs a PIN of at least 4 digits"
-    const/4 v3, 0x1
-    invoke-static {p0, v2, v3}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
-    move-result-object v2
-    invoke-virtual {v2}, Landroid/widget/Toast;->show()V
-    return-void
-    :pin_ok
     invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->prefs()Landroid/content/SharedPreferences;
     move-result-object v1
     invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
@@ -638,14 +610,9 @@
     const-string v2, "hidden"
     iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "kid"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->kid:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     const-string v2, "kidApps"
     iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->kidApps:Ljava/util/HashSet;
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "pin"
-    invoke-interface {v1, v2, v0}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
     invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
     const-string v2, "Saved"
     const/4 v3, 0x0

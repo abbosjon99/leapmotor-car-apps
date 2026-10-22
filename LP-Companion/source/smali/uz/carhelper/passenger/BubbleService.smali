@@ -287,9 +287,9 @@
 .end method
 
 # 3x3 square, 24 px padding -> 408 x 408 px:
-#        [ bar  ]
-# [back] [  X   ] [apps]
-# [swap] [ home ]
+#            [ screen off ]
+# [back] [ home = LP Companion ] [ bar ]
+#            [ swap ]
 .method private buildPanel()V
     .locals 9
     iget-object v0, p0, Luz/carhelper/passenger/BubbleService;->dctx:Landroid/content/Context;
@@ -309,10 +309,26 @@
     invoke-virtual {v1, p0}, Landroid/view/View;->setOnTouchListener(Landroid/view/View$OnTouchListener;)V
     iput-object v1, p0, Luz/carhelper/passenger/BubbleService;->panel:Landroid/widget/LinearLayout;
 
-    # row 1: bar toggle in the middle
+    # row 1: screen off in the middle
     invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v4
     invoke-direct {p0, v4}, Luz/carhelper/passenger/BubbleService;->addSpacer(Landroid/widget/LinearLayout;)V
+    const-string v2, "ic_screen_off"
+    const-string v3, "screenoff"
+    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
+    invoke-direct {p0, v4}, Luz/carhelper/passenger/BubbleService;->addSpacer(Landroid/widget/LinearLayout;)V
+
+    # row 2: back, home (opens LP Companion), bar toggle
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v4
+    const-string v2, "ic_back"
+    const-string v3, "back"
+    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
+    move-result-object v2
+    iput-object v2, p0, Luz/carhelper/passenger/BubbleService;->backBtn:Landroid/widget/ImageView;
+    const-string v2, "ic_home"
+    const-string v3, "home"
+    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
     iget-boolean v2, p0, Luz/carhelper/passenger/BubbleService;->barHidden:Z
     const-string v3, "bar"
     if-eqz v2, :bar_visible
@@ -324,31 +340,13 @@
     invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
     move-result-object v2
     iput-object v2, p0, Luz/carhelper/passenger/BubbleService;->barBtn:Landroid/widget/ImageView;
+
+    # row 3: swap screens in the middle
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v4
     invoke-direct {p0, v4}, Luz/carhelper/passenger/BubbleService;->addSpacer(Landroid/widget/LinearLayout;)V
-
-    # row 2: back, open app, screen off (the bubble itself is the close button)
-    invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
-    move-result-object v4
-    const-string v2, "ic_back"
-    const-string v3, "back"
-    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
-    move-result-object v2
-    iput-object v2, p0, Luz/carhelper/passenger/BubbleService;->backBtn:Landroid/widget/ImageView;
-    const-string v2, "ic_apps"
-    const-string v3, "apps"
-    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
-    const-string v2, "ic_screen_off"
-    const-string v3, "screenoff"
-    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
-
-    # row 3: swap screens on the left, home in the middle
-    invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
-    move-result-object v4
     const-string v2, "ic_swap"
     const-string v3, "swap"
-    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
-    const-string v2, "ic_home"
-    const-string v3, "home"
     invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/BubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
     invoke-direct {p0, v4}, Luz/carhelper/passenger/BubbleService;->addSpacer(Landroid/widget/LinearLayout;)V
 
@@ -573,22 +571,16 @@
     invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->startOnPassenger(Landroid/content/Intent;)V
     return-void
 
-    # Home: same as the sidebar's Home - passenger launcher main screen on display 3
+    # Home: open LP Companion's grid on the passenger screen (display 3)
     :not_apps
     const-string v1, "home"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :not_home
+    invoke-direct {p0}, Luz/carhelper/passenger/BubbleService;->hidePanel()V
     new-instance v1, Landroid/content/Intent;
-    const-string v2, "android.intent.action.MAIN"
-    invoke-direct {v1, v2}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-    const-string v2, "android.intent.category.LAUNCHER"
-    invoke-virtual {v1, v2}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
-    const-string v2, "com.leapmotor.copilotshowapp"
-    const-string v3, "com.leapmotor.copilotshowapp.mvvm.main.MainActivity"
-    invoke-virtual {v1, v2, v3}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
-    const/high16 v2, 0x10000
-    invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    const-class v2, Luz/carhelper/passenger/MainActivity;
+    invoke-direct {v1, p0, v2}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/BubbleService;->startOnPassenger(Landroid/content/Intent;)V
     return-void
 
@@ -608,7 +600,7 @@
     new-instance v2, Luz/carhelper/passenger/PanelAction;
     const/4 v3, 0x0
     invoke-direct {v2, p0, v3}, Luz/carhelper/passenger/PanelAction;-><init>(Luz/carhelper/passenger/BubbleService;I)V
-    const-wide/16 v3, 0x96
+    const-wide/16 v3, 0x28
     invoke-virtual {v1, v2, v3, v4}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
     new-instance v2, Luz/carhelper/passenger/PanelAction;
     const/4 v3, 0x1

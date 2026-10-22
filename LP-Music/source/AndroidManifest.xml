@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="uz.carhelper.music">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- freemme Media Session Aggregator: how the car's dock discovers audio apps (see NetEase/Migu) -->
+    <uses-permission android:name="freemme.permission.msa"/>
+    <uses-permission android:name="freemme.permission.msa.SECURITY_ACCESS"/>
     <queries>
         <!-- so MusicGate can see whether DiPlay is installed -->
         <package android:name="com.shihab.diplay"/>
@@ -13,8 +16,11 @@
             <action android:name="android.media.browse.MediaBrowserService"/>
         </intent>
     </queries>
-    <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher"
+    <application android:appCategory="audio" android:label="@string/app_name" android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false">
+        <!-- Dock now-playing card discovery: the car's media aggregator reads these to find our session service -->
+        <meta-data android:name="MediaSessionServiceName" android:value="uz.carhelper.passenger.MediaBrowser"/>
+        <meta-data android:name="MediaControllerTag" android:value="MediaSession"/>
         <activity android:name="uz.carhelper.passenger.MusicSettingsActivity" android:exported="true"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar">

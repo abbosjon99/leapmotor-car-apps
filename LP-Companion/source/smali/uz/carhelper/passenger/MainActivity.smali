@@ -112,6 +112,25 @@
     const-string v6, "ic_settings"
     const-string v7, "#settings"
     invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
+    const-string v5, "Go to car"
+    const-string v6, "ic_caros"
+    const-string v7, "#gotocar"
+    invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
+    const-string v5, "Exit"
+    const-string v6, "ic_exit"
+    const-string v7, "#exit"
+    invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
+    # child mode toggle (Enter / Exit)
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    move-result v5
+    const-string v6, "ic_child"
+    const-string v7, "Enter child mode"
+    const-string v8, "#childenter"
+    if-eqz v5, :child_pill
+    const-string v7, "Exit child mode"
+    const-string v8, "#childexit"
+    :child_pill
+    invoke-direct {p0, v4, v7, v6, v8}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
     goto :pills_common
     :settings_screen
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->readAutoClose()Z
@@ -272,8 +291,49 @@
     goto :loop
 
     :end
+    invoke-direct {p0, v2}, Luz/carhelper/passenger/MainActivity;->wrapWallpaper(Landroid/view/View;)Landroid/view/View;
+    move-result-object v2
     invoke-virtual {p0, v2}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
     return-void
+.end method
+
+# ---------- apps-menu wallpaper (swipe horizontally to change) ----------
+
+.method private wrapWallpaper(Landroid/view/View;)Landroid/view/View;
+    .locals 6
+    instance-of v0, p0, Luz/carhelper/passenger/SettingsActivity;
+    if-eqz v0, :grid
+    return-object p1
+    :grid
+    new-instance v0, Landroid/widget/ImageView;
+    invoke-direct {v0, p0}, Landroid/widget/ImageView;-><init>(Landroid/content/Context;)V
+    sget-object v1, Landroid/widget/ImageView$ScaleType;->CENTER_CROP:Landroid/widget/ImageView$ScaleType;
+    invoke-virtual {v0, v1}, Landroid/widget/ImageView;->setScaleType(Landroid/widget/ImageView$ScaleType;)V
+    new-instance v1, Luz/carhelper/passenger/WallpaperFrame;
+    invoke-direct {v1, p0, p0, v0}, Luz/carhelper/passenger/WallpaperFrame;-><init>(Landroid/content/Context;Landroid/app/Activity;Landroid/widget/ImageView;)V
+    const/4 v2, -0x1
+    new-instance v3, Landroid/widget/FrameLayout$LayoutParams;
+    invoke-direct {v3, v2, v2}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
+    invoke-virtual {v1, v0, v3}, Landroid/widget/FrameLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    new-instance v3, Landroid/view/View;
+    invoke-direct {v3, p0}, Landroid/view/View;-><init>(Landroid/content/Context;)V
+    const v4, -0x66000000
+    invoke-virtual {v3, v4}, Landroid/view/View;->setBackgroundColor(I)V
+    new-instance v4, Landroid/widget/FrameLayout$LayoutParams;
+    invoke-direct {v4, v2, v2}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
+    invoke-virtual {v1, v3, v4}, Landroid/widget/FrameLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    new-instance v4, Landroid/widget/FrameLayout$LayoutParams;
+    invoke-direct {v4, v2, v2}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
+    invoke-virtual {v1, p1, v4}, Landroid/widget/FrameLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    const-string v3, "apps"
+    const/4 v4, 0x0
+    invoke-virtual {p0, v3, v4}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v3
+    const-string v5, "wallpaper"
+    invoke-interface {v3, v5, v4}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    move-result v3
+    invoke-virtual {v1, v3}, Luz/carhelper/passenger/WallpaperFrame;->apply(I)V
+    return-object v1
 .end method
 
 .method public onClick(Landroid/view/View;)V
@@ -281,6 +341,45 @@
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
     check-cast v0, Ljava/lang/String;
+
+    const-string v1, "#exit"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_exit
+    invoke-virtual {p0}, Landroid/app/Activity;->finish()V
+    return-void
+    :not_exit
+    const-string v1, "#gotocar"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_gotocar
+    new-instance v1, Landroid/content/Intent;
+    const-string v2, "android.intent.action.MAIN"
+    invoke-direct {v1, v2}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const-string v2, "android.intent.category.LAUNCHER"
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
+    const-string v2, "com.leapmotor.copilotshowapp"
+    const-string v3, "com.leapmotor.copilotshowapp.mvvm.main.MainActivity"
+    invoke-virtual {v1, v2, v3}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    const/high16 v2, 0x10000000
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    :try_start_g
+    invoke-static {}, Landroid/app/ActivityOptions;->makeBasic()Landroid/app/ActivityOptions;
+    move-result-object v2
+    const/4 v3, 0x3
+    invoke-virtual {v2, v3}, Landroid/app/ActivityOptions;->setLaunchDisplayId(I)Landroid/app/ActivityOptions;
+    invoke-virtual {v2}, Landroid/app/ActivityOptions;->toBundle()Landroid/os/Bundle;
+    move-result-object v2
+    invoke-virtual {p0, v1, v2}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;Landroid/os/Bundle;)V
+    :try_end_g
+    .catch Ljava/lang/Exception; {:try_start_g .. :try_end_g} :catch_g
+    goto :gotocar_done
+    :catch_g
+    move-exception v1
+    :gotocar_done
+    invoke-virtual {p0}, Landroid/app/Activity;->finish()V
+    return-void
+    :not_gotocar
 
     # Close apps: popup of sideloaded apps opened on the passenger screen
     const-string v1, "#closeall"
@@ -328,11 +427,60 @@
     return-void
     :not_autoclose
 
-    # Settings: hide/show apps screen
+    # child mode: Enter (needs a PIN set) / Exit (PIN pad)
+    const-string v1, "#childenter"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_childenter
+    const-string v1, "apps"
+    const/4 v2, 0x0
+    invoke-virtual {p0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v1
+    const-string v3, "pin"
+    const-string v4, ""
+    invoke-interface {v1, v3, v4}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    invoke-virtual {v2}, Ljava/lang/String;->isEmpty()Z
+    move-result v2
+    if-eqz v2, :do_childenter
+    const-string v1, "Set a password in Settings first"
+    const/4 v2, 0x1
+    invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v1
+    invoke-virtual {v1}, Landroid/widget/Toast;->show()V
+    return-void
+    :do_childenter
+    invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+    move-result-object v1
+    const-string v2, "kid"
+    const/4 v3, 0x1
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    move-result-object v1
+    invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
+    invoke-virtual {p0}, Landroid/app/Activity;->recreate()V
+    return-void
+    :not_childenter
+    const-string v1, "#childexit"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_childexit
+    const-string v1, "exit"
+    invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
+    return-void
+    :not_childexit
+
+    # Settings: hide/show apps screen (locked behind the PIN while in child mode)
     const-string v1, "#settings"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :not_settings
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    move-result v1
+    if-eqz v1, :open_settings
+    const-string v1, "settings"
+    invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
+    return-void
+    :open_settings
     new-instance v1, Landroid/content/Intent;
     const-class v2, Luz/carhelper/passenger/SettingsActivity;
     invoke-direct {v1, p0, v2}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
