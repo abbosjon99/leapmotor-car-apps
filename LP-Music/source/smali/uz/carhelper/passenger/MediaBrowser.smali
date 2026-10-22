@@ -57,7 +57,13 @@
     const-string v1, "LPMusic"
     invoke-direct {v0, p0, v1}, Landroid/media/session/MediaSession;-><init>(Landroid/content/Context;Ljava/lang/String;)V
     iput-object v0, p0, Luz/carhelper/passenger/MediaBrowser;->session:Landroid/media/session/MediaSession;
+    # FLAG_HANDLES_TRANSPORT_CONTROLS (2); add FLAG_HANDLES_MEDIA_BUTTONS (1) only when not releasing them
+    const/4 v1, 0x2
+    invoke-static {p0}, Luz/carhelper/passenger/MusicGate;->releaseButtons(Landroid/content/Context;)Z
+    move-result v2
+    if-nez v2, :flags_set
     const/4 v1, 0x3
+    :flags_set
     invoke-virtual {v0, v1}, Landroid/media/session/MediaSession;->setFlags(I)V
     new-instance v1, Luz/carhelper/passenger/MediaCb;
     invoke-direct {v1, p0}, Luz/carhelper/passenger/MediaCb;-><init>(Landroid/content/Context;)V

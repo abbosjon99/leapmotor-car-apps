@@ -13,7 +13,10 @@ Opening LP Music shows its settings:
 - **Give the wheel buttons to DiPlay while it's playing** — only shown when DiPlay
   (`com.shihab.diplay`) is installed. While DiPlay is actively playing, LP Music stops controlling
   (no mirror, no wheel keys, no type-13 announce) so the wheel buttons drive DiPlay instead.
-- **Save** writes the settings; **Exit** leaves without saving.
+- **Don't grab the hardware media buttons** (on by default) — LP Music's media session won't claim
+  the hardware/`MEDIA_BUTTON` keys, so Android Auto or the actually-playing app keeps them. LP Music
+  still controls music via the car's own wheel signal. Turn off only if the wheel buttons stop working.
+- **Save** writes the settings (and restarts the service so changes apply); **Exit** leaves without saving.
 
 ## Why a separate app
 The dock card experiment needs an app that publishes a standard Android media session. Keeping it
