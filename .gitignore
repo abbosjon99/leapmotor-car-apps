@@ -14,3 +14,10 @@ LP-Companion/tools/
 
 # --- Built APKs (attach to a GitHub Release instead of committing) ---
 *.apk
+
+# --- DiPlay-Leapmotor (Gradle) local build state and Apple MFI auth assets ---
+**/.gradle/
+**/local.properties
+DiPlay-Leapmotor/**/offline-mfi/
+*.pk8
+*.p7b
