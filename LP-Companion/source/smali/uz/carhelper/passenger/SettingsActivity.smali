@@ -26,6 +26,7 @@
 .field private autoClose:Z
 .field private closeMusic:Z
 .field private overheat:Z
+.field private autoOpen:Z
 .field private hidden:Ljava/util/HashSet;
 
 .method public constructor <init>()V
@@ -166,6 +167,11 @@
     invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
     iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
+    const-string v2, "autoOpen"
+    const/4 v4, 0x1
+    invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
     const-string v2, "kid"
     invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
@@ -290,6 +296,18 @@
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
 
+    # Passenger screen
+    const-string v2, "Passenger screen"
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    const-string v2, "Open LP Companion automatically when the passenger screen turns on"
+    const-string v3, "autoOpen"
+    const/4 v4, 0x0
+    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+
     # Closing apps
     const-string v2, "Closing apps"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
@@ -331,6 +349,14 @@
     const-string v2, "Set password"
     const-string v3, "#setpin"
     const v4, -0xe1771b
+    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+
+    # Vehicle settings opener
+    const-string v2, "Vehicle"
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    const-string v2, "Vehicle settings"
+    const-string v3, "#vehset"
+    const v4, -0xbd7a89
     invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
 
     # Apps shown on the passenger screen
@@ -531,6 +557,14 @@
     return-void
     :not_overheat
 
+    const-string v1, "autoOpen"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_autoopen
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
+    return-void
+    :not_autoopen
+
     const-string v1, "closeMusic"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
@@ -587,6 +621,23 @@
     invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
     return-void
     :not_setpin
+    const-string v1, "#vehset"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_vehset
+    new-instance v1, Landroid/content/Intent;
+    const-string v2, "android.settings.SETTINGS"
+    invoke-direct {v1, v2}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const/high16 v2, 0x10000000
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    :try_start_veh
+    invoke-virtual {p0, v1}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
+    :try_end_veh
+    .catch Ljava/lang/Exception; {:try_start_veh .. :try_end_veh} :veh_fail
+    return-void
+    :veh_fail
+    return-void
+    :not_vehset
     const-string v1, "#save"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
@@ -606,6 +657,9 @@
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     const-string v2, "overheat"
     iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "autoOpen"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     const-string v2, "hidden"
     iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;

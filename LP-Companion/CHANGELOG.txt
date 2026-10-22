@@ -193,3 +193,36 @@ LP Companion 2.13
     Each press logs its channel and "accepted" or "dropped (duplicate within 350 ms)".
 
   Undo any of these: install the previous APK (LP-Companion-2.9/2.10/2.11/2.12.apk) with -r.
+
+LP Companion 2.14 / 2.15  (UI overhaul + main-screen bubble)
+  GRID (passenger screen)
+  - Header gains beautiful pill buttons: "Go to car" (opens the Leapmotor launcher on the
+    passenger screen), "Exit", and an Enter/Exit child-mode pill next to Apps. In child mode
+    the Settings button is PIN-locked.
+  - Now-playing bar under the header: shows and controls whatever is playing from ANY source
+    (car radio/Bluetooth/Leapmotor media or a sideloaded player) via the active MediaSession;
+    prev / play-pause / next. Hides itself when nothing is playing.
+  - Wallpaper behind the grid (dimmed for readability). A medium/long horizontal swipe across
+    the grid cycles wallpapers: solid black + 11 bundled images. No picker button.
+  PIN
+  - PIN entry uses a custom on-screen numeric keypad (1234567890 + ⌫ + OK), never the system
+    keyboard - fits the 720 px passenger screen. "Set password" lives in Settings in its own
+    keypad dialog; the kid on/off switch is gone (enter/leave child mode from the grid).
+  BUBBLE (passenger screen, display 3)
+  - Panel relaid out: screen-off (top), [Back] Home(=LP Companion) navbar, swap (bottom).
+    Home opens LP Companion instead of the car launcher; the menu/apps button was removed.
+  - Back is faster (no reopen step) and, when the Back accessibility service is OFF, the whole
+    panel drops Back, shifts Home left and leaves the centre blank (universal rule, both bubbles).
+  SECOND BUBBLE (main screen, display 0)  [MainBubbleService]
+  - A second AssistiveTouch bubble for the driver: turn off passenger screen (top),
+    [Back] LP Companion(menu icon) child-mode-toggle (bottom row), swap (bottom).
+  - "Turn off passenger screen" draws an opaque cover on display 3; tap it to restore.
+  - Child-mode toggle flips kid mode and brings LP Companion to the front on the passenger screen.
+  - Same Back-off rule as the passenger bubble.
+  AUTO-OPEN (1.1)  [PassengerWatcher]
+  - When the passenger screen powers on, LP Companion opens there automatically (off->on edge,
+    debounced 2 s). Toggle in Settings > Passenger screen ("autoOpen", default on).
+  SETTINGS
+  - New "Vehicle settings" pill opens the car's Android Settings (android.settings.SETTINGS).
+  - versionCode 23 / versionName 2.15.
+  Undo: install LP-Companion-2.13.apk with -r.

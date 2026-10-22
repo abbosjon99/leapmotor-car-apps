@@ -40,10 +40,14 @@
     .locals 14
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 
-    # make sure the passenger bubble is running
+    # make sure both bubbles are running (passenger screen + main screen)
     :try_start_bubble
     new-instance v4, Landroid/content/Intent;
     const-class v5, Luz/carhelper/passenger/BubbleService;
+    invoke-direct {v4, p0, v5}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v4}, Landroid/content/Context;->startForegroundService(Landroid/content/Intent;)Landroid/content/ComponentName;
+    new-instance v4, Landroid/content/Intent;
+    const-class v5, Luz/carhelper/passenger/MainBubbleService;
     invoke-direct {v4, p0, v5}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-virtual {p0, v4}, Landroid/content/Context;->startForegroundService(Landroid/content/Intent;)Landroid/content/ComponentName;
     :try_end_bubble
@@ -174,6 +178,21 @@
     invoke-direct {p0, v4, v6, v7, v8}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
 
     invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # now-playing bar (grid only, reflects any active media source)
+    instance-of v5, p0, Luz/carhelper/passenger/SettingsActivity;
+    if-nez v5, :skip_np
+    new-instance v5, Luz/carhelper/passenger/NowPlaying;
+    invoke-direct {v5, p0}, Luz/carhelper/passenger/NowPlaying;-><init>(Landroid/app/Activity;)V
+    new-instance v6, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v7, -0x1
+    const/4 v8, -0x2
+    invoke-direct {v6, v7, v8}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    const/4 v7, 0x0
+    const/16 v9, 0x10
+    invoke-virtual {v6, v7, v7, v7, v9}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
+    invoke-virtual {v3, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    :skip_np
 
     # v4 = current row, v5 = item count, v6 = iterator
     const/4 v4, 0x0

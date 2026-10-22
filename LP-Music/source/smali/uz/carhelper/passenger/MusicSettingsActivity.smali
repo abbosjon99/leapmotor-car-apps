@@ -188,6 +188,13 @@
     const-string v2, "Lets Android Auto or the playing app keep the wheel’s media keys. LP Music still controls music through the car’s own wheel signal. Leave on unless the wheel buttons stop working."
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/MusicSettingsActivity;->hint(Landroid/widget/LinearLayout;Ljava/lang/String;)V
 
+    const-string v2, "Vehicle"
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/MusicSettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    const-string v2, "Vehicle settings"
+    const-string v3, "#vehset"
+    const v4, -0xbd7a89
+    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/MusicSettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+
     invoke-virtual {p0, v0}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
     return-void
 .end method
@@ -224,6 +231,23 @@
     .locals 4
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
+    const-string v1, "#vehset"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_vehset
+    new-instance v1, Landroid/content/Intent;
+    const-string v2, "android.settings.SETTINGS"
+    invoke-direct {v1, v2}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const/high16 v2, 0x10000000
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    :try_start_veh
+    invoke-virtual {p0, v1}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
+    :try_end_veh
+    .catch Ljava/lang/Exception; {:try_start_veh .. :try_end_veh} :veh_fail
+    return-void
+    :veh_fail
+    return-void
+    :not_vehset
     const-string v1, "#save"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1

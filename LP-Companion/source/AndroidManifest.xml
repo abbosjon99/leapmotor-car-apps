@@ -30,6 +30,7 @@
         <activity android:name=".OpenPlayerActivity" android:exported="true"
             android:theme="@android:style/Theme.NoDisplay"/>
         <service android:name=".BubbleService" android:exported="false"/>
+        <service android:name=".MainBubbleService" android:exported="false"/>
         <service android:name=".BackService" android:exported="true" android:label="LP Companion Back button"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
