@@ -44,6 +44,14 @@
     const/4 v3, 0x1
     invoke-virtual {p0, v3, v1}, Landroid/app/Service;->startForeground(ILandroid/app/Notification;)V
 
+    # LP Music gate: if disabled in settings, run nothing
+    invoke-static {p0}, Luz/carhelper/passenger/MusicGate;->enabled(Landroid/content/Context;)Z
+    move-result v0
+    if-nez v0, :lp_enabled
+    invoke-virtual {p0}, Landroid/app/Service;->stopSelf()V
+    return-void
+    :lp_enabled
+
     # our MediaSession
     new-instance v0, Landroid/media/session/MediaSession;
     const-string v1, "LPMusic"

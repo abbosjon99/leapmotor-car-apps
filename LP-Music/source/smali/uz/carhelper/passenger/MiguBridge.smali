@@ -58,15 +58,9 @@
 
 .method private tick()V
     .locals 12
-    # enabled? (same switch as the wheel buttons, default on)
+    # LP Music gate: off, or yielding to a playing DiPlay (don't announce type 13 then)
     iget-object v0, p0, Luz/carhelper/passenger/MiguBridge;->ctx:Landroid/content/Context;
-    const-string v1, "apps"
-    const/4 v2, 0x0
-    invoke-virtual {v0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-    move-result-object v1
-    const-string v2, "wheel"
-    const/4 v3, 0x1
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    invoke-static {v0}, Luz/carhelper/passenger/MusicGate;->shouldHandle(Landroid/content/Context;)Z
     move-result v1
     if-nez v1, :enabled
     return-void

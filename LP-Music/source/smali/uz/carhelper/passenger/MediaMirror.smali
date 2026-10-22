@@ -56,6 +56,14 @@
     .locals 10
     iget-object v9, p0, Luz/carhelper/passenger/MediaMirror;->session:Landroid/media/session/MediaSession;
     iget-object v0, p0, Luz/carhelper/passenger/MediaMirror;->ctx:Landroid/content/Context;
+    # LP Music gate: if off, or yielding to a playing DiPlay, go inactive and stop mirroring
+    invoke-static {v0}, Luz/carhelper/passenger/MusicGate;->shouldHandle(Landroid/content/Context;)Z
+    move-result v1
+    if-nez v1, :gate_ok
+    const/4 v1, 0x0
+    invoke-virtual {v9, v1}, Landroid/media/session/MediaSession;->setActive(Z)V
+    return-void
+    :gate_ok
     invoke-static {v0}, Luz/carhelper/passenger/WheelReceiver;->getSessions(Landroid/content/Context;)Ljava/util/List;
     move-result-object v0
     invoke-static {v0}, Luz/carhelper/passenger/WheelReceiver;->findTarget(Ljava/util/List;)Landroid/media/session/MediaController;

@@ -16,13 +16,8 @@
 
 .method public onReceive(Landroid/content/Context;Landroid/content/Intent;)V
     .locals 7
-    const-string v0, "apps"
-    const/4 v1, 0x0
-    invoke-virtual {p1, v0, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-    move-result-object v0
-    const-string v1, "wheel"
-    const/4 v2, 0x1
-    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    # LP Music gate: off, or yielding to a playing DiPlay
+    invoke-static {p1}, Luz/carhelper/passenger/MusicGate;->shouldHandle(Landroid/content/Context;)Z
     move-result v0
     if-nez v0, :enabled
     return-void

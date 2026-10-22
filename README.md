@@ -11,12 +11,15 @@ built by decompiling/patching with apktool and signing with a local key.
   accessibility service after a restart.
 - **[LP-Music](LP-Music/)** (`uz.carhelper.music`) — a media companion: mirrors the playing
   sideloaded player into its own MediaSession + MediaBrowserService (to try to light up the car's
-  dock "now playing" card), plus the type-13 announce and the steering-wheel key channels.
-- **[DiPlay-Leapmotor](DiPlay-Leapmotor/)** — vendored wireless-CarPlay receiver (2024+ Leapmotor
-  branch), **not ours**: by [Wh1t3co1azZ](https://github.com/Wh1t3co1azZ/DiPlay-Leapmotor),
-  a fork of [DiPlay](https://github.com/shihabal3amri/DiPlay) (GPL-3.0). Our only change makes it
-  yield the steering-wheel keys to LP Music / Migu when either is installed. Source only — it needs
-  Android Studio + Apple MFI assets to build. See [DiPlay-Leapmotor/CREDITS.md](DiPlay-Leapmotor/CREDITS.md).
+  dock "now playing" card), plus the type-13 announce and the steering-wheel key channels. Its
+  screen has a master on/off switch and, when DiPlay is installed, a switch to hand the wheel
+  buttons to DiPlay while CarPlay is playing.
+
+## Credit
+- **DiPlay (wireless CarPlay)** — not included here. Credit to
+  [DiPlay-Leapmotor](https://github.com/Wh1t3co1azZ/DiPlay-Leapmotor) by Wh1t3co1azZ, a fork of
+  [DiPlay](https://github.com/shihabal3amri/DiPlay) (GPL-3.0). LP Music can yield the steering-wheel
+  keys to it while it is playing (toggle in LP Music's settings).
 
 ## Not in this repo (kept local on purpose)
 - `LP-Companion/tools/` — the bundled JDK, `apktool.jar`, `signer.jar`, and the **signing key**

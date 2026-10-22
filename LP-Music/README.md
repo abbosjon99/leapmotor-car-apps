@@ -7,6 +7,14 @@ keeps the type-13 Migu announce and the steering-wheel key channels.
 
 Package: `uz.carhelper.music`  ·  version 1.0  ·  signed with LP Companion's key.
 
+## Settings (the app's screen)
+Opening LP Music shows its settings:
+- **LP Music enabled** — master on/off. Save starts or stops the media service.
+- **Give the wheel buttons to DiPlay while it's playing** — only shown when DiPlay
+  (`com.shihab.diplay`) is installed. While DiPlay is actively playing, LP Music stops controlling
+  (no mirror, no wheel keys, no type-13 announce) so the wheel buttons drive DiPlay instead.
+- **Save** writes the settings; **Exit** leaves without saving.
+
 ## Why a separate app
 The dock card experiment needs an app that publishes a standard Android media session. Keeping it
 apart from LP Companion means we can install it, test, and remove it (`adb uninstall
@@ -25,14 +33,16 @@ impersonate Migu.
 | `KeyDedup.smali`       | 350 ms de-dup shared by the two key channels, logs under `LPWheelKeys`. |
 | `WheelReceiver/Listener/Guard.smali` | Media-session helpers + the notification listener for `getActiveSessions`. |
 | `OpenPlayerActivity.smali` | Opens the playing/last player when the car's media card is tapped. |
-| `LauncherActivity.smali` | Tap the icon = start the service, then close. |
-| `BootReceiver.smali`   | Start the service on boot. |
+| `MusicSettingsActivity.smali` | The launcher screen: enable + DiPlay-yield switches, Save / Exit. |
+| `MusicGate.smali` | Reads the settings and decides `shouldHandle()` — off, or yielding to a playing DiPlay. |
+| `BootReceiver.smali`   | Start the service on boot (it stops itself if disabled). |
+
+Its own music launcher icon lives in `res/drawable/ic_launcher_music_fg.xml` +
+`res/mipmap-anydpi-v26/ic_launcher.xml` (teal background, white note).
 
 ## Build
-```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1
-```
-(reuses `..\LP-Companion\tools`). Produces `LP-Music.apk`.
+Built with the shared toolchain in `..\LP-Companion\tools` (apktool + uber-apk-signer), the same
+way LP Companion is built. Produces `LP-Music.apk`.
 
 ## Install and test (needs the car on ADB)
 First, avoid both apps handling wheel keys at once (their de-dup is per-process and won't cross
@@ -42,7 +52,7 @@ apps): in LP Companion's Settings, turn the **wheel** switch OFF while testing L
 adb install --no-incremental --install-reason 64 -r LP-Music.apk
 adb shell appops set --user 10 uz.carhelper.music SYSTEM_ALERT_WINDOW allow   # only if needed
 adb shell cmd notification allow_listener uz.carhelper.music/uz.carhelper.passenger.WheelListener 10
-adb shell am start -n uz.carhelper.music/uz.carhelper.passenger.LauncherActivity
+adb shell am start -n uz.carhelper.music/uz.carhelper.passenger.MusicSettingsActivity
 ```
 Play something in Yandex Music, then watch the dock card.
 - Card shows the song, controls work  -> the own-named media app is enough; no impersonation needed.
