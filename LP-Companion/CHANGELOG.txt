@@ -1,0 +1,195 @@
+LEAPMOTOR C01 (2025) - CHANGELOG OF EVERYTHING DONE OVER ADB
+=============================================================
+Car: head unit msmnile_gvmq (Snapdragon 8155), Android 12, firmware V7.03.09 (reported as 9.61.11)
+Commands below run from C:\Users\user\Downloads\platform-tools  (in PowerShell write .\adb)
+Install trick used everywhere: adb install --install-reason 64 -r -g <apk>
+  (Leapmotor's installer skips its app whitelist when install reason = 64)
+
+
+2026-10-17 / 18
+---------------
+[INSTALL] Yandex Music (original)                 ru.yandex.music
+          - Earlier attempts renamed to whitelisted names (qqmusiccar, cloudmusic.iot, youku.car):
+            all rejected by the car, nothing installed.
+[SETTING] Main screen density 160 -> 200 -> 220 -> 240 -> 200 -> RESET to 160
+          (carcontrol crashed once at the first change and restarted itself)
+[INSTALL] QuickShortcutMaker 2.4.0                com.sika524.android.quickshortcut
+[INSTALL] Yandex Navigator 31.1.3                 ru.yandex.yandexnavi
+[INSTALL] ContraCam 4.0.136                       com.mybedy.antiradar
+[INSTALL] microG (ReVanced GmsCore) 0.3.13.2      app.revanced.android.gms
+[INSTALL] YouTube ReVanced 21.16.256              app.revanced.android.youtube
+[INSTALL+REMOVE] Yangi TV Smart                   uz.yangi.yangitvsmart       (TV interface, removed)
+[INSTALL+REMOVE] Yangi app 3.2.0                  uz.plus.app                 (did not work, removed)
+[INSTALL+REMOVE] Repackaged Opera Mini (Telegram) com.tencent.qqmusiccar      (unknown signer, removed)
+[INSTALL] Opera Mini 99.7 (official, APKMirror)   com.opera.mini.native
+[INSTALL] Telegram (telegram.org)                 org.telegram.messenger.web
+[INSTALL] YM Button 1.5 (my helper app)           uz.carhelper.wheelmedia
+          Steering-wheel next/prev/play-pause -> Yandex Music. Tap icon = opens Yandex Music.
+[SETTING] Notification listener access granted to YM Button (user 10)
+          Original: empty. Needed only to see which app is playing.
+[READ]    Carlink APK pulled to PC (Downloads\carlink). Car not changed.
+[INSTALL] DiPlay 0.2.21 (CarPlay)                 com.shihab.diplay
+[INSTALL+REMOVE] Zlink 6.0.50                     com.zjinnova.zlink          (no license on car, removed)
+[INSTALL+REMOVE] Zlink 5.4.101                    com.zjinnova.zlink          (no license on car, removed)
+[INSTALL] Headunit Revived 3.5.0 (Android Auto)   com.andrerinas.headunitrevived
+
+2026-10-19
+----------
+[REPLACE] QuickShortcutMaker -> patched 320 dpi   (works)
+[REPLACE] ContraCam          -> patched 320 dpi   (works)
+[REPLACE] Opera Mini         -> patched 320 dpi   (works)
+[REPLACE] Telegram           -> patched 320 dpi   (works)
+[REPLACE] YouTube ReVanced   -> patched 320 dpi   (works, plays video)
+[REPLACE+REVERT] microG      -> patched 320 dpi -> back to ORIGINAL (patched did not work)
+[REPLACE+REVERT] Yandex Music -> patched (broken: "signature mismatch")
+                 -> replaced with official bundle 2026.09.5 (base+arm64+ru+en+xxhdpi). Size unchanged.
+[REPLACE+REVERT] Yandex Navigator -> patched (broken) -> ORIGINAL 31.1.3 reinstalled (check it opens)
+[READ]    AppListData (car's per-app list) read and backed up to backup\AppListData-original.json.
+          NOT WRITTEN. A prepared version with Yandex at 320 dpi is in backup\AppListData-with-yandex.json.
+
+[CHECK]   AppListData on the car = identical to the original backup (no Yandex entries). Nothing to revert.
+[CHECK]   Yandex Navigator original runs, no "signature mismatch".
+[CLEAN]   Removed /data/local/tmp/dalvik-cache (left by screen-layout reads). /data/local/tmp is empty.
+[CLEAN]   Removed empty folder /storage/emulated/10/.zjinnova left by Zlink.
+[CHECK]   Yangi TV Smart, Yangi app, repackaged Opera, Zlink: fully uninstalled, no settings left behind.
+
+[INSTALL] LP Companion 2.4 (my app, formerly "Passenger Apps")   uz.carhelper.passenger
+          - App grid: tap = open/move an app to the passenger screen (display 3).
+          - Header: Settings, Close apps (popup of apps opened on the passenger screen), Hide/Show bar.
+          - Settings page (Save / Cancel): wheel buttons on/off, close previous app (+ also music apps),
+            overload protection (CPU load / low RAM -> close passenger apps + red warning), app checklist.
+          - Bubble on the passenger screen (draggable): Bar toggle, Back, Open app, Screen off, Home;
+            bubble turns into X while the panel is open.
+          - Steering-wheel next/prev/play-pause for any sideloaded player (replaces YM Button).
+          APK: Downloads\car-apks-320dpi\LP-Companion-2.7.apk   source: tools\passenger-apps
+[REMOVE]  YM Button 1.5 (uz.carhelper.wheelmedia) - merged into LP Companion. Its listener access went with it.
+[SETTING] Notification listener access: LP Companion WheelListener, user 10 (was: YM Button). Reads no notifications.
+[SETTING] Overlay permission (appops SYSTEM_ALERT_WINDOW) for LP Companion, user 10. Original: not granted.
+[SETTING] Accessibility service "LP Companion Back button" enabled, user 10, alongside the car's existing
+          voice-assistant service (com.aispeech...), which was kept. Used only for the bubble's Back.
+
+[UPDATE]  LP Companion 2.5 -> 2.7
+          - "Migu mode": announces the playing sideloaded player to the car as media type 13
+            (broadcast com.leapmotor.transfer.MEDIA.INFO). The car then routes wheel buttons as
+            METER.CTRL / VOICE.CTRL broadcasts, which LP Companion forwards to the player - the car
+            no longer starts Kugou. Replaces the old raw wheel receiver.
+          - Bubble: Back now lands on the passenger screen (panel takes input focus first).
+          - New launcher icon (LP logo, PNG at all densities).
+[INSTALL+REMOVE] Migu Music (com.migu.car.music) - installed by you to study, then uninstalled
+          (it reacts to the same button broadcasts).
+[NOTE]    The car's dock music card does not show the song ("no widget slot type 5").
+[NOTE]    An LP Companion update can switch off its Back accessibility service. Re-enable with:
+          adb shell settings --user 10 put secure enabled_accessibility_services com.aispeech.lyra.daemon/com.aispeech.unit.smartapp.model.AccessibilityActionService:uz.carhelper.passenger/uz.carhelper.passenger.BackService
+
+NOTE: every uninstall/reinstall wiped that app's data (logins, settings). That cannot be undone.
+
+
+NEVER CHANGED (only read)
+-------------------------
+  Firmware / system partitions, launcher, Leapmotor apps and their settings
+  App whitelist (/system/basicwhitelist), version value 9.61.11 (persist.general.version)
+  AppListData (car app list) - unless you run the write commands yourself
+  Temporary files in /data/local/tmp - all deleted
+
+
+CURRENT STATE OF APPS I INSTALLED
+---------------------------------
+  App                     Package                              Build
+  Yandex Music 2026.09.5  ru.yandex.music                      original (Yandex bundle)
+  Yandex Navigator 31.1.3 ru.yandex.yandexnavi                 original (verified working)
+  QuickShortcutMaker      com.sika524.android.quickshortcut    patched 320 dpi
+  ContraCam               com.mybedy.antiradar                 patched 320 dpi
+  microG                  app.revanced.android.gms             original
+  YouTube ReVanced        app.revanced.android.youtube         patched 320 dpi
+  Opera Mini 99.7         com.opera.mini.native                patched 320 dpi
+  Telegram                org.telegram.messenger.web           patched 320 dpi
+  LP Companion 2.7        uz.carhelper.passenger               my app (bubble, grid, wheel buttons)
+  DiPlay 0.2.21           com.shihab.diplay                    original
+  Headunit Revived 3.5.0  com.andrerinas.headunitrevived       original
+
+
+HOW TO GO BACK
+--------------
+Remove one app:
+  adb uninstall <package>
+
+Patched app -> original:
+  adb uninstall <package>
+  adb install --install-reason 64 -r -g "C:\Users\user\Downloads\car-apks-320dpi\originals\<file>.apk"
+
+Remove LP Companion (bubble, wheel buttons, its listener / overlay / accessibility access all go with it):
+  adb uninstall uz.carhelper.passenger
+  If the passenger sidebar was hidden at that moment, bring it back:
+  adb shell am broadcast --user 10 -a com.leapmotor.iqiyi.action.nav.visibility --ei visibility 0
+
+Screen density (already factory, only if ever changed again):
+  adb shell wm density reset -d 0
+
+If you ran the AppListData write and want it undone:
+  adb push "C:\Users\user\Downloads\car-apks-320dpi\backup\AppListData-original.json" /data/local/tmp/pf.json
+  adb shell 'service call system_files_service 2 s16 AppListData s16 "$(cat /data/local/tmp/pf.json)"'
+  adb shell rm /data/local/tmp/pf.json
+  adb shell settings put global cloudListUpdate 1
+
+Car fully back to how it was:
+  uninstall all 11 apps in the table above. Density is already 160.
+  Nothing in the firmware or Leapmotor's own apps was modified.
+
+
+ON THE PC (does not affect the car)
+-----------------------------------
+  Downloads\car-apks-320dpi\   originals, patched APKs, scripts, signing key, app-list backups
+  Downloads\carlink\           Carlink APK pulled from the car
+  Downloads\YM-Button-1.5.apk
+  Downloaded APKs in Downloads (Opera Mini, QuickShortcutMaker from APKMirror; Zlink files added by you)
+
+LP Companion 2.8
+  - Back button in the bubble panel turns grey when the 'LP Companion Back button'
+    accessibility service is off. Tapping it shows a message and opens the
+    Accessibility settings on the main screen so you can turn it back on.
+  - Undo: install LP Companion 2.7 again (adb install --install-reason 64 -r).
+
+LP Companion 2.9
+  - Back stopped working after every car restart: the car drops the "LP Companion Back button"
+    accessibility service on boot, and has no Accessibility settings screen to turn it back on.
+  - Fix: new BackRepair. When the Back service isn't running, the app adds itself back to
+    enabled_accessibility_services (keeps every other entry, e.g. the car's aispeech service).
+    Checks every 10 s for 2 min after the bubble starts, then every 60 s. Tapping a grey Back
+    also tries it right away.
+  - Needs one ADB grant (new permission WRITE_SECURE_SETTINGS, survives restarts and updates):
+      adb shell pm grant --user 10 uz.carhelper.passenger android.permission.WRITE_SECURE_SETTINGS
+  - Grey Back button no longer opens Accessibility settings (the car has none); it shows a message.
+  - Undo: adb shell pm revoke --user 10 uz.carhelper.passenger android.permission.WRITE_SECURE_SETTINGS
+          and/or install LP Companion 2.8 again (adb install --install-reason 64 -r).
+
+LP Companion 2.10
+  - Settings > Status: green/red row for the bubble (overlay), wheel buttons (notification access),
+    self-repair (WRITE_SECURE_SETTINGS) and Back (accessibility). A red row shows the ADB command
+    that fixes it. Opening Settings also tries to switch Back on.
+  - Notification access can't be self-repaired (Android 12 only lets the system grant it), so if
+    that row is red after a restart, run its command.
+
+LP Companion 2.11
+  - Bubble panel: new Swap button (bottom-left). Moves the app last opened from the LP grid on the
+    passenger screen to the main screen; tap again to bring it back. Apps on the main screen are
+    left alone by Close apps / auto-close. Only knows apps opened from the LP grid.
+
+LP Companion 2.12
+  - Kid mode (Settings): switch + PIN (4+ digits) + "Kids" tick per app. While on: the grid shows
+    only the "Kids" apps, Close apps is hidden, Swap is off, and Settings asks for the PIN.
+  - Forgot the PIN: adb shell pm clear --user 10 uz.carhelper.passenger  (resets ALL LP settings;
+    then run the one-time grants from README again and check Settings > Status)
+
+LP Companion 2.13
+  - Second steering-wheel channel: com.leapmotor.steerwheelcontrol.media, int extra "action"
+    1 = previous, 4 = next, 7 = play/pause (from DiPlay-Leapmotor's 2024-27 notes; it is also
+    the broadcast the old YM Button used). Registered by the bubble service while it runs.
+  - Both channels (METER.CTRL via the Migu bridge = "meter", steerwheelcontrol = "steer") share
+    one 350 ms de-dup, so a press that arrives on both is handled once.
+  - Voice commands (VOICE.CTRL) are not de-duplicated.
+  - If a car source (radio, Bluetooth, Leapmotor apps) is playing and the sideloaded player
+    isn't, a "steer" press is left to the car.
+  - Test: adb logcat -s LPWheelKeys   then press prev / next / play-pause on the wheel.
+    Each press logs its channel and "accepted" or "dropped (duplicate within 350 ms)".
+
+  Undo any of these: install the previous APK (LP-Companion-2.9/2.10/2.11/2.12.apk) with -r.

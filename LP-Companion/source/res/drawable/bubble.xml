@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AssistiveTouch-style button: translucent rounded square, soft white rings, solid white centre. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#73404040"
+        android:pathData="M12,0h24a12,12 0 0 1 12,12v24a12,12 0 0 1 -12,12h-24a12,12 0 0 1 -12,-12v-24a12,12 0 0 1 12,-12z"/>
+    <path android:fillColor="#40FFFFFF" android:pathData="M24,9a15,15 0 1,1 0,30a15,15 0 1,1 0,-30z"/>
+    <path android:fillColor="#66FFFFFF" android:pathData="M24,13a11,11 0 1,1 0,22a11,11 0 1,1 0,-22z"/>
+    <path android:fillColor="#F2FFFFFF" android:pathData="M24,16.5a7.5,7.5 0 1,1 0,15a7.5,7.5 0 1,1 0,-15z"/>
+</vector>

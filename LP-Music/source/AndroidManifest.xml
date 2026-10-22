@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="uz.carhelper.music">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+        </intent>
+        <intent>
+            <action android:name="android.media.browse.MediaBrowserService"/>
+        </intent>
+    </queries>
+    <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:allowBackup="false">
+        <activity android:name="uz.carhelper.passenger.LauncherActivity" android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="uz.carhelper.passenger.OpenPlayerActivity" android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay"/>
+        <service android:name="uz.carhelper.passenger.MediaBrowser" android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+        <service android:name="uz.carhelper.passenger.WheelListener" android:exported="true"
+            android:label="LP Music wheel buttons"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+        </service>
+        <receiver android:name="uz.carhelper.passenger.MiguCtrlReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.leapmotor.action.METER.CTRL"/>
+                <action android:name="com.leapmotor.action.VOICE.CTRL"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name="uz.carhelper.passenger.BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

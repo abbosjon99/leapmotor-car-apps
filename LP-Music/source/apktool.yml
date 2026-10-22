@@ -1,0 +1,13 @@
+version: 3.0.3
+apkFileName: lp-music.apk
+usesFramework:
+  ids:
+  - 1
+sdkInfo:
+  minSdkVersion: 26
+  targetSdkVersion: 30
+versionInfo:
+  versionCode: 21
+  versionName: '2.13'
+doNotCompress:
+- arsc

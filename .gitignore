@@ -1,0 +1,16 @@
+# --- Never publish: signing key + its passwords ---
+LP-Companion/tools/
+*.jks
+*.keystore
+**/signing-key.txt
+
+# --- Bundled toolchain (JDK ~328 MB, apktool.jar, signer.jar) — restored locally, not tracked ---
+**/tools/jdk/
+**/tools/*.jar
+
+# --- Build outputs and apktool intermediates ---
+**/build/
+**/source/build/
+
+# --- Built APKs (attach to a GitHub Release instead of committing) ---
+*.apk

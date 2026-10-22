@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back_service_desc">Lets the LP Companion bubble press Back. Reads no screen content.</string>
+</resources>
