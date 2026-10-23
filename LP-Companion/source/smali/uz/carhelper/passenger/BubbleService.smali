@@ -86,6 +86,17 @@
     # auto-hide the car's passenger sidebar on start
     invoke-direct {p0}, Luz/carhelper/passenger/BubbleService;->hideBar()V
 
+    # mirror child mode to the shared Settings.Secure flag so LP Music matches on boot
+    const-string v0, "apps"
+    const/4 v1, 0x0
+    invoke-virtual {p0, v0, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v0
+    const-string v1, "kid"
+    const/4 v2, 0x0
+    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v0
+    invoke-static {p0, v0}, Luz/carhelper/passenger/ChildMode;->sync(Landroid/content/Context;Z)V
+
     # passenger display and its size
     const-string v0, "display"
     invoke-virtual {p0, v0}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
@@ -135,12 +146,17 @@
     move-result-object v6
     invoke-direct {v5, v6, v3}, Luz/carhelper/passenger/PassengerWatcher;-><init>(Landroid/content/Context;Landroid/hardware/display/DisplayManager;)V
     invoke-virtual {v3, v5, v2}, Landroid/hardware/display/DisplayManager;->registerDisplayListener(Landroid/hardware/display/DisplayManager$DisplayListener;Landroid/os/Handler;)V
-    # act as Migu (media type 13) toward the car's media app
+    # act as Migu (media type 13) toward the car's media app - but not when LP Music is
+    # installed, so the wheel keys route to LP Music instead of to us
+    invoke-static {p0}, Luz/carhelper/passenger/WheelReceiver;->yieldToMusic(Landroid/content/Context;)Z
+    move-result v3
+    if-nez v3, :skip_migu
     new-instance v3, Luz/carhelper/passenger/MiguBridge;
     invoke-virtual {p0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
     move-result-object v4
     invoke-direct {v3, v4, v2}, Luz/carhelper/passenger/MiguBridge;-><init>(Landroid/content/Context;Landroid/os/Handler;)V
     invoke-virtual {v2, v3}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
+    :skip_migu
     # put the Back accessibility service back if the car dropped it (e.g. after a restart)
     new-instance v3, Luz/carhelper/passenger/BackRepair;
     invoke-virtual {p0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;

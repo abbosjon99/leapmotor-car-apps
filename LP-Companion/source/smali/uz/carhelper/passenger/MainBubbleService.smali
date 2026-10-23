@@ -616,6 +616,7 @@
     invoke-interface {v1, v3, v2}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     move-result-object v1
     invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
+    invoke-static {p0, v2}, Luz/carhelper/passenger/ChildMode;->sync(Landroid/content/Context;Z)V
     new-instance v1, Landroid/content/Intent;
     const-class v3, Luz/carhelper/passenger/MainActivity;
     invoke-direct {v1, p0, v3}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V

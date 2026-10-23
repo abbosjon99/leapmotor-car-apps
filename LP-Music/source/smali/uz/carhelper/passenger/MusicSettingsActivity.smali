@@ -99,6 +99,19 @@
     .locals 8
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
 
+    # child mode is shared with LP Companion: when it is on, LP Music is locked too
+    invoke-static {p0}, Luz/carhelper/passenger/ChildMode;->locked(Landroid/content/Context;)Z
+    move-result v0
+    if-eqz v0, :not_child_locked
+    const-string v0, "Child mode is on — locked by LP Companion"
+    const/4 v1, 0x1
+    invoke-static {p0, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v0
+    invoke-virtual {v0}, Landroid/widget/Toast;->show()V
+    invoke-virtual {p0}, Landroid/app/Activity;->finish()V
+    return-void
+    :not_child_locked
+
     invoke-static {p0}, Luz/carhelper/passenger/MusicGate;->enabled(Landroid/content/Context;)Z
     move-result v0
     iput-boolean v0, p0, Luz/carhelper/passenger/MusicSettingsActivity;->enabled:Z

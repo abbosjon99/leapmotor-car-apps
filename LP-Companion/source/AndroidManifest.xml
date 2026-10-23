@@ -13,6 +13,7 @@
         <intent>
             <action android:name="android.media.browse.MediaBrowserService"/>
         </intent>
+        <package android:name="uz.carhelper.music"/>
     </queries>
     <application android:label="LP Companion" android:icon="@mipmap/ic_launcher" android:allowBackup="false">
         <activity android:name=".MainActivity" android:exported="true"

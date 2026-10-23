@@ -15,6 +15,25 @@
     return-void
 .end method
 
+# true when LP Music is installed: LP Companion then leaves the steering-wheel media
+# keys to LP Music so a press doesn't drive two players at once.
+.method static yieldToMusic(Landroid/content/Context;)Z
+    .locals 3
+    :try_start_0
+    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v0
+    const-string v1, "uz.carhelper.music"
+    const/4 v2, 0x0
+    invoke-virtual {v0, v1, v2}, Landroid/content/pm/PackageManager;->getPackageInfo(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;
+    const/4 v0, 0x1
+    return v0
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    :catch_0
+    const/4 v0, 0x0
+    return v0
+.end method
+
 .method static getSessions(Landroid/content/Context;)Ljava/util/List;
     .locals 4
     :try_start_0

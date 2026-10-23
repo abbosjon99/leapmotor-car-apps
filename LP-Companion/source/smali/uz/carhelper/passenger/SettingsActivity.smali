@@ -236,9 +236,14 @@
     invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
     invoke-virtual {v1, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
-    # Status: one row per grant, green = on, red = off + the ADB command that fixes it
+    # Status: one row per grant, green = on, red = off + the ADB command that fixes it.
+    # Re-evaluated every time Settings opens; the Re-check pill reopens it to refresh now.
     const-string v2, "Status"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    const-string v2, "Re-check"
+    const-string v3, "#recheck"
+    const v4, -0xbd7a89
+    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
     invoke-static {p0}, Landroid/provider/Settings;->canDrawOverlays(Landroid/content/Context;)Z
     move-result v6
     const-string v2, "Bubble (overlay)"
@@ -351,17 +356,22 @@
     const v4, -0xe1771b
     invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
 
-    # Vehicle settings opener
+    # Vehicle section: two pills side by side
     const-string v2, "Vehicle"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v2, 0x0
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    invoke-virtual {v1, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     const-string v2, "Vehicle settings"
     const-string v3, "#vehset"
     const v4, -0xbd7a89
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
-    const-string v2, "Go to car"
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    const-string v2, "Back to car UI"
     const-string v3, "#gotocar"
-    const v4, -0xbd7a89
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    const v4, -0xb1661c
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
 
     # Apps shown on the passenger screen
     const-string v2, "Apps shown on the passenger screen"
@@ -625,6 +635,14 @@
     invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
     return-void
     :not_setpin
+    const-string v1, "#recheck"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_recheck
+    invoke-virtual {p0}, Landroid/app/Activity;->recreate()V
+    return-void
+    :not_recheck
+
     const-string v1, "#gotocar"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1

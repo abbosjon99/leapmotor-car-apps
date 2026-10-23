@@ -14,6 +14,13 @@
 .method protected onCreate(Landroid/os/Bundle;)V
     .locals 4
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+    # locked while child mode is on (shared with LP Companion)
+    invoke-static {p0}, Luz/carhelper/passenger/ChildMode;->locked(Landroid/content/Context;)Z
+    move-result v0
+    if-eqz v0, :not_child_locked
+    invoke-virtual {p0}, Landroid/app/Activity;->finish()V
+    return-void
+    :not_child_locked
     const/4 v0, 0x0
     :try_start_0
     invoke-static {p0}, Luz/carhelper/passenger/WheelReceiver;->getSessions(Landroid/content/Context;)Ljava/util/List;

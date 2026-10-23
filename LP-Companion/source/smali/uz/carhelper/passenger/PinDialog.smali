@@ -13,6 +13,7 @@
 .field private final sb:Ljava/lang/StringBuilder;
 .field private dots:Landroid/widget/TextView;
 .field private dialog:Landroid/app/AlertDialog;
+.field private verified:Z
 
 .method public static show(Landroid/app/Activity;Ljava/lang/String;)V
     .locals 1
@@ -130,7 +131,7 @@
 .end method
 
 .method private build()V
-    .locals 6
+    .locals 7
     iget-object v0, p0, Luz/carhelper/passenger/PinDialog;->act:Landroid/app/Activity;
     new-instance v1, Landroid/widget/LinearLayout;
     invoke-direct {v1, v0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
@@ -152,6 +153,16 @@
     const-string v3, "Enter PIN"
     if-eqz v4, :title_ready
     const-string v3, "Set a PIN (4+ digits)"
+    invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->prefs()Landroid/content/SharedPreferences;
+    move-result-object v4
+    const-string v5, "pin"
+    const-string v6, ""
+    invoke-interface {v4, v5, v6}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v4
+    invoke-virtual {v4}, Ljava/lang/String;->isEmpty()Z
+    move-result v4
+    if-nez v4, :title_ready
+    const-string v3, "Enter current PIN"
     :title_ready
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
     const/high16 v3, 0x41c00000
@@ -280,6 +291,39 @@
     invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v2
     if-eqz v2, :not_set
+    # if a PIN already exists, the first entry must be the current PIN
+    invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->prefs()Landroid/content/SharedPreferences;
+    move-result-object v2
+    const-string v3, "pin"
+    const-string v4, ""
+    invoke-interface {v2, v3, v4}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    invoke-virtual {v2}, Ljava/lang/String;->isEmpty()Z
+    move-result v3
+    if-nez v3, :set_new
+    iget-boolean v3, p0, Luz/carhelper/passenger/PinDialog;->verified:Z
+    if-nez v3, :set_new
+    invoke-virtual {v0, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v2
+    if-nez v2, :old_ok
+    const-string v2, "Wrong current PIN"
+    invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
+    iget-object v2, p0, Luz/carhelper/passenger/PinDialog;->sb:Ljava/lang/StringBuilder;
+    const/4 v3, 0x0
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->setLength(I)V
+    invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->updateDots()V
+    return-void
+    :old_ok
+    const/4 v2, 0x1
+    iput-boolean v2, p0, Luz/carhelper/passenger/PinDialog;->verified:Z
+    iget-object v2, p0, Luz/carhelper/passenger/PinDialog;->sb:Ljava/lang/StringBuilder;
+    const/4 v3, 0x0
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->setLength(I)V
+    invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->updateDots()V
+    const-string v2, "Enter a new PIN (4+ digits)"
+    invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
+    return-void
+    :set_new
     invoke-virtual {v0}, Ljava/lang/String;->length()I
     move-result v2
     const/4 v3, 0x4
@@ -334,6 +378,8 @@
     move-result-object v2
     invoke-interface {v2}, Landroid/content/SharedPreferences$Editor;->apply()V
     iget-object v2, p0, Luz/carhelper/passenger/PinDialog;->act:Landroid/app/Activity;
+    const/4 v3, 0x0
+    invoke-static {v2, v3}, Luz/carhelper/passenger/ChildMode;->sync(Landroid/content/Context;Z)V
     invoke-virtual {v2}, Landroid/app/Activity;->recreate()V
     return-void
     :open_settings

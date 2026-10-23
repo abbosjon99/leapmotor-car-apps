@@ -59,7 +59,7 @@
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
     new-instance v2, Landroid/widget/TextView;
     invoke-direct {v2, p1}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const/high16 v3, 0x41b00000
+    const/high16 v3, 0x41d00000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
     const/4 v3, -0x1
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
@@ -68,7 +68,7 @@
     invoke-virtual {v0, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     new-instance v2, Landroid/widget/TextView;
     invoke-direct {v2, p1}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const/high16 v3, 0x41600000
+    const/high16 v3, 0x41800000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
     const v3, -0x555556
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V

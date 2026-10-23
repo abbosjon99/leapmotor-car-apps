@@ -32,6 +32,18 @@
     const/4 v2, 0x0
     invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
     move-result-object v2
+    # only an app still running on the passenger screen can be swapped
+    if-eqz v2, :last_checked
+    new-instance v3, Ljava/util/HashSet;
+    invoke-direct {v3}, Ljava/util/HashSet;-><init>()V
+    const-string v4, "running"
+    invoke-interface {v0, v4, v3}, Landroid/content/SharedPreferences;->getStringSet(Ljava/lang/String;Ljava/util/Set;)Ljava/util/Set;
+    move-result-object v3
+    invoke-interface {v3, v2}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
+    move-result v3
+    if-nez v3, :last_checked
+    const/4 v2, 0x0
+    :last_checked
     const/4 v3, 0x0
     const-string v4, "Moved to the main screen — tap swap again to bring it back"
     if-nez v2, :have_app

@@ -28,6 +28,12 @@
     if-nez v0, :enabled
     return-void
     :enabled
+    # leave the wheel keys to LP Music when it is installed
+    invoke-static {p1}, Luz/carhelper/passenger/WheelReceiver;->yieldToMusic(Landroid/content/Context;)Z
+    move-result v0
+    if-eqz v0, :not_music
+    return-void
+    :not_music
 
     # v1 = button: 1 previous, 2 next, 3 play/pause
     const-string v0, "action"
