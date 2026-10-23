@@ -3,6 +3,7 @@
 .implements Landroid/view/View$OnClickListener;
 .implements Landroid/content/DialogInterface$OnClickListener;
 .implements Landroid/content/SharedPreferences$OnSharedPreferenceChangeListener;
+.implements Landroid/view/View$OnLongClickListener;
 
 .field private runningPkgs:[Ljava/lang/String;
 .field private wp:Luz/carhelper/passenger/WallpaperFrame;
@@ -41,6 +42,32 @@
 .method protected onCreate(Landroid/os/Bundle;)V
     .locals 14
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+
+    # fresh install / data cleared: bring the settings back from the backup in Settings.Secure; and the adb
+    # "forgot the password" switch (both are no-ops in the normal case)
+    :try_start_bk
+    invoke-static {p0}, Luz/carhelper/passenger/Backup;->restore(Landroid/content/Context;)V
+    :try_end_bk
+    .catch Ljava/lang/Throwable; {:try_start_bk .. :try_end_bk} :catch_bk
+    :catch_bk
+
+    # interface language (after the restore above, which can bring the chosen language back)
+    invoke-static {p0}, Luz/carhelper/passenger/Lang;->init(Landroid/content/Context;)V
+
+    # a permission lost after a reboot / firmware update: try to get it back through the car's own adb
+    :try_start_hl
+    const/4 v0, 0x0
+    invoke-static {p0, v0}, Luz/carhelper/passenger/Heal;->start(Landroid/content/Context;Z)V
+    :try_end_hl
+    .catch Ljava/lang/Throwable; {:try_start_hl .. :try_end_hl} :catch_hl
+    :catch_hl
+
+    # the PIN reset toast is shown in that language
+    :try_start_pr
+    invoke-static {p0}, Luz/carhelper/passenger/Backup;->pinReset(Landroid/content/Context;)V
+    :try_end_pr
+    .catch Ljava/lang/Throwable; {:try_start_pr .. :try_end_pr} :catch_pr
+    :catch_pr
 
     # follow wallpaper / child-mode changes made from the grid on the other screen
     const-string v0, "apps"
@@ -126,10 +153,44 @@
     invoke-direct {v6, v7, v8, v9}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
     invoke-virtual {v4, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
+    # RAM / temperature chip (what overload protection watches, coloured green / amber / red); not for the child
+    # on the passenger screen
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
+    move-result v5
+    if-nez v5, :no_health
+    new-instance v5, Landroid/widget/TextView;
+    invoke-direct {v5, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+    const/high16 v6, 0x41900000
+    invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextSize(F)V
+    const/16 v6, 0x1a
+    const/16 v7, 0xe
+    invoke-virtual {v5, v6, v7, v6, v7}, Landroid/widget/TextView;->setPadding(IIII)V
+    const v6, 0x66000000
+    const v7, 0x40ffffff
+    const/high16 v8, 0x42c80000
+    invoke-static {v6, v7, v8}, Luz/carhelper/passenger/Ui;->rect(IIF)Landroid/graphics/drawable/GradientDrawable;
+    move-result-object v6
+    invoke-virtual {v5, v6}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+    :try_start_ht
+    invoke-static {v5}, Luz/carhelper/passenger/HealthTick;->start(Landroid/widget/TextView;)V
+    :try_end_ht
+    .catch Ljava/lang/Throwable; {:try_start_ht .. :try_end_ht} :catch_ht
+    :catch_ht
+    new-instance v6, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v7, -0x2
+    invoke-direct {v6, v7, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    const/4 v7, 0x0
+    const/16 v8, 0x10
+    invoke-virtual {v6, v7, v7, v8, v7}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
+    invoke-virtual {v4, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    :no_health
+
     # header pills: Settings (grid only), Close apps, one Hide/Show bar toggle
     instance-of v5, p0, Luz/carhelper/passenger/SettingsActivity;
     if-nez v5, :settings_screen
     const-string v5, "Settings"
+    invoke-static {v5}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v5
     const-string v6, "ic_settings"
     const-string v7, "#settings"
     invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
@@ -139,8 +200,12 @@
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->readAutoClose()Z
     move-result v5
     const-string v6, "Close previous app: Off"
+    invoke-static {v6}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v6
     if-eqz v5, :ac_label
     const-string v6, "Close previous app: On"
+    invoke-static {v6}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v6
     :ac_label
     const-string v7, "ic_apps"
     const-string v8, "#autoclose"
@@ -149,8 +214,12 @@
     invoke-direct {p0, v5}, Luz/carhelper/passenger/MainActivity;->readBool(Ljava/lang/String;)Z
     move-result v5
     const-string v6, "\u21b3 Also close music apps: Off"
+    invoke-static {v6}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v6
     if-eqz v5, :cm_label
     const-string v6, "\u21b3 Also close music apps: On"
+    invoke-static {v6}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v6
     :cm_label
     const-string v7, "ic_music"
     const-string v8, "#closemusic"
@@ -161,6 +230,8 @@
     move-result v5
     if-nez v5, :no_closeall
     const-string v5, "Close apps"
+    invoke-static {v5}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v5
     const-string v6, "ic_close"
     const-string v7, "#closeall"
     invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
@@ -168,9 +239,13 @@
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->readBarHidden()Z
     move-result v5
     const-string v6, "Hide bar"
+    invoke-static {v6}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v6
     const-string v7, "ic_bar_hide"
     if-eqz v5, :bar_label
     const-string v6, "Show bar"
+    invoke-static {v6}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v6
     const-string v7, "ic_bar_show"
     :bar_label
     const-string v8, "#bar"
@@ -232,9 +307,13 @@
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
     move-result v7
     const-string v8, "Child mode"
+    invoke-static {v8}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v8
     const-string v9, "#childenter"
     if-eqz v7, :np_child
     const-string v8, "Exit child mode"
+    invoke-static {v8}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v8
     const-string v9, "#childexit"
     :np_child
     const-string v10, "ic_child"
@@ -251,6 +330,8 @@
     invoke-virtual {v7, v8}, Landroid/view/View;->setAlpha(F)V
     :child_tile_done
     const-string v8, "Change wallpaper"
+    invoke-static {v8}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v8
     const-string v9, "#wallpaper"
     const-string v10, "ic_image"
     invoke-direct {p0, v6, v10, v8, v9}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/LinearLayout;
@@ -341,6 +422,8 @@
     move-result-object v11
     invoke-virtual {v10, v11}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
     invoke-virtual {v10, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+    # tap = open on the passenger screen, long press = the tile menu (main / passenger / Kids / hide)
+    invoke-virtual {v10, p0}, Landroid/view/View;->setOnLongClickListener(Landroid/view/View$OnLongClickListener;)V
 
     new-instance v11, Landroid/widget/LinearLayout$LayoutParams;
     const/4 v12, 0x0
@@ -591,8 +674,12 @@
     xor-int/lit8 v1, v1, 0x1
     invoke-direct {p0, v2, v1}, Luz/carhelper/passenger/MainActivity;->writeBool(Ljava/lang/String;Z)V
     const-string v2, "\u21b3 Also close music apps: Off"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     if-eqz v1, :cm_text
     const-string v2, "\u21b3 Also close music apps: On"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     :cm_text
     check-cast p1, Landroid/widget/TextView;
     invoke-virtual {p1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
@@ -609,8 +696,12 @@
     xor-int/lit8 v1, v1, 0x1
     invoke-direct {p0, v1}, Luz/carhelper/passenger/MainActivity;->writeAutoClose(Z)V
     const-string v2, "Close previous app: Off"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     if-eqz v1, :ac_text
     const-string v2, "Close previous app: On"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     :ac_text
     check-cast p1, Landroid/widget/TextView;
     invoke-virtual {p1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
@@ -634,6 +725,8 @@
     move-result v2
     if-eqz v2, :do_childenter
     const-string v1, "Set a password in Settings first"
+    invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
     const/4 v2, 0x1
     invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v1
@@ -672,6 +765,8 @@
     move-result v1
     if-eqz v1, :open_settings
     const-string v1, "settings"
+    invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
     invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
     return-void
     :open_settings
@@ -693,10 +788,14 @@
     invoke-direct {p0, v1}, Luz/carhelper/passenger/MainActivity;->writeBarHidden(Z)V
     const/4 v2, 0x0
     const-string v3, "Hide bar"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const-string v4, "ic_bar_hide"
     if-eqz v1, :bar_send
     const/16 v2, 0x8
     const-string v3, "Show bar"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const-string v4, "ic_bar_show"
     :bar_send
     check-cast p1, Landroid/widget/TextView;
@@ -777,12 +876,34 @@
     invoke-interface {v2}, Landroid/content/SharedPreferences$Editor;->apply()V
     return-void
     :do_launch
+    invoke-virtual {p0, v0}, Luz/carhelper/passenger/MainActivity;->openApp(Ljava/lang/String;)V
+    return-void
+.end method
+
+# Open an app (flattened component name) on the passenger screen: a tile tap, or "Open on the passenger screen" in the
+# tile menu. NEW_TASK | RESET_TASK_IF_NEEDED, same as a launcher tap, so a task that is already running somewhere
+# (e.g. moved to the main screen) is moved here. The grid closes afterwards.
+.method public openApp(Ljava/lang/String;)V
+    .locals 6
     # wake the passenger screen first (car screensaver / screen rest / our own cover)
     invoke-static {p0}, Luz/carhelper/passenger/Wake;->passenger(Landroid/content/Context;)V
-    invoke-static {v0}, Landroid/content/ComponentName;->unflattenFromString(Ljava/lang/String;)Landroid/content/ComponentName;
+    invoke-static {p1}, Landroid/content/ComponentName;->unflattenFromString(Ljava/lang/String;)Landroid/content/ComponentName;
     move-result-object v0
+    if-nez v0, :comp_ok
+    return-void
+    :comp_ok
     invoke-virtual {v0}, Landroid/content/ComponentName;->getPackageName()Ljava/lang/String;
     move-result-object v4
+    # v5 = true when LP Companion had this app on the MAIN screen: that screen is covered with Home afterwards
+    const-string v1, "apps"
+    const/4 v2, 0x0
+    invoke-virtual {p0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v1
+    const-string v3, "onMain"
+    invoke-interface {v1, v3, v2}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
+    invoke-virtual {v4, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
     invoke-direct {p0, v4}, Luz/carhelper/passenger/MainActivity;->onLaunching(Ljava/lang/String;)V
     new-instance v1, Landroid/content/Intent;
     const-string v2, "android.intent.action.MAIN"
@@ -790,7 +911,6 @@
     const-string v2, "android.intent.category.LAUNCHER"
     invoke-virtual {v1, v2}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
     invoke-virtual {v1, v0}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;
-    # NEW_TASK | RESET_TASK_IF_NEEDED, same as a launcher tap
     const/high16 v2, 0x10200000
     invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
 
@@ -802,6 +922,9 @@
     invoke-virtual {v2}, Landroid/app/ActivityOptions;->toBundle()Landroid/os/Bundle;
     move-result-object v2
     invoke-virtual {p0, v1, v2}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;Landroid/os/Bundle;)V
+    if-eqz v5, :no_home
+    invoke-static {p0}, Luz/carhelper/passenger/Swapper;->home(Landroid/content/Context;)V
+    :no_home
     invoke-virtual {p0}, Landroid/app/Activity;->finish()V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
@@ -816,6 +939,40 @@
     move-result-object v2
     invoke-virtual {v2}, Landroid/widget/Toast;->show()V
     return-void
+.end method
+
+# long press on an app tile: the tile menu. Child mode on the passenger screen: nothing (a child must not change the
+# lists or move apps). Tiles carry their component name as the tag; the other buttons use tags that start with "#".
+.method public onLongClick(Landroid/view/View;)Z
+    .locals 3
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
+    move-result v0
+    if-eqz v0, :allowed
+    const/4 v0, 0x1
+    return v0
+    :allowed
+    invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
+    move-result-object v0
+    instance-of v1, v0, Ljava/lang/String;
+    if-nez v1, :is_string
+    const/4 v0, 0x0
+    return v0
+    :is_string
+    check-cast v0, Ljava/lang/String;
+    const-string v1, "#"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+    move-result v1
+    if-eqz v1, :tile
+    const/4 v0, 0x0
+    return v0
+    :tile
+    :try_start_0
+    invoke-static {p0, v0}, Luz/carhelper/passenger/TileMenu;->show(Luz/carhelper/passenger/MainActivity;Ljava/lang/String;)V
+    :try_end_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
+    :catch_0
+    const/4 v0, 0x1
+    return v0
 .end method
 
 # the grid on the other screen changed the wallpaper or child mode: follow it right away
@@ -833,15 +990,42 @@
     invoke-virtual {v0, v1}, Luz/carhelper/passenger/WallpaperFrame;->apply(I)V
     return-void
     :not_wallpaper
+    # child mode switched, or the Kids / hidden lists changed (Settings, or the tile menu on the other screen)
     const-string v0, "kid"
     invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v0
+    if-nez v0, :refresh
+    const-string v0, "kidApps"
+    invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-nez v0, :refresh
+    const-string v0, "hidden"
+    invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-nez v0, :refresh
+    # the interface language was switched in Settings: rebuild this grid in it
+    const-string v0, "lang"
+    invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
     if-eqz v0, :done
+    :refresh
     invoke-virtual {p0}, Landroid/app/Activity;->isFinishing()Z
     move-result v0
     if-nez v0, :done
     invoke-virtual {p0}, Landroid/app/Activity;->recreate()V
     :done
+    return-void
+.end method
+
+# keep the Settings.Secure backup of the settings current (only writes when something changed)
+.method protected onStop()V
+    .locals 0
+    invoke-super {p0}, Landroid/app/Activity;->onStop()V
+    :try_start_0
+    invoke-static {p0}, Luz/carhelper/passenger/Backup;->save(Landroid/content/Context;)V
+    :try_end_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
+    :catch_0
     return-void
 .end method
 
@@ -1074,6 +1258,8 @@
     move-result v2
     if-eqz v2, :have
     const-string v2, "No running apps to close"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const/4 v3, 0x0
     invoke-static {p0, v2, v3}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v2

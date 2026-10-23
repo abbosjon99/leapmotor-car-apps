@@ -1,0 +1,192 @@
+Close apps	Cerrar apps
+Tap an app to close it	Toca una app para cerrarla
+Cancel	Cancelar
+All but music	Todo menos la música
+Close all	Cerrar todo
+Settings	Ajustes
+Hide bar	Ocultar barra
+Show bar	Mostrar barra
+Child mode	Modo infantil
+Exit child mode	Salir del modo infantil
+Change wallpaper	Cambiar fondo
+Close previous app: Off	Cerrar la app anterior: no
+Close previous app: On	Cerrar la app anterior: sí
+↳ Also close music apps: Off	↳ Cerrar también las apps de música: no
+↳ Also close music apps: On	↳ Cerrar también las apps de música: sí
+Set a password in Settings first	Primero define una contraseña en Ajustes
+No running apps to close	No hay apps en ejecución que cerrar
+No passenger screen to turn off	No hay pantalla del pasajero que apagar
+Child mode on	Modo infantil activado
+Child mode off	Modo infantil desactivado
+Back is starting — tap it again in a moment	Atrás se está iniciando: vuelve a tocarlo en un momento
+Back is off — LP Companion needs the WRITE_SECURE_SETTINGS grant over ADB	Atrás está desactivado: LP Companion necesita el permiso WRITE_SECURE_SETTINGS por ADB
+LP Companion (main screen)	LP Companion (pantalla principal)
+LP Companion controls on the main screen	Controles de LP Companion en la pantalla principal
+LP Companion is running	LP Companion se está ejecutando
+RAM / temperature unavailable	RAM / temperatura no disponibles
+⚠  System overloaded (	⚠  Sistema sobrecargado (
+) — passenger apps closed	) — apps del pasajero cerradas
+Enter PIN	Introduce el PIN
+Set a PIN (4+ digits)	Define un PIN (4 o más dígitos)
+Enter current PIN	Introduce el PIN actual
+Wrong current PIN	PIN actual incorrecto
+Enter a new PIN (4+ digits)	Introduce un PIN nuevo (4 o más dígitos)
+Need at least 4 digits	Se necesitan al menos 4 dígitos
+PIN set	PIN definido
+Wrong PIN	PIN incorrecto
+OK	OK
+status OK	OK
+level OK	bien
+OFF	NO
+Kids	Niños
+Status	Estado
+Save	Guardar
+Saved	Guardado
+Language	Idioma
+Bubble (overlay)	Burbuja (superposición)
+Now playing (notification access)	Reproduciendo ahora (acceso a notificaciones)
+Self-repair after restart	Autorreparación tras reiniciar
+Needs the self-repair permission above	Necesita el permiso de autorreparación de arriba
+Switching on now — reopen this page in a few seconds	Activándose ahora: vuelve a abrir esta página en unos segundos
+Back button (accessibility)	Botón Atrás (accesibilidad)
+Re-check status	Volver a comprobar
+Passenger screen	Pantalla del pasajero
+Open LP Companion automatically when the passenger screen turns on	Abrir LP Companion automáticamente al encenderse la pantalla del pasajero
+When it turns on, go back to the app that was open (instead of the grid)	Al encenderse, volver a la app que estaba abierta (en lugar de la cuadrícula)
+Passenger bubble: push its app to the main screen  ←	Burbuja del pasajero: enviar su app a la pantalla principal  ←
+Passenger bubble: bring the main screen's app over  →	Burbuja del pasajero: traer la app de la pantalla principal  →
+Bubble menu	Menú de la burbuja
+Close the bubble menu automatically	Cerrar el menú de la burbuja automáticamente
+Close it after	Cerrar tras
+ s	 s
+Closing apps	Cierre de apps
+Close the previous app when another one is opened	Cerrar la app anterior al abrir otra
+Also close music apps	Cerrar también las apps de música
+Protection	Protección
+Overload protection: close passenger apps if CPU or RAM is overloaded	Protección contra sobrecarga: cerrar las apps del pasajero si la CPU o la RAM están sobrecargadas
+Right now:   	Ahora:   
+not available	no disponible
+RAM 	RAM 
+temp OK	temp. normal
+temp warm	temp. elevada
+temp hot	temp. alta
+overheating	sobrecalentamiento
+ GB free  ·  	 GB libres  ·  
+high	alta
+overloaded	sobrecargado
+Password to leave child mode	Contraseña para salir del modo infantil
+Set password	Definir contraseña
+Backup and recovery	Copia de seguridad y recuperación
+Your settings are backed up automatically and come back after a reset or a reinstall. The password and child mode are not included. Needs the self-repair permission in Status.	Tus ajustes se copian automáticamente y vuelven tras un restablecimiento o una reinstalación. No se incluyen la contraseña ni el modo infantil. Requiere el permiso de autorreparación de Estado.
+Forgot the password? On the PC run:  adb shell settings put secure lp_companion_pin_reset 1  then open LP Companion. The password is cleared and child mode is switched off; everything else stays.	¿Olvidaste la contraseña? En el PC ejecuta:  adb shell settings put secure lp_companion_pin_reset 1  y abre LP Companion. Se borra la contraseña y se desactiva el modo infantil; lo demás se mantiene.
+Vehicle	Vehículo
+Vehicle settings	Ajustes del vehículo
+Back to car UI	Volver a la interfaz del coche
+Apps shown on the passenger screen	Apps mostradas en la pantalla del pasajero
+Untick an app to hide it from the grid. Tick Kids to allow it in child mode.	Desmarca una app para ocultarla de la cuadrícula. Marca Niños para permitirla en el modo infantil.
+Moved to the main screen	Movida a la pantalla principal
+Moved to the passenger screen	Movida a la pantalla del pasajero
+Opened on the passenger screen	Abierta en la pantalla del pasajero
+Opened on the main screen	Abierta en la pantalla principal
+No app on the passenger screen to move	No hay ninguna app en la pantalla del pasajero que mover
+No app on the main screen to move	No hay ninguna app en la pantalla principal que mover
+Moving apps is off in child mode	Mover apps está desactivado en el modo infantil
+That app is no longer installed	Esa app ya no está instalada
+Open on the main screen	Abrir en la pantalla principal
+Open on the passenger screen	Abrir en la pantalla del pasajero
+Add to Kids (allowed in child mode)	Añadir a Niños (permitida en el modo infantil)
+Remove from Kids	Quitar de Niños
+Hide from the grid	Ocultar de la cuadrícula
+Added to Kids	Añadida a Niños
+Removed from Kids	Quitada de Niños
+Hidden from the grid. Bring it back in Settings.	Oculta de la cuadrícula. Puedes recuperarla en Ajustes.
+LP Companion: password cleared, child mode is off	LP Companion: contraseña borrada, modo infantil desactivado
+Fix missing permissions automatically using the car's own ADB	Restaurar automáticamente los permisos que falten mediante el ADB del propio coche
+The first time, the car may ask to allow USB debugging for this app: choose Always allow. Wi-Fi ADB has to be on; the app switches it on itself when it can.	La primera vez, el coche puede pedir permitir la depuración USB para esta app: elige Permitir siempre. El ADB por Wi-Fi debe estar activado; la app lo activa sola cuando puede.
+Fix permissions now	Reparar permisos
+Last attempt: 	Último intento: 
+No attempt yet	Aún no se ha intentado
+Permissions granted through the car's ADB	Permisos concedidos mediante el ADB del coche
+Could not reach the car's ADB (port 5555)	No se pudo conectar con el ADB del coche (puerto 5555)
+Allow the connection on the car's screen (Always allow), then try again	Permite la conexión en la pantalla del coche (Permitir siempre) y vuelve a intentarlo
+Could not grant the permissions	No se pudieron conceder los permisos
+All permissions are already granted	Todos los permisos ya están concedidos
+Trying to grant the permissions…	Intentando conceder los permisos…
+Camera	Cámara
+SMS	SMS
+Accessibility	Accesibilidad
+Device admin	Administrador del dispositivo
+Body sensors	Sensores corporales
+Location in the background	Ubicación en segundo plano
+All files	Todos los archivos
+Files	Archivos
+Contacts	Contactos
+Draw over other apps	Superponer sobre otras apps
+Change system settings	Cambiar ajustes del sistema
+Phone state	Estado del teléfono
+Call log	Registro de llamadas
+Install other apps	Instalar otras apps
+Phone calls	Llamadas telefónicas
+Microphone	Micrófono
+Calendar	Calendario
+Location	Ubicación
+See all installed apps	Ver todas las apps instaladas
+Tap an app to install it. Only plain .apk files are installed.	Toca una app para instalarla. Solo se instalan archivos .apk simples.
+Install apps from storage	Instalar apps desde el almacenamiento
+Grant access	Conceder acceso
+Refresh	Actualizar
+Bundles (.xapk, .apks, .apkm) are not supported. Only plain .apk files can be installed.	Los paquetes (.xapk, .apks, .apkm) no son compatibles. Solo se pueden instalar archivos .apk simples.
+To see the files, this app needs All files access. The car's ADB can grant it.	Para ver los archivos, esta app necesita «Acceso a todos los archivos». El ADB del coche puede concedérselo.
+Up	Subir
+No folders or .apk files here.	No hay carpetas ni archivos .apk aquí.
+Delete	Eliminar
+Could not delete the file	No se pudo eliminar el archivo
+Delete this file?	¿Eliminar este archivo?
+The file is removed from the storage. This cannot be undone.	El archivo se elimina del almacenamiento. No se puede deshacer.
+File deleted	Archivo eliminado
+Update	Actualización
+The file could not be read as an Android app.	No se pudo leer el archivo como app de Android.
+Off: the app asks for them itself. Only for experts.	Desactivado: la app los pide ella misma. Solo para expertos.
+Grant all permissions (-g)	Conceder todos los permisos (-g)
+This replaces LP Companion itself. The app will restart and you will not see the result.	Esto reemplaza a LP Companion. La app se reiniciará y no verás el resultado.
+Keep it off	Dejarlo desactivado
+New app	App nueva
+Install only apps you trust. This install skips the car's app whitelist and uses the car's ADB rights.	Instala solo apps de confianza. Esta instalación se salta la lista blanca de apps del coche y usa los derechos de ADB del coche.
+This app is signed with a different key than the installed copy. The install will fail unless you uninstall the old one first (its data is lost).	Esta app está firmada con una clave distinta a la de la copia instalada. La instalación fallará salvo que desinstales antes la anterior (se pierden sus datos).
+Same version as the installed one	La misma versión que la instalada
+Grant all permissions?	¿Conceder todos los permisos?
+Permissions asked	Permisos solicitados
+Installing…	Instalando…
+Older than the installed version. The install will fail.	Más antigua que la versión instalada. La instalación fallará.
+This is not an app	Esto no es una app
+Sensitive permissions	Permisos sensibles
+Every permission the app asks for is granted without asking you. This can break the system. Only turn it on if you know what you are doing.	Cada permiso que pida la app se concede sin preguntarte. Esto puede romper el sistema. Actívalo solo si sabes lo que haces.
+I know what I am doing	Sé lo que hago
+Size	Tamaño
+Install	Instalar
+The car does not allow removing this app.	El coche no permite quitar esta app.
+The installed copy was signed with a different key. Uninstall it first (its data is lost).	La copia instalada está firmada con otra clave. Desinstálala primero (se pierden sus datos).
+The file is not a valid app.	El archivo no es una app válida.
+The app needs a newer Android version than this car has.	La app necesita una versión de Android más reciente que la de este coche.
+Could not uninstall the app	No se pudo desinstalar la app
+A newer version is already installed. Downgrading is not allowed.	Ya hay una versión más reciente instalada. No se permite volver a una anterior.
+Installed	Instalada
+The car refused this install.	El coche rechazó esta instalación.
+Uninstalled	Desinstalada
+Could not install the app	No se pudo instalar la app
+Not enough free storage on the car.	No hay suficiente espacio libre en el coche.
+The app is built for a different processor type.	La app está compilada para otro tipo de procesador.
+Device storage	Almacenamiento del dispositivo
+Downloads	Descargas
+USB drive	Unidad USB
+The app and its data are deleted. This cannot be undone.	La app y sus datos se eliminan. No se puede deshacer.
+Uninstall apps	Desinstalar apps
+Only apps installed from LP Companion are listed.	Solo se muestran las apps instaladas desde LP Companion.
+Close	Cerrar
+Nothing installed from here yet.	Aún no se ha instalado nada desde aquí.
+Uninstalling…	Desinstalando…
+Uninstall this app?	¿Desinstalar esta app?
+Uninstall	Desinstalar
+The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	El ADB del coche está en modo de depuración inalámbrica (TLS). Se necesita el ADB de red clásico en el puerto 5555.
+The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	El ADB del coche está apagado o no es accesible. Activa el ADB inalámbrico en la página de servicio del coche y pulsa «Volver a comprobar».
+needs ADB	requiere ADB

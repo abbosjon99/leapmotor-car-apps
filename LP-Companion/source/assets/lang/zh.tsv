@@ -1,0 +1,192 @@
+Close apps	关闭应用
+Tap an app to close it	点按应用即可关闭
+Cancel	取消
+All but music	除音乐外全部
+Close all	全部关闭
+Settings	设置
+Hide bar	隐藏侧栏
+Show bar	显示侧栏
+Child mode	儿童模式
+Exit child mode	退出儿童模式
+Change wallpaper	更换壁纸
+Close previous app: Off	关闭上一个应用：关
+Close previous app: On	关闭上一个应用：开
+↳ Also close music apps: Off	↳ 同时关闭音乐应用：关
+↳ Also close music apps: On	↳ 同时关闭音乐应用：开
+Set a password in Settings first	请先在设置中设置密码
+No running apps to close	没有可关闭的运行中应用
+No passenger screen to turn off	没有可关闭的副驾屏幕
+Child mode on	儿童模式已开启
+Child mode off	儿童模式已关闭
+Back is starting — tap it again in a moment	返回键正在启动，请稍后再点一次
+Back is off — LP Companion needs the WRITE_SECURE_SETTINGS grant over ADB	返回键已关闭——LP Companion 需要通过 ADB 授予 WRITE_SECURE_SETTINGS 权限
+LP Companion (main screen)	LP Companion（主屏）
+LP Companion controls on the main screen	主屏上的 LP Companion 控制
+LP Companion is running	LP Companion 正在运行
+RAM / temperature unavailable	内存/温度不可用
+⚠  System overloaded (	⚠  系统过载（
+) — passenger apps closed	）——副驾应用已关闭
+Enter PIN	输入 PIN 码
+Set a PIN (4+ digits)	设置 PIN 码（至少 4 位）
+Enter current PIN	输入当前 PIN 码
+Wrong current PIN	当前 PIN 码错误
+Enter a new PIN (4+ digits)	输入新 PIN 码（至少 4 位）
+Need at least 4 digits	至少需要 4 位数字
+PIN set	PIN 码已设置
+Wrong PIN	PIN 码错误
+OK	确定
+status OK	正常
+level OK	正常
+OFF	关闭
+Kids	儿童
+Status	状态
+Save	保存
+Saved	已保存
+Language	语言
+Bubble (overlay)	悬浮球（悬浮窗）
+Now playing (notification access)	正在播放（通知访问权限）
+Self-repair after restart	重启后自动修复
+Needs the self-repair permission above	需要上方的自动修复权限
+Switching on now — reopen this page in a few seconds	正在开启——请几秒后重新打开此页面
+Back button (accessibility)	返回键（无障碍）
+Re-check status	重新检查
+Passenger screen	副驾屏幕
+Open LP Companion automatically when the passenger screen turns on	副驾屏幕亮起时自动打开 LP Companion
+When it turns on, go back to the app that was open (instead of the grid)	亮屏时返回之前打开的应用（而不是应用列表）
+Passenger bubble: push its app to the main screen  ←	副驾悬浮球：把其应用推到主屏  ←
+Passenger bubble: bring the main screen's app over  →	副驾悬浮球：把主屏的应用拉过来  →
+Bubble menu	悬浮球菜单
+Close the bubble menu automatically	自动关闭悬浮球菜单
+Close it after	关闭时间
+ s	 秒
+Closing apps	关闭应用
+Close the previous app when another one is opened	打开新应用时关闭上一个应用
+Also close music apps	同时关闭音乐应用
+Protection	保护
+Overload protection: close passenger apps if CPU or RAM is overloaded	过载保护：CPU 或内存过载时关闭副驾应用
+Right now:   	当前：   
+not available	不可用
+RAM 	内存 
+temp OK	温度正常
+temp warm	温度偏高
+temp hot	温度过高
+overheating	过热
+ GB free  ·  	 GB 可用  ·  
+high	偏高
+overloaded	过载
+Password to leave child mode	退出儿童模式的密码
+Set password	设置密码
+Backup and recovery	备份与恢复
+Your settings are backed up automatically and come back after a reset or a reinstall. The password and child mode are not included. Needs the self-repair permission in Status.	设置会自动备份，并在重置或重新安装后恢复。密码和儿童模式不包含在内。需要“状态”中的自动修复权限。
+Forgot the password? On the PC run:  adb shell settings put secure lp_companion_pin_reset 1  then open LP Companion. The password is cleared and child mode is switched off; everything else stays.	忘记密码？在电脑上运行：adb shell settings put secure lp_companion_pin_reset 1，然后打开 LP Companion。密码将被清除并关闭儿童模式，其他设置保持不变。
+Vehicle	车辆
+Vehicle settings	车辆设置
+Back to car UI	返回车机界面
+Apps shown on the passenger screen	副驾屏幕显示的应用
+Untick an app to hide it from the grid. Tick Kids to allow it in child mode.	取消勾选可将应用从列表中隐藏。勾选“儿童”可在儿童模式中允许该应用。
+Moved to the main screen	已移到主屏
+Moved to the passenger screen	已移到副驾屏幕
+Opened on the passenger screen	已在副驾屏幕打开
+Opened on the main screen	已在主屏打开
+No app on the passenger screen to move	副驾屏幕上没有可移动的应用
+No app on the main screen to move	主屏上没有可移动的应用
+Moving apps is off in child mode	儿童模式下无法移动应用
+That app is no longer installed	该应用已不再安装
+Open on the main screen	在主屏打开
+Open on the passenger screen	在副驾屏幕打开
+Add to Kids (allowed in child mode)	加入“儿童”（儿童模式下允许）
+Remove from Kids	从“儿童”中移除
+Hide from the grid	从列表中隐藏
+Added to Kids	已加入“儿童”
+Removed from Kids	已从“儿童”中移除
+Hidden from the grid. Bring it back in Settings.	已从列表隐藏。可在设置中恢复。
+LP Companion: password cleared, child mode is off	LP Companion：密码已清除，儿童模式已关闭
+Fix missing permissions automatically using the car's own ADB	通过车机自带的 ADB 自动补齐缺失的权限
+The first time, the car may ask to allow USB debugging for this app: choose Always allow. Wi-Fi ADB has to be on; the app switches it on itself when it can.	首次使用时，车机可能会询问是否允许此应用进行 USB 调试：请选择“始终允许”。需要开启无线 ADB；应用在有权限时会自行开启。
+Fix permissions now	修复权限
+Last attempt: 	上次尝试： 
+No attempt yet	尚未尝试
+Permissions granted through the car's ADB	已通过车机 ADB 授予权限
+Could not reach the car's ADB (port 5555)	无法连接车机 ADB（端口 5555）
+Allow the connection on the car's screen (Always allow), then try again	请在车机屏幕上允许连接（选择“始终允许”），然后重试
+Could not grant the permissions	无法授予权限
+All permissions are already granted	所有权限均已授予
+Trying to grant the permissions…	正在尝试授予权限…
+Camera	相机
+SMS	短信
+Accessibility	无障碍
+Device admin	设备管理员
+Body sensors	身体传感器
+Location in the background	后台位置信息
+All files	所有文件
+Files	文件
+Contacts	联系人
+Draw over other apps	显示在其他应用上层
+Change system settings	修改系统设置
+Phone state	手机状态
+Call log	通话记录
+Install other apps	安装其他应用
+Phone calls	拨打电话
+Microphone	麦克风
+Calendar	日历
+Location	位置信息
+See all installed apps	查看所有已安装应用
+Tap an app to install it. Only plain .apk files are installed.	点按应用即可安装。仅支持普通的 .apk 文件。
+Install apps from storage	从存储安装应用
+Grant access	授予权限
+Refresh	刷新
+Bundles (.xapk, .apks, .apkm) are not supported. Only plain .apk files can be installed.	不支持合集包（.xapk、.apks、.apkm）。只能安装普通的 .apk 文件。
+To see the files, this app needs All files access. The car's ADB can grant it.	要查看文件，此应用需要“所有文件访问权限”。可通过车机 ADB 授予。
+Up	上一级
+No folders or .apk files here.	这里没有文件夹或 .apk 文件。
+Delete	删除
+Could not delete the file	无法删除文件
+Delete this file?	删除此文件？
+The file is removed from the storage. This cannot be undone.	文件将从存储中删除，无法撤销。
+File deleted	文件已删除
+Update	更新
+The file could not be read as an Android app.	无法将该文件读取为 Android 应用。
+Off: the app asks for them itself. Only for experts.	关闭：由应用自行请求权限。仅限专业用户。
+Grant all permissions (-g)	授予所有权限 (-g)
+This replaces LP Companion itself. The app will restart and you will not see the result.	这将替换 LP Companion 本身。应用会重启，您将看不到结果。
+Keep it off	保持关闭
+New app	新应用
+Install only apps you trust. This install skips the car's app whitelist and uses the car's ADB rights.	请只安装您信任的应用。此安装会绕过车机的应用白名单，并使用车机 ADB 的权限。
+This app is signed with a different key than the installed copy. The install will fail unless you uninstall the old one first (its data is lost).	此应用的签名密钥与已安装的版本不同。除非先卸载旧版本（其数据将丢失），否则安装会失败。
+Same version as the installed one	与已安装版本相同
+Grant all permissions?	授予所有权限？
+Permissions asked	请求的权限数
+Installing…	正在安装…
+Older than the installed version. The install will fail.	比已安装的版本旧，安装将失败。
+This is not an app	这不是应用
+Sensitive permissions	敏感权限
+Every permission the app asks for is granted without asking you. This can break the system. Only turn it on if you know what you are doing.	应用请求的每项权限都会在不询问您的情况下授予。这可能会破坏系统。只有在您清楚自己在做什么时才开启。
+I know what I am doing	我清楚自己在做什么
+Size	大小
+Install	安装
+The car does not allow removing this app.	车机不允许移除此应用。
+The installed copy was signed with a different key. Uninstall it first (its data is lost).	已安装的版本使用了不同的签名密钥。请先卸载它（其数据将丢失）。
+The file is not a valid app.	该文件不是有效的应用。
+The app needs a newer Android version than this car has.	该应用需要比此车机更高的 Android 版本。
+Could not uninstall the app	无法卸载应用
+A newer version is already installed. Downgrading is not allowed.	已安装更新的版本，不允许降级。
+Installed	已安装
+The car refused this install.	车机拒绝了此次安装。
+Uninstalled	已卸载
+Could not install the app	无法安装应用
+Not enough free storage on the car.	车机可用存储空间不足。
+The app is built for a different processor type.	该应用是为其他类型的处理器构建的。
+Device storage	设备存储
+Downloads	下载
+USB drive	U 盘
+The app and its data are deleted. This cannot be undone.	应用及其数据将被删除，无法撤销。
+Uninstall apps	卸载应用
+Only apps installed from LP Companion are listed.	仅列出通过 LP Companion 安装的应用。
+Close	关闭
+Nothing installed from here yet.	尚未通过这里安装任何应用。
+Uninstalling…	正在卸载…
+Uninstall this app?	卸载此应用？
+Uninstall	卸载
+The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	车机 ADB 处于无线调试（TLS）模式。需要使用端口 5555 的传统网络 ADB。
+The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	车机 ADB 已关闭或无法连接。请在车机后台页面开启无线 ADB，然后点击“重新检查”。
+needs ADB	需要 ADB

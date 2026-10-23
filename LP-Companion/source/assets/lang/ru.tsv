@@ -1,0 +1,192 @@
+Close apps	Закрыть приложения
+Tap an app to close it	Нажмите на приложение, чтобы закрыть его
+Cancel	Отмена
+All but music	Всё, кроме музыки
+Close all	Закрыть все
+Settings	Настройки
+Hide bar	Скрыть панель
+Show bar	Показать панель
+Child mode	Детский режим
+Exit child mode	Выйти из детского режима
+Change wallpaper	Сменить обои
+Close previous app: Off	Закрывать прошлое приложение: выкл.
+Close previous app: On	Закрывать прошлое приложение: вкл.
+↳ Also close music apps: Off	↳ Закрывать и музыкальные приложения: выкл.
+↳ Also close music apps: On	↳ Закрывать и музыкальные приложения: вкл.
+Set a password in Settings first	Сначала задайте пароль в настройках
+No running apps to close	Нет запущенных приложений для закрытия
+No passenger screen to turn off	Нет экрана пассажира для выключения
+Child mode on	Детский режим включён
+Child mode off	Детский режим выключен
+Back is starting — tap it again in a moment	Кнопка «Назад» запускается — нажмите ещё раз через секунду
+Back is off — LP Companion needs the WRITE_SECURE_SETTINGS grant over ADB	Кнопка «Назад» отключена — LP Companion нужно разрешение WRITE_SECURE_SETTINGS через ADB
+LP Companion (main screen)	LP Companion (главный экран)
+LP Companion controls on the main screen	Управление LP Companion на главном экране
+LP Companion is running	LP Companion работает
+RAM / temperature unavailable	ОЗУ / температура недоступны
+⚠  System overloaded (	⚠  Система перегружена (
+) — passenger apps closed	) — приложения пассажира закрыты
+Enter PIN	Введите PIN-код
+Set a PIN (4+ digits)	Задайте PIN-код (от 4 цифр)
+Enter current PIN	Введите текущий PIN-код
+Wrong current PIN	Неверный текущий PIN-код
+Enter a new PIN (4+ digits)	Введите новый PIN-код (от 4 цифр)
+Need at least 4 digits	Нужно не менее 4 цифр
+PIN set	PIN-код задан
+Wrong PIN	Неверный PIN-код
+OK	ОК
+status OK	ОК
+level OK	норма
+OFF	ВЫКЛ
+Kids	Дети
+Status	Состояние
+Save	Сохранить
+Saved	Сохранено
+Language	Язык
+Bubble (overlay)	Пузырёк (поверх окон)
+Now playing (notification access)	Сейчас играет (доступ к уведомлениям)
+Self-repair after restart	Самовосстановление после перезапуска
+Needs the self-repair permission above	Нужно разрешение самовосстановления выше
+Switching on now — reopen this page in a few seconds	Включается — откройте страницу снова через несколько секунд
+Back button (accessibility)	Кнопка «Назад» (специальные возможности)
+Re-check status	Проверить снова
+Passenger screen	Экран пассажира
+Open LP Companion automatically when the passenger screen turns on	Открывать LP Companion автоматически при включении экрана пассажира
+When it turns on, go back to the app that was open (instead of the grid)	При включении возвращаться в открытое приложение (вместо списка)
+Passenger bubble: push its app to the main screen  ←	Пузырёк пассажира: отправить его приложение на главный экран  ←
+Passenger bubble: bring the main screen's app over  →	Пузырёк пассажира: перенести приложение с главного экрана  →
+Bubble menu	Меню пузырька
+Close the bubble menu automatically	Закрывать меню пузырька автоматически
+Close it after	Закрывать через
+ s	 с
+Closing apps	Закрытие приложений
+Close the previous app when another one is opened	Закрывать прошлое приложение при открытии другого
+Also close music apps	Закрывать и музыкальные приложения
+Protection	Защита
+Overload protection: close passenger apps if CPU or RAM is overloaded	Защита от перегрузки: закрывать приложения пассажира при перегрузке ЦП или ОЗУ
+Right now:   	Сейчас:   
+not available	недоступно
+RAM 	ОЗУ 
+temp OK	темп. в норме
+temp warm	темп. повышена
+temp hot	темп. высокая
+overheating	перегрев
+ GB free  ·  	 ГБ свободно  ·  
+high	высокая
+overloaded	перегрузка
+Password to leave child mode	Пароль для выхода из детского режима
+Set password	Задать пароль
+Backup and recovery	Резервная копия и восстановление
+Your settings are backed up automatically and come back after a reset or a reinstall. The password and child mode are not included. Needs the self-repair permission in Status.	Настройки автоматически сохраняются в резервной копии и возвращаются после сброса или переустановки. Пароль и детский режим не сохраняются. Нужно разрешение самовосстановления из раздела «Состояние».
+Forgot the password? On the PC run:  adb shell settings put secure lp_companion_pin_reset 1  then open LP Companion. The password is cleared and child mode is switched off; everything else stays.	Забыли пароль? На компьютере выполните:  adb shell settings put secure lp_companion_pin_reset 1  и откройте LP Companion. Пароль будет сброшен, детский режим выключится; всё остальное сохранится.
+Vehicle	Автомобиль
+Vehicle settings	Настройки автомобиля
+Back to car UI	Назад к интерфейсу автомобиля
+Apps shown on the passenger screen	Приложения на экране пассажира
+Untick an app to hide it from the grid. Tick Kids to allow it in child mode.	Снимите галочку, чтобы скрыть приложение из списка. Отметьте «Дети», чтобы разрешить его в детском режиме.
+Moved to the main screen	Перенесено на главный экран
+Moved to the passenger screen	Перенесено на экран пассажира
+Opened on the passenger screen	Открыто на экране пассажира
+Opened on the main screen	Открыто на главном экране
+No app on the passenger screen to move	На экране пассажира нет приложения для переноса
+No app on the main screen to move	На главном экране нет приложения для переноса
+Moving apps is off in child mode	В детском режиме перенос приложений отключён
+That app is no longer installed	Это приложение больше не установлено
+Open on the main screen	Открыть на главном экране
+Open on the passenger screen	Открыть на экране пассажира
+Add to Kids (allowed in child mode)	Добавить в «Дети» (разрешено в детском режиме)
+Remove from Kids	Убрать из «Дети»
+Hide from the grid	Скрыть из списка
+Added to Kids	Добавлено в «Дети»
+Removed from Kids	Убрано из «Дети»
+Hidden from the grid. Bring it back in Settings.	Скрыто из списка. Вернуть можно в настройках.
+LP Companion: password cleared, child mode is off	LP Companion: пароль сброшен, детский режим выключен
+Fix missing permissions automatically using the car's own ADB	Автоматически восстанавливать недостающие разрешения через ADB самого автомобиля
+The first time, the car may ask to allow USB debugging for this app: choose Always allow. Wi-Fi ADB has to be on; the app switches it on itself when it can.	В первый раз автомобиль может спросить, разрешить ли отладку по USB для этого приложения: выберите «Всегда разрешать». Wi-Fi ADB должен быть включён; приложение включает его само, если может.
+Fix permissions now	Исправить разрешения
+Last attempt: 	Последняя попытка: 
+No attempt yet	Попыток ещё не было
+Permissions granted through the car's ADB	Разрешения выданы через ADB автомобиля
+Could not reach the car's ADB (port 5555)	Не удалось подключиться к ADB автомобиля (порт 5555)
+Allow the connection on the car's screen (Always allow), then try again	Разрешите подключение на экране автомобиля («Всегда разрешать») и повторите попытку
+Could not grant the permissions	Не удалось выдать разрешения
+All permissions are already granted	Все разрешения уже выданы
+Trying to grant the permissions…	Пытаюсь выдать разрешения…
+Camera	Камера
+SMS	SMS
+Accessibility	Специальные возможности
+Device admin	Администратор устройства
+Body sensors	Датчики тела
+Location in the background	Местоположение в фоне
+All files	Все файлы
+Files	Файлы
+Contacts	Контакты
+Draw over other apps	Поверх других приложений
+Change system settings	Изменение настроек системы
+Phone state	Состояние телефона
+Call log	Журнал звонков
+Install other apps	Установка других приложений
+Phone calls	Телефонные звонки
+Microphone	Микрофон
+Calendar	Календарь
+Location	Местоположение
+See all installed apps	Просмотр всех установленных приложений
+Tap an app to install it. Only plain .apk files are installed.	Нажмите на приложение, чтобы установить его. Устанавливаются только обычные файлы .apk.
+Install apps from storage	Установка приложений из памяти
+Grant access	Дать доступ
+Refresh	Обновить
+Bundles (.xapk, .apks, .apkm) are not supported. Only plain .apk files can be installed.	Пакеты (.xapk, .apks, .apkm) не поддерживаются. Можно установить только обычные файлы .apk.
+To see the files, this app needs All files access. The car's ADB can grant it.	Чтобы видеть файлы, приложению нужен «Доступ ко всем файлам». Его может выдать ADB автомобиля.
+Up	Вверх
+No folders or .apk files here.	Здесь нет папок и файлов .apk.
+Delete	Удалить
+Could not delete the file	Не удалось удалить файл
+Delete this file?	Удалить этот файл?
+The file is removed from the storage. This cannot be undone.	Файл будет удалён из памяти. Это нельзя отменить.
+File deleted	Файл удалён
+Update	Обновление
+The file could not be read as an Android app.	Не удалось прочитать файл как приложение Android.
+Off: the app asks for them itself. Only for experts.	Выкл.: приложение запрашивает их само. Только для опытных пользователей.
+Grant all permissions (-g)	Выдать все разрешения (-g)
+This replaces LP Companion itself. The app will restart and you will not see the result.	Это заменит сам LP Companion. Приложение перезапустится, и результат вы не увидите.
+Keep it off	Оставить выключенным
+New app	Новое приложение
+Install only apps you trust. This install skips the car's app whitelist and uses the car's ADB rights.	Устанавливайте только доверенные приложения. Эта установка обходит белый список приложений автомобиля и использует права ADB автомобиля.
+This app is signed with a different key than the installed copy. The install will fail unless you uninstall the old one first (its data is lost).	Это приложение подписано другим ключом, чем установленная копия. Установка не удастся, пока вы не удалите старую (её данные будут потеряны).
+Same version as the installed one	Та же версия, что и установленная
+Grant all permissions?	Выдать все разрешения?
+Permissions asked	Запрошено разрешений
+Installing…	Установка…
+Older than the installed version. The install will fail.	Старее установленной версии. Установка не удастся.
+This is not an app	Это не приложение
+Sensitive permissions	Чувствительные разрешения
+Every permission the app asks for is granted without asking you. This can break the system. Only turn it on if you know what you are doing.	Каждое разрешение, которое запрашивает приложение, выдаётся без вашего подтверждения. Это может сломать систему. Включайте, только если понимаете, что делаете.
+I know what I am doing	Я понимаю, что делаю
+Size	Размер
+Install	Установить
+The car does not allow removing this app.	Автомобиль не разрешает удалить это приложение.
+The installed copy was signed with a different key. Uninstall it first (its data is lost).	Установленная копия подписана другим ключом. Сначала удалите её (данные будут потеряны).
+The file is not a valid app.	Файл не является допустимым приложением.
+The app needs a newer Android version than this car has.	Приложению нужна более новая версия Android, чем в этом автомобиле.
+Could not uninstall the app	Не удалось удалить приложение
+A newer version is already installed. Downgrading is not allowed.	Уже установлена более новая версия. Понижение версии не разрешено.
+Installed	Установлено
+The car refused this install.	Автомобиль отклонил эту установку.
+Uninstalled	Удалено
+Could not install the app	Не удалось установить приложение
+Not enough free storage on the car.	В автомобиле недостаточно свободной памяти.
+The app is built for a different processor type.	Приложение собрано для другого типа процессора.
+Device storage	Память устройства
+Downloads	Загрузки
+USB drive	USB-накопитель
+The app and its data are deleted. This cannot be undone.	Приложение и его данные будут удалены. Это нельзя отменить.
+Uninstall apps	Удаление приложений
+Only apps installed from LP Companion are listed.	Показаны только приложения, установленные через LP Companion.
+Close	Закрыть
+Nothing installed from here yet.	Отсюда пока ничего не установлено.
+Uninstalling…	Удаление…
+Uninstall this app?	Удалить это приложение?
+Uninstall	Удалить
+The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	ADB автомобиля работает в режиме беспроводной отладки (TLS). Нужен обычный сетевой ADB на порту 5555.
+The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	ADB автомобиля выключен или недоступен. Включите беспроводной ADB на служебной странице автомобиля и нажмите «Проверить снова».
+needs ADB	нужен ADB

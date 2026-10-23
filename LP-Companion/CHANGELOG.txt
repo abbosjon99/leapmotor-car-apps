@@ -417,3 +417,189 @@ LP Companion 2.26  (2026-10-23)  versionCode 34
     (Swapper.grid, now public), then the normal stop + kill runs. closeAppsKeep also forgets lastPassenger / onMain
     for any app it closes.
   Undo: install LP-Companion-2.25.apk (same downgrade note as 2.20).
+
+LP Companion 2.27  (2026-10-23)  versionCode 35
+  BUILT, NOT YET INSTALLED OR TRIED ON THE CAR (the car was offline over adb). Assembled with 0 errors and every
+  call/field reference to the app's own classes cross-checked against a definition; the ART verifier has not run.
+  First install: `adb install --no-incremental --install-reason 64 -r LP-Companion-2.27.apk`, then watch
+  `adb logcat -s AndroidRuntime:E` and open the grid on the main screen once (restarts the bubbles).
+  - FIX (found while reading the code): in 2.25 and 2.26 three calls to SettingsActivity.addPill (Cancel, Save,
+    Set password) still used the old void signature after addPill began to return the TextView in 2.25. That is a
+    NoSuchMethodError, so the Settings page would crash when opened on 2.25 / 2.26. Fixed; Settings was never
+    opened on the car on those two versions.
+  - Long-press menu on a grid tile (TileMenu): a tap still opens the app on the passenger screen. A long press
+    shows a card with Open on the main screen / Open on the passenger screen / Add to Kids (Remove from Kids) /
+    Hide from the grid. "Open on the main screen" is left out in child mode, and in child mode on the passenger
+    screen a long press does nothing. Swapper.openOn moves the task if the app already runs on the other screen
+    (same NEW_TASK | RESET_TASK_IF_NEEDED launch as a move) and keeps the running / lastPassenger / onMain records
+    right. MainActivity.openApp is the old tap code as a method. The grids now also refresh live when kidApps or
+    hidden change (prefs listener), from Settings or from the menu on the other screen.
+  - Resume on wake (PassengerWatcher.resume): when the passenger screen turns on, the app that was open there is
+    brought back (NEW_TASK only, so it is not reset) instead of the grid. Settings > Passenger screen: new switch
+    "When it turns on, go back to the app that was open" (pref resumeLast, default ON). Only for an app still in
+    the "running" set; in child mode only for a Kids app; otherwise the grid opens as before. Needs the existing
+    "Open LP Companion automatically when the passenger screen turns on" switch to be on.
+  - Close apps (both screens): new blue "All but music" button when a listed app is playing right now. It closes
+    every listed app that does not have a PLAYING media session (CloseDialog.playing / others).
+  - RAM / temperature readout (Health, HealthTick): a chip in the grid header (not shown to the child on the
+    passenger screen), updated every 5 s, green / amber / red by the same rules overload protection uses: low-memory
+    flag or < 1/16 RAM free, thermal status SEVERE, or a sensor at 95 C = overloaded; < 1/8 free, MODERATE, 85 C or a
+    1-minute load above 7 = high. The overload warning on the passenger screen now includes the numbers, and
+    Settings > Protection shows a "Right now" line. Temperature: Android gives apps no Celsius value, so it reads
+    /sys/class/thermal/thermal_zone*/temp; if the firmware does not let apps read those, only Android's thermal
+    status is shown (temp OK / warm / hot / overheating). Which one works on the car is not known yet.
+  - Settings backup and PIN recovery (Backup): the settings (not the password, child mode on/off or the running
+    records) are written as JSON to Settings.Secure "lp_companion_backup" after Settings > Save, the tile menu and
+    whenever a grid stops. On the first start with empty data (`pm clear`, reinstall) they come back. Needs the
+    WRITE_SECURE_SETTINGS grant. Forgot the password: `adb shell settings put secure lp_companion_pin_reset 1`, then
+    open LP Companion: the password is cleared and child mode is switched off, everything else stays.
+    Settings shows both under "Backup and recovery".
+  - New classes: TileMenu, Health, HealthTick, Backup. New prefs: resumeLast (default on), setup (marker).
+    Backed-up keys: wheel, autoOpen, resumeLast, passToMain, passFromMain, bubbleAuto, autoClose, closeMusic,
+    overheat, bubbleSecs, wallpaper, kidApps, hidden.
+  - The new calls from the core paths (backup, chip, tile menu, Settings readout, warning text) are wrapped in
+    try/catch Throwable so a problem in one of them cannot take the grid or Settings down.
+  Undo: install LP-Companion-2.26.apk (same downgrade note as 2.20); the new prefs are ignored by 2.26. Note that 2.26
+  still has the Settings crash above.
+
+LP Companion 2.28  (2026-10-23)  versionCode 36
+  BUILT, NOT YET INSTALLED OR TRIED ON THE CAR (still offline). 2.28 contains everything in 2.27 plus languages, so
+  install 2.28 directly: `adb install --no-incremental --install-reason 64 -r LP-Companion-2.28.apk`.
+  - Interface languages: Uzbek, Russian, Spanish, English, Chinese. Which one is used:
+      1. the language picked in Settings > Language (pref "lang": uz, ru, es, en, zh), else
+      2. the system language if it is Uzbek, Russian, Spanish or English, else
+      3. English. A Chinese system (the car's default) therefore starts in English; Chinese is picked in Settings.
+    Settings > Language (first card) shows the language in use; a tap opens a list with the five names written in their
+    own language (O'zbekcha, Русский, Español, English, 中文). Choosing one saves the page (unsaved switches are kept),
+    switches at once and reopens Settings in the new language; both grids rebuild by themselves (prefs listener on
+    "lang"). The choice is part of the settings backup.
+  - How it works: every user-visible English text in the code goes through Lang.t(english) and is looked up in
+    assets/lang/<code>.tsv (english<TAB>translation per line, UTF-8). A text with no entry shows in English, so a
+    missing translation is never blank. 103 texts are translated: grid, Close apps, tile menu, PIN pad, Settings, the
+    toasts of Swapper / bubbles / Backup, the RAM / temperature chip words and the overload warning. Left in English on
+    purpose: the app name, "by abbosjon99", the adb commands, log text, and the words in Settings that are commands.
+    The word OK has three keys ("OK" for the PIN pad button, "status OK" in Settings > Status, "level OK" for the chip)
+    because it needs different Chinese / Uzbek words; English maps the two helper keys back to OK (assets/lang/en.tsv).
+  - Source of the translations: translations.txt (english||uz||ru||es||zh per line) in the project folder;
+    `powershell -ExecutionPolicy Bypass -File make-lang.ps1` regenerates source\assets\lang\*.tsv from it. To add a text:
+    write it in the code as `const-string vN, "English text"` followed by
+    `invoke-static {vN}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;` and
+    `move-result-object vN`, add a line to translations.txt, run make-lang.ps1 and rebuild.
+  - New classes: Lang (engine, picker data), LangDialog (the picker). Settings' save code is now one method (saveAll) so
+    the language switch can keep unsaved changes. Lang.init runs first in the grid, Settings and both bubble services.
+  - The Uzbek is Latin script with a plain apostrophe (o', g'). The Chinese uses 副驾 for the passenger screen and 主屏
+    for the main screen. The translations have not been checked by a native speaker and the new screens have not been
+    seen on the car, so wording and text that is too long for a button are likely to need a pass.
+  Undo: install LP-Companion-2.26.apk (same downgrade note as 2.20); the "lang" pref is ignored there.
+
+LP Companion 2.29  (2026-10-23)  versionCode 37
+  BUILT, NOT YET INSTALLED OR TRIED ON THE CAR (offline). Includes 2.27 and 2.28.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.29.apk`
+  - Gets its own permissions back through the car's own adb. After a reboot or firmware update, if any of these is
+    missing, the app connects from the head unit to its own adbd (wifi adb, 127.0.0.1:5555) and grants it:
+      WRITE_SECURE_SETTINGS   pm grant --user U <pkg> android.permission.WRITE_SECURE_SETTINGS
+      draw over other apps    appops set --user U <pkg> SYSTEM_ALERT_WINDOW allow
+      notification access     cmd notification allow_listener <pkg>/uz.carhelper.passenger.WheelListener U
+    (U = the app's Android user, 10 on the car.) Nothing else is ever sent: the client refuses every command that is not
+    one of those three shapes before it connects (AdbRunner.allowed, tested against injection attempts).
+  - When it runs: automatically when the bubble service or the grid starts (Heal.start), only if something is missing, at
+    most every 10 minutes, with up to 6 tries 45 s apart while adbd is not reachable yet (right after boot); and on
+    demand with Settings > Status > "Fix permissions now". Settings > Status also has the switch "Fix missing
+    permissions automatically using the car's own ADB" (pref healAdb, default ON, part of the backup) and a line with the
+    result of the last attempt (pref healResult). After a success it turns the Back service on and starts the bubbles.
+  - What it needs: the INTERNET permission (added to the manifest; Android grants it itself), wifi adb listening on the head
+    unit, and the FIRST time the car may show "Allow USB debugging?" for this app's own key (the app makes its own 2048-bit
+    RSA key, kept in files/adbkey, never leaves the app): choose Always allow. If the head unit never shows that prompt a
+    new key cannot be approved and this feature cannot work; that can only be learned on the car. A firmware update that
+    wipes /data/misc/adb/adb_keys makes the prompt come back once.
+  - The adb client is plain Java (adbclient/src, package uz.carhelper.passenger.adb: AdbKey, AdbConnection, AdbRunner,
+    AdbException), converted to smali with Google's D8 (tools/r8.jar, 8.5.35, downloaded from dl.google.com/dl/android/
+    maven2, 16.7 MB, SHA-1 checked). adbclient/build-adb.ps1 rebuilds it: javac, tests, D8, apktool -> source\smali\...\adb.
+    adbclient/test has a mock adbd written separately from the client (it checks the signature the way adbd does, and
+    checks every field of the adb public key struct). 9 test groups pass: first run with an unknown key and approval, the
+    saved key accepted without a prompt, prompt never answered, Deny, nothing listening, a command off the allow-list,
+    adbd without authentication, an error text / output in several packets, and the allow-list itself.
+  - NOT tested against a real adbd. Things only the car can show: the exact adbd handshake on this firmware (an Android 11+
+    adbd may answer with a TLS request instead of AUTH for some connections; that ends as a FAIL result), whether the
+    approval prompt appears, and whether the app's process stays alive long enough after a boot (if the bubble services stop
+    themselves for lack of the overlay permission, the process may be cached and killed; opening the grid or "Fix permissions
+    now" always works from the foreground).
+  - 11 new texts, translated into uz / ru / es / zh (translations.txt). New classes: Heal, HealToast, and the adb package.
+  Undo: install LP-Companion-2.26.apk (same downgrade note as 2.20). To stop it without downgrading, switch the setting off.
+
+LP Companion 2.30  (2026-10-23)  versionCode 38
+  BUILT, NOT YET INSTALLED OR TRIED ON THE CAR (offline). Includes 2.27 - 2.29.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.30.apk`
+  - Settings page layout: the Vehicle card is now directly under the Status card (it was further down) and has four rows:
+    Vehicle settings, Back to car UI, Install apps from storage, Uninstall apps. "Re-check status" and "Fix permissions now"
+    are two buttons side by side at the bottom of the Status card (below the auto-fix switch and the last-attempt line);
+    their Russian / Uzbek / Spanish labels were shortened to fit.
+  - Install apps from storage (a full-screen page, Settings > Vehicle card): a read-only file browser for the car's device
+    storage (the car user's /storage/emulated/10, with a Downloads shortcut) and mounted USB drives. It lists only folders
+    and .apk files; .xapk / .apks / .apkm bundles are shown greyed out and are not installable. Hidden dot-folders,
+    "Android", and the system folders of USB drives (System Volume Information, $RECYCLE.BIN, LOST.DIR, ...) are never
+    shown, and every path is checked on its real (canonical) path, so a shortcut cannot lead out of the allowed places.
+    It needs the "All files access" permission: the page shows a Grant button that gives it through the car's adb
+    (appops set --user U <pkg> MANAGE_EXTERNAL_STORAGE allow). Not part of the automatic self-repair.
+  - Tapping an APK opens the warning card: name, package, version (new app / update from X / same version / older, which
+    will fail), size, number of permissions and the sensitive ones (camera, microphone, location, SMS, ...), a warning to
+    install only trusted apps, a warning when the installed copy has a different signing key, and an extra warning when
+    the APK is LP Companion itself. The "Grant all permissions (-g)" switch sits above the Install button, OFF by default;
+    turning it on opens a second warning card (it can break the system) that needs "I know what I am doing". The Install
+    button is locked for 10 seconds with a countdown.
+  - The install streams the APK through the car's own adb: `cmd package install -S <size> --install-reason 64 -r [-g]`
+    (the same way adb install does), so the file path never goes into a shell command. A progress card shows the
+    percentage; failures are explained in words (downgrade, different signature, no storage, wrong processor type, ...)
+    with the installer's raw text underneath. Nothing is auto-uninstalled.
+  - Delete: each APK / bundle row has a small Delete button; a warning card confirms, and only files inside the allowed
+    places can be deleted.
+  - Uninstall apps (Settings > Vehicle card): a card like Close apps that lists ONLY the apps this app installed. The
+    record (package, name, version, time) is kept in the app's private settings (key "installed"), also in the settings
+    backup, and only packages in it can be removed (`pm uninstall <pkg>` through adb; the name is validated first). Tapping
+    one opens a confirm card with its Uninstall button locked for 10 seconds. Apps installed earlier from the PC are not in
+    the record, so they are not listed. LP Companion itself is never listed.
+  - The adb client (Java, adbclient/) grew installApk (streaming with adb's flow control: 64 KB messages, or whatever the
+    device announces) and uninstallPackage; the allow-list of the earlier grant commands is unchanged. Tests against the
+    mock adbd: 14 groups, including byte-exact streaming of a 1.5 MB file (SHA-256), the -g command line, a device that only
+    takes 4096-byte messages, an installer refusal, files that are never sent (wrong name, not a zip, tiny, missing) and bad
+    package names (all refused before connecting).
+  - The UI is Java too (adbclient/src/.../apk), compiled against the real Android API (tools/android.jar from Google's
+    platform-31_r01.zip, 56 MB, SHA-1 checked) so wrong Android calls are caught by the compiler, then converted to smali
+    with D8. Ui / Lang / Backup exist as compile-only stubs in adbclient/stubs (never shipped); xref-check.ps1 verifies the
+    converted code's calls into the real smali classes. adbclient/build-adb.ps1 does everything: compile, test, convert.
+  - Manifest: QUERY_ALL_PACKAGES (to see whether an APK's package is installed), MANAGE_EXTERNAL_STORAGE, and the
+    ApkManagerActivity. INTERNET was added in 2.29.
+  - 96 more texts translated into uz / ru / es / zh (189 in total). java-keys.ps1 lists any text the Java UI uses that has
+    no line in translations.txt.
+  - Not tested on the car: everything on screen (layout of the cards on the 720 px passenger display, the page itself), the
+    real adbd handling of `exec:cmd package install -S`, whether USB drives are visible to this app's Android user, and
+    whether the All files grant takes effect without a restart. The streaming protocol itself is tested against a mock.
+  Undo: install LP-Companion-2.29.apk (same downgrade note as 2.20). To remove installed apps, use Settings > Uninstall apps
+  before downgrading.
+
+LP Companion 2.31  (2026-10-23)  versionCode 39
+  BUILT, NOT YET INSTALLED OR TRIED ON THE CAR (offline). Includes 2.27 - 2.30.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.31.apk`
+  - The adb handshake has fallbacks (copied from what the community installer tools do), all tested against the mock adbd
+    (18 groups now). adbd answers every signature or key it does not take with a fresh token, so: the first token is signed
+    in adb's own style, the next one the other way (SHA1withRSA over the token) - neither shows a prompt - and only then is
+    the public key sent: the usual byte order first, the other order (every 32-bit word swapped) only if adbd asks again.
+    What worked is remembered next to the key (file adbkey.hint) and tried first next time. If the car answers our CNXN with
+    STLS (wireless-debugging mode) the result is "TLS|..." with a plain sentence ("Classic network ADB on port 5555 is
+    needed"); we do not speak TLS. The big-endian order is a guess at what some firmware wants: a standard PC adb connected
+    to this car before, so the usual order is likely right.
+  - adb switch-on: before the self-repair, an install, an uninstall or the All files grant, the app checks that something
+    listens on 127.0.0.1:5555. If not, and the "Fix missing permissions automatically" switch is on (or you tapped "Fix
+    permissions now") and WRITE_SECURE_SETTINGS is granted, it sets Settings.Global adb_enabled to 1 (and, if the port is
+    still closed, development_settings_enabled to 1) and waits up to ~14 s for the port. It never switches adb off or
+    restarts adbd. If adb_enabled is already 1 but the port is closed (the car's adbd not on TCP), nothing more can be done
+    from here. If WRITE_SECURE_SETTINGS itself is lost (firmware update), only adb can give it back.
+  - Settings > Vehicle: "Install apps from storage" and "Uninstall apps" are greyed out, with "needs ADB" added to their
+    title, while adbd cannot be reached; tapping one explains how to switch wireless ADB on in the car's backend page. The
+    check runs in the background whenever Settings opens or "Re-check status" is tapped. No install without adb (the
+    standard PackageInstaller route was left out on purpose).
+  - The per-app whitelist idea (forced dpi / bar spacing) was tried by the user and did not work; nothing was built for it.
+  - 3 new texts + 1 changed (the tip under the auto-fix switch), translated into uz / ru / es / zh (192 in total).
+  - Not tested on the car: the real adbd handshake, whether adb_enabled alone brings the port back, how the greyed rows
+    look.
+  Undo: install LP-Companion-2.30.apk.

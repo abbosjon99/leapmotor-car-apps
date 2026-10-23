@@ -27,6 +27,8 @@
 .field private closeMusic:Z
 .field private overheat:Z
 .field private autoOpen:Z
+.field private resumeLast:Z
+.field private healAdb:Z
 .field private passToMain:Z
 .field private passFromMain:Z
 .field private bubbleAuto:Z
@@ -143,10 +145,14 @@
 
     # v2 = status colour, v3 = chip text
     sget v2, Luz/carhelper/passenger/Ui;->OK:I
-    const-string v3, "OK"
+    const-string v3, "status OK"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     if-nez p3, :colour_done
     sget v2, Luz/carhelper/passenger/Ui;->BAD:I
     const-string v3, "OFF"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     :colour_done
 
     # dot
@@ -319,6 +325,8 @@
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
     const-string v1, " s"
+    invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
     move-result-object v0
@@ -388,6 +396,8 @@
     new-instance v2, Landroid/widget/CheckBox;
     invoke-direct {v2, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
     const-string v3, "Kids"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setText(Ljava/lang/CharSequence;)V
     const/high16 v3, 0x41b00000
     invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setTextSize(F)V
@@ -414,6 +424,7 @@
 .method protected onCreate(Landroid/os/Bundle;)V
     .locals 14
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+    invoke-static {p0}, Luz/carhelper/passenger/Lang;->init(Landroid/content/Context;)V
 
     # load current settings into memory
     invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->prefs()Landroid/content/SharedPreferences;
@@ -441,6 +452,16 @@
     invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
     iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
+    # go back to the app that was in front when the passenger screen turns on again: on by default (v4 = true here)
+    const-string v2, "resumeLast"
+    invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->resumeLast:Z
+    # fix missing permissions through the car's own adb: on by default (v4 = true here)
+    const-string v2, "healAdb"
+    invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->healAdb:Z
     # passenger move buttons: "<-" push to main defaults on, "->" bring over defaults off (v4 = true, v3 = false here)
     const-string v2, "passToMain"
     invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
@@ -520,6 +541,8 @@
     const/4 v2, 0x1
     invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const-string v2, "Settings"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const/high16 v3, 0x42200000
     const/4 v6, -0x1
     const/4 v7, 0x1
@@ -540,24 +563,69 @@
     invoke-direct {v2, v3, v6, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
     invoke-virtual {v4, v5, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     const-string v2, "Cancel"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "#cancel"
     const v6, 0x2effffff
-    invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
     const-string v2, "Save"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "#save"
     sget v6, Luz/carhelper/passenger/Ui;->ACCENT:I
-    invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
     invoke-virtual {v1, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # Language: the row shows the language in use, a tap opens the picker (Uzbek, Russian, Spanish, English, Chinese)
+    const-string v2, "Language"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v2, 0x1c
+    const/16 v3, 0x12
+    const/16 v4, 0x14
+    invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    const-string v2, "Language"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const/high16 v3, 0x41d00000
+    const/4 v4, -0x1
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v4, -0x2
+    const/high16 v7, 0x3f800000
+    invoke-direct {v3, v6, v4, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v5, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    invoke-static {}, Luz/carhelper/passenger/Lang;->code()Ljava/lang/String;
+    move-result-object v2
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->label(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#lang"
+    const v4, 0x2effffff
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    invoke-virtual {v8, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     # Status: one row per grant, green = on, red = off + the ADB command that fixes it.
     # Re-evaluated every time Settings opens; "Re-check" reopens it to refresh now.
     const-string v2, "Status"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
     invoke-static {p0}, Landroid/provider/Settings;->canDrawOverlays(Landroid/content/Context;)Z
     move-result v6
     const-string v2, "Bubble (overlay)"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v4, "adb shell appops set --user 10 uz.carhelper.passenger SYSTEM_ALERT_WINDOW allow"
     invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
@@ -572,6 +640,8 @@
     invoke-virtual {v2, v3}, Landroid/app/NotificationManager;->isNotificationListenerAccessGranted(Landroid/content/ComponentName;)Z
     move-result v6
     const-string v2, "Now playing (notification access)"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v4, "adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10"
     invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
@@ -584,6 +654,8 @@
     const/4 v6, 0x1
     :wss_row
     const-string v2, "Self-repair after restart"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v4, "adb shell pm grant --user 10 uz.carhelper.passenger android.permission.WRITE_SECURE_SETTINGS"
     invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
@@ -595,24 +667,134 @@
     if-nez v3, :back_row
     const/4 v6, 0x0
     const-string v4, "Needs the self-repair permission above"
+    invoke-static {v4}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v4
     invoke-static {p0}, Luz/carhelper/passenger/BackRepair;->ensure(Landroid/content/Context;)Z
     move-result v3
     if-eqz v3, :back_row
     const-string v4, "Switching on now — reopen this page in a few seconds"
+    invoke-static {v4}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v4
     :back_row
     const-string v2, "Back button (accessibility)"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    # Fix missing permissions through the car's own adb (see Heal)
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Fix missing permissions automatically using the car's own ADB"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "healAdb"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->healAdb:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    const-string v2, "The first time, the car may ask to allow USB debugging for this app: choose Always allow. Wi-Fi ADB has to be on; the app switches it on itself when it can."
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const/high16 v3, 0x41900000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT3:I
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x1c
+    const/4 v4, 0x0
+    const/16 v6, 0x12
+    invoke-virtual {v2, v3, v4, v3, v6}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v8, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "No attempt yet"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    :try_start_ds
+    invoke-static {p0}, Luz/carhelper/passenger/Heal;->describe(Landroid/content/Context;)Ljava/lang/String;
+    move-result-object v2
+    :try_end_ds
+    .catch Ljava/lang/Throwable; {:try_start_ds .. :try_end_ds} :catch_ds
+    :catch_ds
+    const-string v3, "Last attempt: "
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3, v2}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const/high16 v3, 0x41900000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT2:I
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x1c
+    const/16 v4, 0x16
+    invoke-virtual {v2, v3, v4, v3, v4}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v8, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # the two buttons at the bottom of the Status card, side by side
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v2, 0xc
+    const/16 v3, 0x12
+    const/16 v4, 0x14
+    invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     const-string v2, "Re-check status"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "#recheck"
+    const v4, 0x2effffff
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    const-string v2, "Fix permissions now"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#heal"
+    const v4, 0x2effffff
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    invoke-virtual {v8, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # Vehicle: the car's own settings, back to the car UI, install apps from storage, uninstall what was installed from here
+    const-string v2, "Vehicle"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
+    const-string v2, "Vehicle settings"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#vehset"
+    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Back to car UI"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#gotocar"
+    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Install apps from storage"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#files"
+    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Uninstall apps"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#uninstall"
     invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
 
     # Passenger screen
     const-string v2, "Passenger screen"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
     const-string v2, "Open LP Companion automatically when the passenger screen turns on"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "autoOpen"
     const/4 v4, 0x0
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -622,7 +804,21 @@
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
 
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "When it turns on, go back to the app that was open (instead of the grid)"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "resumeLast"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->resumeLast:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
     const-string v2, "Passenger bubble: push its app to the main screen  ←"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "passToMain"
     const/4 v4, 0x0
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -632,6 +828,8 @@
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
     const-string v2, "Passenger bubble: bring the main screen's app over  →"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "passFromMain"
     const/4 v4, 0x0
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -642,10 +840,14 @@
 
     # Bubble menu: closes itself after a few seconds (both bubbles); the button steps through 3 / 5 / 8 / 10 / 15 / 20 / 30 / 60 s
     const-string v2, "Bubble menu"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
     const-string v2, "Close the bubble menu automatically"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "bubbleAuto"
     const/4 v4, 0x0
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -663,6 +865,8 @@
     const/16 v4, 0x14
     invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     const-string v2, "Close it after"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const/high16 v3, 0x41d00000
     const/4 v4, -0x1
     const/4 v6, 0x0
@@ -690,10 +894,14 @@
 
     # Closing apps
     const-string v2, "Closing apps"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
     const-string v2, "Close the previous app when another one is opened"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "autoClose"
     const/4 v4, 0x0
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -703,6 +911,8 @@
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
     const-string v2, "Also close music apps"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "closeMusic"
     const/16 v4, 0x28
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -716,10 +926,14 @@
 
     # Protection
     const-string v2, "Protection"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
     const-string v2, "Overload protection: close passenger apps if CPU or RAM is overloaded"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "overheat"
     const/4 v4, 0x0
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
@@ -727,9 +941,36 @@
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    # what the protection sees right now (the same numbers as the chip in the grid header)
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "not available"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    :try_start_hd
+    invoke-static {p0}, Luz/carhelper/passenger/Health;->detail(Landroid/content/Context;)Ljava/lang/String;
+    move-result-object v2
+    :try_end_hd
+    .catch Ljava/lang/Throwable; {:try_start_hd .. :try_end_hd} :catch_hd
+    :catch_hd
+    const-string v3, "Right now:   "
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3, v2}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const/high16 v3, 0x41b00000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT2:I
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x1c
+    const/16 v4, 0x16
+    invoke-virtual {v2, v3, v4, v3, v4}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v8, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     # Child mode: entering/leaving is done from the grid; here you only set the PIN
     const-string v2, "Child mode"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
@@ -742,6 +983,8 @@
     const/16 v4, 0x14
     invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     const-string v2, "Password to leave child mode"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const/high16 v3, 0x41d00000
     const/4 v4, -0x1
     const/4 v6, 0x0
@@ -753,28 +996,54 @@
     invoke-direct {v3, v6, v4, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
     invoke-virtual {v5, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     const-string v2, "Set password"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const-string v3, "#setpin"
     sget v4, Luz/carhelper/passenger/Ui;->ACCENT:I
-    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
     invoke-virtual {v8, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
-    # Vehicle
-    const-string v2, "Vehicle"
+    # Backup and recovery: info only (all of it works through Settings.Secure, see Backup)
+    const-string v2, "Backup and recovery"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v8
-    const-string v2, "Vehicle settings"
-    const-string v3, "#vehset"
-    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    const-string v2, "Your settings are backed up automatically and come back after a reset or a reinstall. The password and child mode are not included. Needs the self-repair permission in Status."
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const/high16 v3, 0x41b00000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT2:I
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x1c
+    const/16 v4, 0x16
+    invoke-virtual {v2, v3, v4, v3, v4}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v8, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
-    const-string v2, "Back to car UI"
-    const-string v3, "#gotocar"
-    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    const-string v2, "Forgot the password? On the PC run:  adb shell settings put secure lp_companion_pin_reset 1  then open LP Companion. The password is cleared and child mode is switched off; everything else stays."
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const/high16 v3, 0x41b00000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT2:I
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x1c
+    const/16 v4, 0x16
+    invoke-virtual {v2, v3, v4, v3, v4}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v8, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     # Apps shown on the passenger screen
     const-string v2, "Apps shown on the passenger screen"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
     const-string v2, "Untick an app to hide it from the grid. Tick Kids to allow it in child mode."
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const/high16 v3, 0x41900000
     sget v4, Luz/carhelper/passenger/Ui;->TEXT3:I
     const/4 v5, 0x0
@@ -827,6 +1096,12 @@
 
     :end
     invoke-virtual {p0, v0}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
+    # grey out Install / Uninstall while the car's adb cannot be reached (checked in the background)
+    :try_start_gate
+    invoke-static {p0, v0}, Luz/carhelper/passenger/apk/AdbGate;->apply(Landroid/app/Activity;Landroid/view/View;)V
+    :try_end_gate
+    .catch Ljava/lang/Throwable; {:try_start_gate .. :try_end_gate} :catch_gate
+    :catch_gate
     return-void
 .end method
 
@@ -848,6 +1123,8 @@
     return-void
     :wrong
     const-string v1, "Wrong PIN"
+    invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
     const/4 v2, 0x0
     invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v1
@@ -899,6 +1176,22 @@
     iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
     return-void
     :not_autoopen
+
+    const-string v1, "resumeLast"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_resume
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->resumeLast:Z
+    return-void
+    :not_resume
+
+    const-string v1, "healAdb"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_heal
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->healAdb:Z
+    return-void
+    :not_heal
 
     const-string v1, "bubbleAuto"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -975,11 +1268,135 @@
     return-void
 .end method
 
+# write every setting that is held in memory, then refresh the Settings.Secure backup
+.method private saveAll()V
+    .locals 4
+    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->prefs()Landroid/content/SharedPreferences;
+    move-result-object v1
+    invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+    move-result-object v1
+    const-string v2, "wheel"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->wheel:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "autoClose"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->autoClose:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "closeMusic"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->closeMusic:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "overheat"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "autoOpen"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "resumeLast"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->resumeLast:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "healAdb"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->healAdb:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "passToMain"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passToMain:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "passFromMain"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "bubbleAuto"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "bubbleSecs"
+    iget v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "hidden"
+    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "kidApps"
+    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->kidApps:Ljava/util/HashSet;
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
+    invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->commit()Z
+    # keep the Settings.Secure backup current (settings survive a reset)
+    :try_start_bs
+    invoke-static {p0}, Luz/carhelper/passenger/Backup;->save(Landroid/content/Context;)V
+    :try_end_bs
+    .catch Ljava/lang/Throwable; {:try_start_bs .. :try_end_bs} :catch_bs
+    :catch_bs
+    return-void
+.end method
+
+# a language was picked in the language dialog: keep the page's unsaved changes, switch the language and reopen
+# Settings in it
+.method public setLang(Ljava/lang/String;)V
+    .locals 0
+    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->saveAll()V
+    invoke-static {p0, p1}, Luz/carhelper/passenger/Lang;->choose(Landroid/content/Context;Ljava/lang/String;)V
+    invoke-virtual {p0}, Landroid/app/Activity;->recreate()V
+    return-void
+.end method
+
 # Save writes everything and leaves; Cancel just leaves
 .method public onClick(Landroid/view/View;)V
     .locals 4
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
+    const-string v1, "#lang"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_lang
+    invoke-static {p0}, Luz/carhelper/passenger/LangDialog;->show(Luz/carhelper/passenger/SettingsActivity;)V
+    return-void
+    :not_lang
+    const-string v1, "#heal"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_heal_click
+    :try_start_hc
+    const/4 v1, 0x1
+    invoke-static {p0, v1}, Luz/carhelper/passenger/Heal;->start(Landroid/content/Context;Z)V
+    :try_end_hc
+    .catch Ljava/lang/Throwable; {:try_start_hc .. :try_end_hc} :catch_hc
+    :catch_hc
+    return-void
+    :not_heal_click
+    # a row greyed out by AdbGate: the car's adb cannot be reached
+    const-string v1, "#adboff"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_adboff_click
+    const-string v1, "The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status."
+    invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
+    const/4 v2, 0x1
+    invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v1
+    invoke-virtual {v1}, Landroid/widget/Toast;->show()V
+    return-void
+    :not_adboff_click
+    const-string v1, "#files"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_files_click
+    :try_start_fm
+    new-instance v1, Landroid/content/Intent;
+    const-class v2, Luz/carhelper/passenger/apk/ApkManagerActivity;
+    invoke-direct {v1, p0, v2}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v1}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
+    :try_end_fm
+    .catch Ljava/lang/Throwable; {:try_start_fm .. :try_end_fm} :catch_fm
+    :catch_fm
+    return-void
+    :not_files_click
+    const-string v1, "#uninstall"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_uninstall_click
+    :try_start_un
+    invoke-static {p0}, Luz/carhelper/passenger/apk/UninstallDialog;->show(Landroid/app/Activity;)V
+    :try_end_un
+    .catch Ljava/lang/Throwable; {:try_start_un .. :try_end_un} :catch_un
+    :catch_un
+    return-void
+    :not_uninstall_click
     const-string v1, "#bubbleSecs"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
@@ -1062,45 +1479,10 @@
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :leave
-    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->prefs()Landroid/content/SharedPreferences;
-    move-result-object v1
-    invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
-    move-result-object v1
-    const-string v2, "wheel"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->wheel:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "autoClose"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->autoClose:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "closeMusic"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->closeMusic:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "overheat"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "autoOpen"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "passToMain"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passToMain:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "passFromMain"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "bubbleAuto"
-    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "bubbleSecs"
-    iget v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "hidden"
-    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
-    const-string v2, "kidApps"
-    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->kidApps:Ljava/util/HashSet;
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
-    invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
+    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->saveAll()V
     const-string v2, "Saved"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     const/4 v3, 0x0
     invoke-static {p0, v2, v3}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v2

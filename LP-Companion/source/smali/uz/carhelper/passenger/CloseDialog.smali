@@ -58,6 +58,8 @@
 
     # title + hint
     const-string v3, "Close apps"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const/high16 v4, 0x42000000
     const/4 v5, -0x1
     const/4 v6, 0x1
@@ -65,6 +67,8 @@
     move-result-object v3
     invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     const-string v3, "Tap an app to close it"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const/high16 v4, 0x41a00000
     sget v5, Luz/carhelper/passenger/Ui;->TEXT3:I
     const/4 v6, 0x0
@@ -117,6 +121,8 @@
     invoke-virtual {v3, v4, v5, v4, v4}, Landroid/widget/LinearLayout;->setPadding(IIII)V
 
     const-string v5, "Cancel"
+    invoke-static {v5}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v5
     const v6, 0x2effffff
     const v7, 0x44ffffff
     sget v8, Luz/carhelper/passenger/Ui;->STROKE:I
@@ -135,7 +141,34 @@
     invoke-direct {v6, v4, v7, v8}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
     invoke-virtual {v3, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
+    # "All but music": only when a listed app is playing and something else is open too
+    invoke-direct {p0}, Luz/carhelper/passenger/CloseDialog;->playing()[Ljava/lang/String;
+    move-result-object v5
+    array-length v5, v5
+    if-eqz v5, :no_keep
+    array-length v6, v10
+    if-le v6, v5, :no_keep
+    const-string v5, "All but music"
+    invoke-static {v5}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v5
+    sget v6, Luz/carhelper/passenger/Ui;->ACCENT:I
+    sget v7, Luz/carhelper/passenger/Ui;->ACCENT_PRESSED:I
+    invoke-static {v0, v5, v6, v7, v4}, Luz/carhelper/passenger/Ui;->pill(Landroid/content/Context;Ljava/lang/CharSequence;III)Landroid/widget/TextView;
+    move-result-object v5
+    const-string v6, "#keep"
+    invoke-virtual {v5, v6}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v5, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+    new-instance v6, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v7, -0x2
+    invoke-direct {v6, v7, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    const/16 v7, 0x14
+    invoke-virtual {v6, v4, v4, v7, v4}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
+    invoke-virtual {v3, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    :no_keep
+
     const-string v5, "Close all"
+    invoke-static {v5}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v5
     const v6, 0xffe5484d
     const v7, 0xffc93a3f
     invoke-static {v0, v5, v6, v7, v4}, Luz/carhelper/passenger/Ui;->pill(Landroid/content/Context;Ljava/lang/CharSequence;III)Landroid/widget/TextView;
@@ -146,7 +179,7 @@
     invoke-virtual {v3, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
-    # show: transparent window so only the rounded card is visible, 840 px wide
+    # show: transparent window so only the rounded card is visible, 1000 px wide
     invoke-virtual {v1, v2}, Landroid/app/Dialog;->setContentView(Landroid/view/View;)V
     const/4 v3, 0x1
     invoke-virtual {v1, v3}, Landroid/app/Dialog;->setCanceledOnTouchOutside(Z)V
@@ -156,7 +189,7 @@
     const/4 v5, 0x0
     invoke-direct {v4, v5}, Landroid/graphics/drawable/ColorDrawable;-><init>(I)V
     invoke-virtual {v3, v4}, Landroid/view/Window;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
-    const/16 v4, 0x348
+    const/16 v4, 0x3e8
     const/4 v5, -0x2
     invoke-virtual {v3, v4, v5}, Landroid/view/Window;->setLayout(II)V
     invoke-virtual {v1}, Landroid/app/Dialog;->show()V
@@ -247,6 +280,90 @@
     return-void
 .end method
 
+# the listed apps that have a media session which is playing right now
+.method private playing()[Ljava/lang/String;
+    .locals 7
+    new-instance v0, Ljava/util/ArrayList;
+    invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+    :try_start_0
+    iget-object v1, p0, Luz/carhelper/passenger/CloseDialog;->act:Luz/carhelper/passenger/MainActivity;
+    invoke-static {v1}, Luz/carhelper/passenger/WheelReceiver;->getSessions(Landroid/content/Context;)Ljava/util/List;
+    move-result-object v1
+    invoke-interface {v1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+    move-result-object v1
+    :loop
+    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+    move-result v2
+    if-eqz v2, :done
+    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+    move-result-object v2
+    check-cast v2, Landroid/media/session/MediaController;
+    invoke-static {v2}, Luz/carhelper/passenger/WheelReceiver;->isPlaying(Landroid/media/session/MediaController;)Z
+    move-result v3
+    if-eqz v3, :loop
+    invoke-virtual {v2}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
+    move-result-object v2
+    iget-object v3, p0, Luz/carhelper/passenger/CloseDialog;->pkgs:[Ljava/lang/String;
+    array-length v4, v3
+    const/4 v5, 0x0
+    :find
+    if-ge v5, v4, :loop
+    aget-object v6, v3, v5
+    add-int/lit8 v5, v5, 0x1
+    invoke-virtual {v6, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v6
+    if-eqz v6, :find
+    invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+    goto :loop
+    :done
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    :catch_0
+    invoke-virtual {v0}, Ljava/util/ArrayList;->size()I
+    move-result v1
+    new-array v1, v1, [Ljava/lang/String;
+    invoke-virtual {v0, v1}, Ljava/util/ArrayList;->toArray([Ljava/lang/Object;)[Ljava/lang/Object;
+    move-result-object v1
+    check-cast v1, [Ljava/lang/String;
+    return-object v1
+.end method
+
+# the listed apps that are NOT playing music right now
+.method private others()[Ljava/lang/String;
+    .locals 8
+    invoke-direct {p0}, Luz/carhelper/passenger/CloseDialog;->playing()[Ljava/lang/String;
+    move-result-object v0
+    new-instance v1, Ljava/util/ArrayList;
+    invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
+    iget-object v2, p0, Luz/carhelper/passenger/CloseDialog;->pkgs:[Ljava/lang/String;
+    array-length v3, v2
+    const/4 v4, 0x0
+    :next
+    if-ge v4, v3, :done
+    aget-object v5, v2, v4
+    add-int/lit8 v4, v4, 0x1
+    array-length v6, v0
+    :check
+    add-int/lit8 v6, v6, -0x1
+    if-ltz v6, :keep
+    aget-object v7, v0, v6
+    invoke-virtual {v7, v5}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v7
+    if-eqz v7, :check
+    goto :next
+    :keep
+    invoke-virtual {v1, v5}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+    goto :next
+    :done
+    invoke-virtual {v1}, Ljava/util/ArrayList;->size()I
+    move-result v2
+    new-array v2, v2, [Ljava/lang/String;
+    invoke-virtual {v1, v2}, Ljava/util/ArrayList;->toArray([Ljava/lang/Object;)[Ljava/lang/Object;
+    move-result-object v2
+    check-cast v2, [Ljava/lang/String;
+    return-object v2
+.end method
+
 .method private dismiss()V
     .locals 1
     iget-object v0, p0, Luz/carhelper/passenger/CloseDialog;->dlg:Landroid/app/Dialog;
@@ -272,6 +389,21 @@
     :not_cancel
     iget-object v1, p0, Luz/carhelper/passenger/CloseDialog;->act:Luz/carhelper/passenger/MainActivity;
     iget-object v2, p0, Luz/carhelper/passenger/CloseDialog;->pkgs:[Ljava/lang/String;
+    const-string v3, "#keep"
+    invoke-virtual {v3, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :not_keep
+    # close everything that is not playing music right now
+    invoke-direct {p0}, Luz/carhelper/passenger/CloseDialog;->others()[Ljava/lang/String;
+    move-result-object v2
+    invoke-direct {p0}, Luz/carhelper/passenger/CloseDialog;->dismiss()V
+    array-length v3, v2
+    if-nez v3, :close_others
+    return-void
+    :close_others
+    invoke-virtual {v1, v2}, Luz/carhelper/passenger/MainActivity;->closeApps([Ljava/lang/String;)V
+    return-void
+    :not_keep
     const-string v3, "#all"
     invoke-virtual {v3, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3

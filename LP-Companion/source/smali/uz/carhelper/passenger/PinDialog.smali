@@ -151,8 +151,12 @@
     invoke-virtual {v4, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v4
     const-string v3, "Enter PIN"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     if-eqz v4, :title_ready
     const-string v3, "Set a PIN (4+ digits)"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->prefs()Landroid/content/SharedPreferences;
     move-result-object v4
     const-string v5, "pin"
@@ -163,6 +167,8 @@
     move-result v4
     if-nez v4, :title_ready
     const-string v3, "Enter current PIN"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     :title_ready
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
     const/high16 v3, 0x41c00000
@@ -224,7 +230,11 @@
     const-string v3, "0"
     invoke-direct {p0, v2, v3, v3}, Luz/carhelper/passenger/PinDialog;->key(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
     const-string v3, "OK"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const-string v4, "ok"
+    invoke-static {v4}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v4
     invoke-direct {p0, v2, v3, v4}, Luz/carhelper/passenger/PinDialog;->key(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
 
     new-instance v2, Landroid/app/AlertDialog$Builder;
@@ -235,6 +245,8 @@
     invoke-virtual {v2, v3}, Landroid/app/AlertDialog$Builder;->setCancelable(Z)Landroid/app/AlertDialog$Builder;
     move-result-object v2
     const-string v3, "Cancel"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const/4 v4, 0x0
     invoke-virtual {v2, v3, v4}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
     move-result-object v2
@@ -264,6 +276,8 @@
     return-void
     :not_del
     const-string v1, "ok"
+    invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :digit
@@ -307,6 +321,8 @@
     move-result v2
     if-nez v2, :old_ok
     const-string v2, "Wrong current PIN"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
     iget-object v2, p0, Luz/carhelper/passenger/PinDialog;->sb:Ljava/lang/StringBuilder;
     const/4 v3, 0x0
@@ -321,6 +337,8 @@
     invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->setLength(I)V
     invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->updateDots()V
     const-string v2, "Enter a new PIN (4+ digits)"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
     return-void
     :set_new
@@ -329,6 +347,8 @@
     const/4 v3, 0x4
     if-ge v2, v3, :do_set
     const-string v2, "Need at least 4 digits"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
     return-void
     :do_set
@@ -342,6 +362,8 @@
     invoke-interface {v2}, Landroid/content/SharedPreferences$Editor;->apply()V
     invoke-direct {p0}, Luz/carhelper/passenger/PinDialog;->dismiss()V
     const-string v2, "PIN set"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
     return-void
     :not_set
@@ -355,6 +377,8 @@
     move-result v3
     if-nez v3, :match
     const-string v2, "Wrong PIN"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-direct {p0, v2}, Luz/carhelper/passenger/PinDialog;->toast(Ljava/lang/String;)V
     iget-object v2, p0, Luz/carhelper/passenger/PinDialog;->sb:Ljava/lang/StringBuilder;
     const/4 v3, 0x0

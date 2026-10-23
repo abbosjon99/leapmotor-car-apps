@@ -1,0 +1,192 @@
+Close apps	Ilovalarni yopish
+Tap an app to close it	Yopish uchun ilovani bosing
+Cancel	Bekor
+All but music	Musiqadan tashqari
+Close all	Hammasini yopish
+Settings	Sozlamalar
+Hide bar	Panelni yashirish
+Show bar	Panelni ko'rsatish
+Child mode	Bolalar rejimi
+Exit child mode	Bolalar rejimidan chiqish
+Change wallpaper	Fon rasmini almashtirish
+Close previous app: Off	Oldingi ilovani yopish: o'chiq
+Close previous app: On	Oldingi ilovani yopish: yoqilgan
+↳ Also close music apps: Off	↳ Musiqa ilovalarini ham yopish: o'chiq
+↳ Also close music apps: On	↳ Musiqa ilovalarini ham yopish: yoqilgan
+Set a password in Settings first	Avval sozlamalarda parol o'rnating
+No running apps to close	Yopiladigan ishlayotgan ilova yo'q
+No passenger screen to turn off	O'chiriladigan yo'lovchi ekrani yo'q
+Child mode on	Bolalar rejimi yoqildi
+Child mode off	Bolalar rejimi o'chirildi
+Back is starting — tap it again in a moment	Orqaga tugmasi ishga tushmoqda — birozdan so'ng yana bosing
+Back is off — LP Companion needs the WRITE_SECURE_SETTINGS grant over ADB	Orqaga tugmasi o'chiq — LP Companion uchun ADB orqali WRITE_SECURE_SETTINGS ruxsati kerak
+LP Companion (main screen)	LP Companion (asosiy ekran)
+LP Companion controls on the main screen	LP Companion boshqaruvi asosiy ekranda
+LP Companion is running	LP Companion ishlamoqda
+RAM / temperature unavailable	RAM / harorat mavjud emas
+⚠  System overloaded (	⚠  Tizim haddan tashqari yuklangan (
+) — passenger apps closed	) — yo'lovchi ilovalari yopildi
+Enter PIN	PIN-kodni kiriting
+Set a PIN (4+ digits)	PIN-kod o'rnating (4+ raqam)
+Enter current PIN	Joriy PIN-kodni kiriting
+Wrong current PIN	Joriy PIN-kod noto'g'ri
+Enter a new PIN (4+ digits)	Yangi PIN-kod kiriting (4+ raqam)
+Need at least 4 digits	Kamida 4 ta raqam kerak
+PIN set	PIN-kod o'rnatildi
+Wrong PIN	PIN-kod noto'g'ri
+OK	OK
+status OK	OK
+level OK	yaxshi
+OFF	O'CHIQ
+Kids	Bolalar
+Status	Holat
+Save	Saqlash
+Saved	Saqlandi
+Language	Til
+Bubble (overlay)	Pufak (ekran ustida)
+Now playing (notification access)	Hozir ijro etilmoqda (bildirishnoma ruxsati)
+Self-repair after restart	Qayta ishga tushgandan keyin o'zini tiklash
+Needs the self-repair permission above	Yuqoridagi o'zini tiklash ruxsati kerak
+Switching on now — reopen this page in a few seconds	Hozir yoqilmoqda — bir necha soniyadan so'ng sahifani qayta oching
+Back button (accessibility)	Orqaga tugmasi (maxsus imkoniyatlar)
+Re-check status	Qayta tekshirish
+Passenger screen	Yo'lovchi ekrani
+Open LP Companion automatically when the passenger screen turns on	Yo'lovchi ekrani yonganda LP Companion avtomatik ochilsin
+When it turns on, go back to the app that was open (instead of the grid)	Yonganda ochiq turgan ilovaga qaytish (ro'yxat o'rniga)
+Passenger bubble: push its app to the main screen  ←	Yo'lovchi pufagi: ilovasini asosiy ekranga yuborish  ←
+Passenger bubble: bring the main screen's app over  →	Yo'lovchi pufagi: asosiy ekrandagi ilovani olib kelish  →
+Bubble menu	Pufak menyusi
+Close the bubble menu automatically	Pufak menyusini avtomatik yopish
+Close it after	Yopilish vaqti
+ s	 s
+Closing apps	Ilovalarni yopish
+Close the previous app when another one is opened	Boshqasi ochilganda oldingi ilovani yopish
+Also close music apps	Musiqa ilovalarini ham yopish
+Protection	Himoya
+Overload protection: close passenger apps if CPU or RAM is overloaded	Ortiqcha yuklanishdan himoya: CPU yoki RAM haddan tashqari yuklansa, yo'lovchi ilovalarini yopish
+Right now:   	Hozir:   
+not available	mavjud emas
+RAM 	RAM 
+temp OK	harorat normal
+temp warm	harorat ko'tarilgan
+temp hot	harorat yuqori
+overheating	qizib ketmoqda
+ GB free  ·  	 GB bo'sh  ·  
+high	yuqori
+overloaded	ortiqcha yuklangan
+Password to leave child mode	Bolalar rejimidan chiqish uchun parol
+Set password	Parol o'rnatish
+Backup and recovery	Zaxira nusxa va tiklash
+Your settings are backed up automatically and come back after a reset or a reinstall. The password and child mode are not included. Needs the self-repair permission in Status.	Sozlamalaringiz avtomatik ravishda zaxiralanadi va qayta tiklash yoki qayta o'rnatishdan keyin qaytadi. Parol va bolalar rejimi kiritilmaydi. Holat bo'limidagi o'zini tiklash ruxsati kerak.
+Forgot the password? On the PC run:  adb shell settings put secure lp_companion_pin_reset 1  then open LP Companion. The password is cleared and child mode is switched off; everything else stays.	Parolni unutdingizmi? Kompyuterda bajaring:  adb shell settings put secure lp_companion_pin_reset 1  so'ng LP Companion'ni oching. Parol o'chiriladi va bolalar rejimi o'chadi; qolgan hamma narsa saqlanadi.
+Vehicle	Avtomobil
+Vehicle settings	Avtomobil sozlamalari
+Back to car UI	Avtomobil interfeysiga qaytish
+Apps shown on the passenger screen	Yo'lovchi ekranida ko'rsatiladigan ilovalar
+Untick an app to hide it from the grid. Tick Kids to allow it in child mode.	Ilovani ro'yxatdan yashirish uchun belgisini olib tashlang. Bolalar rejimida ruxsat berish uchun «Bolalar»ni belgilang.
+Moved to the main screen	Asosiy ekranga ko'chirildi
+Moved to the passenger screen	Yo'lovchi ekraniga ko'chirildi
+Opened on the passenger screen	Yo'lovchi ekranida ochildi
+Opened on the main screen	Asosiy ekranda ochildi
+No app on the passenger screen to move	Ko'chiriladigan ilova yo'lovchi ekranida yo'q
+No app on the main screen to move	Ko'chiriladigan ilova asosiy ekranda yo'q
+Moving apps is off in child mode	Bolalar rejimida ilovalarni ko'chirish o'chirilgan
+That app is no longer installed	Bu ilova endi o'rnatilmagan
+Open on the main screen	Asosiy ekranda ochish
+Open on the passenger screen	Yo'lovchi ekranida ochish
+Add to Kids (allowed in child mode)	Bolalarga qo'shish (bolalar rejimida ruxsat etiladi)
+Remove from Kids	Bolalardan olib tashlash
+Hide from the grid	Ro'yxatdan yashirish
+Added to Kids	Bolalarga qo'shildi
+Removed from Kids	Bolalardan olib tashlandi
+Hidden from the grid. Bring it back in Settings.	Ro'yxatdan yashirildi. Sozlamalarda qaytarishingiz mumkin.
+LP Companion: password cleared, child mode is off	LP Companion: parol o'chirildi, bolalar rejimi o'chiq
+Fix missing permissions automatically using the car's own ADB	Yetishmayotgan ruxsatlarni avtomobilning o'z ADB'si orqali avtomatik tiklash
+The first time, the car may ask to allow USB debugging for this app: choose Always allow. Wi-Fi ADB has to be on; the app switches it on itself when it can.	Birinchi marta avtomobil bu ilova uchun USB orqali nosozliklarni tuzatishga ruxsat so'rashi mumkin: «Doim ruxsat berish»ni tanlang. Wi-Fi ADB yoqilgan bo'lishi kerak; ilova imkoni bo'lsa uni o'zi yoqadi.
+Fix permissions now	Ruxsatlarni tiklash
+Last attempt: 	Oxirgi urinish: 
+No attempt yet	Hali urinish bo'lmagan
+Permissions granted through the car's ADB	Ruxsatlar avtomobil ADB'si orqali berildi
+Could not reach the car's ADB (port 5555)	Avtomobil ADB'siga ulanib bo'lmadi (5555-port)
+Allow the connection on the car's screen (Always allow), then try again	Avtomobil ekranida ulanishga ruxsat bering («Doim ruxsat berish»), so'ng qayta urinib ko'ring
+Could not grant the permissions	Ruxsatlarni berib bo'lmadi
+All permissions are already granted	Barcha ruxsatlar allaqachon berilgan
+Trying to grant the permissions…	Ruxsatlar berilmoqda…
+Camera	Kamera
+SMS	SMS
+Accessibility	Maxsus imkoniyatlar
+Device admin	Qurilma administratori
+Body sensors	Tana sensorlari
+Location in the background	Fonda joylashuv
+All files	Barcha fayllar
+Files	Fayllar
+Contacts	Kontaktlar
+Draw over other apps	Boshqa ilovalar ustidan chizish
+Change system settings	Tizim sozlamalarini o'zgartirish
+Phone state	Telefon holati
+Call log	Qo'ng'iroqlar tarixi
+Install other apps	Boshqa ilovalarni o'rnatish
+Phone calls	Telefon qo'ng'iroqlari
+Microphone	Mikrofon
+Calendar	Kalendar
+Location	Joylashuv
+See all installed apps	O'rnatilgan barcha ilovalarni ko'rish
+Tap an app to install it. Only plain .apk files are installed.	O'rnatish uchun ilovani bosing. Faqat oddiy .apk fayllar o'rnatiladi.
+Install apps from storage	Xotiradan ilovalarni o'rnatish
+Grant access	Ruxsat berish
+Refresh	Yangilash
+Bundles (.xapk, .apks, .apkm) are not supported. Only plain .apk files can be installed.	To'plamlar (.xapk, .apks, .apkm) qo'llab-quvvatlanmaydi. Faqat oddiy .apk fayllarni o'rnatish mumkin.
+To see the files, this app needs All files access. The car's ADB can grant it.	Fayllarni ko'rish uchun bu ilovaga «Barcha fayllarga ruxsat» kerak. Uni avtomobil ADB'si bera oladi.
+Up	Yuqoriga
+No folders or .apk files here.	Bu yerda papkalar yoki .apk fayllar yo'q.
+Delete	O'chirish
+Could not delete the file	Faylni o'chirib bo'lmadi
+Delete this file?	Bu fayl o'chirilsinmi?
+The file is removed from the storage. This cannot be undone.	Fayl xotiradan o'chiriladi. Buni bekor qilib bo'lmaydi.
+File deleted	Fayl o'chirildi
+Update	Yangilash
+The file could not be read as an Android app.	Fayl Android ilovasi sifatida o'qilmadi.
+Off: the app asks for them itself. Only for experts.	O'chiq: ilova ruxsatlarni o'zi so'raydi. Faqat tajribali foydalanuvchilar uchun.
+Grant all permissions (-g)	Barcha ruxsatlarni berish (-g)
+This replaces LP Companion itself. The app will restart and you will not see the result.	Bu LP Companion'ning o'zini almashtiradi. Ilova qayta ishga tushadi va natijani ko'rmaysiz.
+Keep it off	O'chiq qoldirish
+New app	Yangi ilova
+Install only apps you trust. This install skips the car's app whitelist and uses the car's ADB rights.	Faqat ishonchli ilovalarni o'rnating. Bu o'rnatish avtomobilning ilovalar ruxsat ro'yxatini chetlab o'tadi va avtomobil ADB huquqlaridan foydalanadi.
+This app is signed with a different key than the installed copy. The install will fail unless you uninstall the old one first (its data is lost).	Bu ilova o'rnatilgan nusxadan boshqa kalit bilan imzolangan. Avval eskisini o'chirmasangiz, o'rnatish bajarilmaydi (uning ma'lumotlari yo'qoladi).
+Same version as the installed one	O'rnatilgan nusxa bilan bir xil versiya
+Grant all permissions?	Barcha ruxsatlar berilsinmi?
+Permissions asked	So'ralgan ruxsatlar
+Installing…	O'rnatilmoqda…
+Older than the installed version. The install will fail.	O'rnatilgan versiyadan eski. O'rnatish bajarilmaydi.
+This is not an app	Bu ilova emas
+Sensitive permissions	Nozik ruxsatlar
+Every permission the app asks for is granted without asking you. This can break the system. Only turn it on if you know what you are doing.	Ilova so'ragan har bir ruxsat sizdan so'ralmasdan beriladi. Bu tizimni buzishi mumkin. Faqat nima qilayotganingizni bilsangiz yoqing.
+I know what I am doing	Nima qilayotganimni bilaman
+Size	Hajmi
+Install	O'rnatish
+The car does not allow removing this app.	Avtomobil bu ilovani o'chirishga ruxsat bermaydi.
+The installed copy was signed with a different key. Uninstall it first (its data is lost).	O'rnatilgan nusxa boshqa kalit bilan imzolangan. Avval uni o'chiring (ma'lumotlari yo'qoladi).
+The file is not a valid app.	Fayl yaroqli ilova emas.
+The app needs a newer Android version than this car has.	Ilova uchun bu avtomobildagidan yangiroq Android versiyasi kerak.
+Could not uninstall the app	Ilovani o'chirib bo'lmadi
+A newer version is already installed. Downgrading is not allowed.	Yangiroq versiya allaqachon o'rnatilgan. Eski versiyaga qaytish mumkin emas.
+Installed	O'rnatildi
+The car refused this install.	Avtomobil bu o'rnatishni rad etdi.
+Uninstalled	O'chirildi
+Could not install the app	Ilovani o'rnatib bo'lmadi
+Not enough free storage on the car.	Avtomobilda bo'sh joy yetarli emas.
+The app is built for a different processor type.	Ilova boshqa turdagi protsessor uchun yaratilgan.
+Device storage	Qurilma xotirasi
+Downloads	Yuklamalar
+USB drive	USB-fleshka
+The app and its data are deleted. This cannot be undone.	Ilova va uning ma'lumotlari o'chiriladi. Buni bekor qilib bo'lmaydi.
+Uninstall apps	Ilovalarni o'chirish
+Only apps installed from LP Companion are listed.	Faqat LP Companion orqali o'rnatilgan ilovalar ko'rsatiladi.
+Close	Yopish
+Nothing installed from here yet.	Bu yerdan hali hech narsa o'rnatilmagan.
+Uninstalling…	O'chirilmoqda…
+Uninstall this app?	Bu ilova o'chirilsinmi?
+Uninstall	O'chirish
+The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	Avtomobil ADB'i simsiz nosozliklarni tuzatish (TLS) rejimida. 5555-portdagi oddiy tarmoq ADB'i kerak.
+The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	Avtomobil ADB'i o'chiq yoki unga ulanib bo'lmaydi. Avtomobilning texnik sahifasida simsiz ADB'ni yoqing, so'ng «Qayta tekshirish»ni bosing.
+needs ADB	ADB kerak

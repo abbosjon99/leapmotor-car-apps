@@ -55,6 +55,12 @@
 .method public onCreate()V
     .locals 12
     invoke-super {p0}, Landroid/app/Service;->onCreate()V
+    # interface language for the toasts and labels of this service
+    :try_start_lg
+    invoke-static {p0}, Luz/carhelper/passenger/Lang;->init(Landroid/content/Context;)V
+    :try_end_lg
+    .catch Ljava/lang/Throwable; {:try_start_lg .. :try_end_lg} :catch_lg
+    :catch_lg
     sput-object p0, Luz/carhelper/passenger/MainBubbleService;->instance:Luz/carhelper/passenger/MainBubbleService;
 
     # silent foreground notification so the service isn't killed
@@ -65,6 +71,8 @@
     new-instance v1, Landroid/app/NotificationChannel;
     const-string v2, "mainbubble"
     const-string v3, "LP Companion (main screen)"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const/4 v4, 0x1
     invoke-direct {v1, v2, v3, v4}, Landroid/app/NotificationChannel;-><init>(Ljava/lang/String;Ljava/lang/CharSequence;I)V
     invoke-virtual {v0, v1}, Landroid/app/NotificationManager;->createNotificationChannel(Landroid/app/NotificationChannel;)V
@@ -75,6 +83,8 @@
     iget v3, v3, Landroid/content/pm/ApplicationInfo;->icon:I
     invoke-virtual {v1, v3}, Landroid/app/Notification$Builder;->setSmallIcon(I)Landroid/app/Notification$Builder;
     const-string v3, "LP Companion controls on the main screen"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     invoke-virtual {v1, v3}, Landroid/app/Notification$Builder;->setContentTitle(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;
     invoke-virtual {v1}, Landroid/app/Notification$Builder;->build()Landroid/app/Notification;
     move-result-object v1
@@ -647,6 +657,8 @@
     return-void
     :no_screen
     const-string v0, "No passenger screen to turn off"
+    invoke-static {v0}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v0
     const/4 v1, 0x0
     invoke-static {p0, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v0
@@ -767,6 +779,8 @@
     move-result v3
     if-eqz v3, :pin_exists
     const-string v3, "Set a password in Settings first"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     const/4 v1, 0x1
     invoke-static {p0, v3, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v1
@@ -795,10 +809,14 @@
     :child_done
     const/4 v1, 0x1
     const-string v3, "Child mode on"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     if-eqz v2, :child_toast
     goto :child_show
     :child_toast
     const-string v3, "Child mode off"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     :child_show
     invoke-static {p0, v3, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
     move-result-object v1
@@ -818,8 +836,12 @@
     invoke-static {v1}, Luz/carhelper/passenger/BackRepair;->ensure(Landroid/content/Context;)Z
     move-result v2
     const-string v3, "Back is starting — tap it again in a moment"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     if-nez v2, :back_toast
     const-string v3, "Back is off — LP Companion needs the WRITE_SECURE_SETTINGS grant over ADB"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     :back_toast
     const/4 v2, 0x1
     invoke-static {v1, v3, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;

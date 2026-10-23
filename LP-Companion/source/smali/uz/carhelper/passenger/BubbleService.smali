@@ -60,6 +60,19 @@
 .method public onCreate()V
     .locals 12
     invoke-super {p0}, Landroid/app/Service;->onCreate()V
+    # interface language for the toasts and labels of this service
+    :try_start_lg
+    invoke-static {p0}, Luz/carhelper/passenger/Lang;->init(Landroid/content/Context;)V
+    :try_end_lg
+    .catch Ljava/lang/Throwable; {:try_start_lg .. :try_end_lg} :catch_lg
+    :catch_lg
+    # a permission lost after a reboot / firmware update: try to get it back through the car's own adb (background thread)
+    :try_start_hl
+    const/4 v0, 0x0
+    invoke-static {p0, v0}, Luz/carhelper/passenger/Heal;->start(Landroid/content/Context;Z)V
+    :try_end_hl
+    .catch Ljava/lang/Throwable; {:try_start_hl .. :try_end_hl} :catch_hl
+    :catch_hl
     sput-object p0, Luz/carhelper/passenger/BubbleService;->instance:Luz/carhelper/passenger/BubbleService;
 
     # silent foreground notification so the service isn't killed
@@ -80,6 +93,8 @@
     iget v3, v3, Landroid/content/pm/ApplicationInfo;->icon:I
     invoke-virtual {v1, v3}, Landroid/app/Notification$Builder;->setSmallIcon(I)Landroid/app/Notification$Builder;
     const-string v3, "LP Companion is running"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
     invoke-virtual {v1, v3}, Landroid/app/Notification$Builder;->setContentTitle(Ljava/lang/CharSequence;)Landroid/app/Notification$Builder;
     invoke-virtual {v1}, Landroid/app/Notification$Builder;->build()Landroid/app/Notification;
     move-result-object v1
@@ -1268,7 +1283,26 @@
     iget-object v0, p0, Luz/carhelper/passenger/BubbleService;->dctx:Landroid/content/Context;
     new-instance v1, Landroid/widget/TextView;
     invoke-direct {v1, v0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const-string v2, "\u26a0  System overloaded \u2014 passenger apps closed"
+    # the same numbers the grid chip shows, e.g. "System overloaded (RAM 94%  .  88 C) - passenger apps closed"
+    const-string v2, "RAM / temperature unavailable"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    :try_start_hs
+    invoke-static {v0}, Luz/carhelper/passenger/Health;->summary(Landroid/content/Context;)Ljava/lang/String;
+    move-result-object v2
+    :try_end_hs
+    .catch Ljava/lang/Throwable; {:try_start_hs .. :try_end_hs} :catch_hs
+    :catch_hs
+    const-string v3, "\u26a0  System overloaded ("
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3, v2}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, ") \u2014 passenger apps closed"
+    invoke-static {v3}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v2, v3}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
     const/high16 v2, 0x41d00000
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextSize(F)V
@@ -1338,8 +1372,12 @@
     invoke-static {v0}, Luz/carhelper/passenger/BackRepair;->ensure(Landroid/content/Context;)Z
     move-result v1
     const-string v2, "Back is starting \u2014 tap it again in a moment"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     if-nez v1, :show
     const-string v2, "Back is off \u2014 LP Companion needs the WRITE_SECURE_SETTINGS grant over ADB"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
     :show
     const/4 v1, 0x1
     invoke-static {v0, v2, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;

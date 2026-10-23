@@ -6,7 +6,7 @@ floating AssistiveTouch-style bubbles on both screens, a Settings page, a now-pl
 PIN-protected child mode and overload protection, and it wakes the passenger screen when something is
 opened there.
 
-Package: `uz.carhelper.passenger`  ·  current version: 2.26 (versionCode 34)
+Package: `uz.carhelper.passenger`  ·  current version: 2.31 (versionCode 39, built, not yet tried on the car)
 
 **Music control is not done here any more.** Steering-wheel media keys and the car's media widget moved
 to the sibling app **LP Music** (`uz.carhelper.music`, folder `../LP-Music`). LP Companion only shows and
@@ -33,6 +33,13 @@ on the car, so LP Companion no longer handles the wheel media keys and nothing i
   the LP grid there (`Swapper.grid`), because Android will not kill an app that is still on screen. Other apps'
   processes are not visible to LP Companion on this firmware (`getRunningAppProcesses` returns only its own), so
   an idle app with no media session that LP did not start is not listed.
+- Tile menu (since 2.27, `TileMenu`): a tap opens the app on the passenger screen; a long press shows Open on the
+  main screen / Open on the passenger screen / Add to (Remove from) Kids / Hide from the grid. Not in child mode on
+  the passenger screen; "Open on the main screen" is also left out while child mode is on.
+- Close apps has a blue "All but music" button when a listed app is playing: it closes everything that is not.
+- Header chip (since 2.27, `Health`, `HealthTick`): "RAM 62%  .  54 C", updated every 5 s and coloured by the same
+  thresholds overload protection uses. Temperature comes from the thermal-zone files if the firmware lets apps read
+  them, otherwise only Android's thermal status is shown. Hidden for the child on the passenger screen.
 - Look: the wallpaper gets only a light dim (`Theme.scrim`) and the tiles/pills are dark smoked glass
   (`Ui.glass`, `Ui.pillBg`) so the photo stays as sharp as it can be; the bundled photos are only 1280x720.
 - Optional auto-close: opening an app closes the previous one (`autoClose`, plus `closeMusic`).
@@ -78,6 +85,49 @@ on the car, so LP Companion no longer handles the wheel media keys and nothing i
   (120 px) and bottom bar (144 px) on the main screen. Most apps respect them; a few screens (Yandex Music's
   "В авто" player) draw edge-to-edge under the bars. LP Companion cannot change another app's layout.
 
+**Install / uninstall apps** (since 2.30; Settings > Vehicle card, `apk` package): "Install apps from storage" is a
+read-only browser (device storage of the car's user plus mounted USB drives; only folders and plain `.apk`, bundles greyed
+out; `Android`, dot-folders and system folders never shown). Tapping an APK shows a warning card (what it is, new / update,
+sensitive permissions, signature and self-install warnings), the "Grant all permissions (-g)" switch (off; turning it on
+needs a second "I know what I am doing"), and an Install button locked for 10 s. The APK is streamed through the car's own
+adb (`cmd package install -S size --install-reason 64 -r [-g]`). A Delete button removes an APK file after a warning.
+"Uninstall apps" lists only the apps installed this way (private record `installed`, also in the backup) and removes one
+through adb after a confirm card with a 10 s lock. Needs the All files access permission (Grant button on the page).
+Source: `adbclient/src/.../apk/*.java` (compiled against `tools/android.jar`), converted by `adbclient/build-adb.ps1`.
+
+**Permission self-repair** (since 2.29, `Heal`, `adb` package): when WRITE_SECURE_SETTINGS, "draw over other apps" or
+notification access is missing (after a reboot or firmware update), the app connects from the head unit to its own wifi adb
+(127.0.0.1:5555) with its own RSA key and runs only the three grant commands (`pm grant`, `appops set`, `cmd notification
+allow_listener`; anything else is refused). Runs when the bubble service or the grid starts (at most every 10 minutes, with
+retries while adbd is not up yet) and from Settings > Status > "Fix permissions now"; the switch "Fix missing permissions
+automatically using the car's own ADB" (`healAdb`, default on) turns the automatic part off. The first time the car may ask
+"Allow USB debugging?" for this app: choose Always allow. Needs wifi adb listening on the head unit and the INTERNET
+permission (in the manifest). The client is Java in `adbclient/` with tests against a mock adbd; `adbclient/build-adb.ps1`
+compiles it, runs the tests, converts it with D8 (`tools/r8.jar`, not in git) and writes `source/smali/.../adb/`.
+Not yet tried against the car's real adbd.
+Since 2.31 the handshake also tries the second signature style and, if adbd asks again after the key, the other public-key
+byte order (remembered in `adbkey.hint`), and says so when the car is in TLS (wireless-debugging) mode. `apk/AdbLink` checks
+that adbd listens before each job and, when allowed (`healAdb` on, WRITE_SECURE_SETTINGS granted), sets `adb_enabled` to 1
+again; `apk/AdbGate` greys out "Install apps from storage" and "Uninstall apps" in Settings while adbd cannot be reached.
+
+**Languages** (since 2.28, `Lang`, `LangDialog`): Uzbek, Russian, Spanish, English, Chinese. The language is the one
+picked in Settings > Language; if none was picked, the system language when it is Uzbek, Russian, Spanish or English;
+otherwise English (so a Chinese system starts in English). All texts live in the code as English and go through
+`Lang.t(english)`; the translations are in `translations.txt` (english||uz||ru||es||zh), turned into
+`source/assets/lang/*.tsv` by `make-lang.ps1`. A text without a translation just shows in English. To add a text, see
+the 2.28 entry in CHANGELOG.txt.
+
+**Resume on wake** (since 2.27, `PassengerWatcher.resume`, setting `resumeLast`, default on): when the passenger
+screen turns on, the app that was open there comes back instead of the grid (only if LP still lists it as running; in
+child mode only a Kids app). Part of the "open LP Companion when the passenger screen turns on" setting.
+
+**Backup and recovery** (since 2.27, `Backup`; needs `WRITE_SECURE_SETTINGS`)
+- The settings are kept as JSON in `Settings.Secure` key `lp_companion_backup` (after Settings > Save, the tile menu
+  and whenever a grid stops) and come back on the first start with empty data (`pm clear`, reinstall). Not included:
+  the password, child mode on/off, and the running / lastPassenger / onMain records.
+- Forgot the password: `adb shell settings put secure lp_companion_pin_reset 1`, then open LP Companion. The
+  password is cleared and child mode is off; everything else stays (no more `pm clear` for this).
+
 **Child mode** (state is shared with LP Music)
 - Flag: pref `kid`, mirrored by `ChildMode.sync` to `Settings.Secure` key `lp_companion_child` ("1"/"0") so
   LP Music locks itself too. Only the passenger screen is restricted.
@@ -91,8 +141,9 @@ on the car, so LP Companion no longer handles the wheel media keys and nothing i
   2.22 the main bubble's child button also asks for it: it opens the grid on the main screen with extra
   `exitPin`, and `MainActivity` shows the pad. Leaving does nothing to the passenger screen (`ChildMode.exit` is
   empty since 2.25): open grids follow the `kid` pref live and an app in front stays.
-- Forgot the PIN: `adb shell pm clear --user 10 uz.carhelper.passenger` resets ALL LP Companion settings;
-  then redo the one-time grants below.
+- Forgot the PIN: since 2.27 `adb shell settings put secure lp_companion_pin_reset 1` and open LP Companion (see
+  Backup and recovery). The old way, `adb shell pm clear --user 10 uz.carhelper.passenger`, resets ALL settings
+  (they come back from the backup if the grant is there); then redo the one-time grants below.
 
 **Wake** (`Wake.passenger`, since 2.20)
 - After about 3 minutes without activity the car's `com.leapmotor.screensaver` covers the passenger screen:
@@ -183,6 +234,12 @@ missing.
 | `NowPlaying.smali`        | The now-playing card (cover tint, progress bar, controls); hidden in child mode. |
 | `CloseDialog.smali`       | The "Close apps" popup (rows removed one by one; `dismiss()`). |
 | `AutoClose.smali`         | Runnable that closes a bubble panel after the idle time (`which` 0 = passenger, 1 = main). |
+| `TileMenu.smali`          | Long-press menu of a grid tile (open on main / passenger, Kids, hide). |
+| `Health.smali`, `HealthTick.smali` | RAM / load / temperature readout with the protection thresholds; the 5 s chip updater. |
+| `Backup.smali`            | Settings backup to `Settings.Secure`, restore after a reset, adb PIN reset. |
+| `apk/*.smali` | The file manager, install warning, delete and uninstall cards; generated from `adbclient/src/.../apk` (do not edit by hand). |
+| `Heal.smali`, `HealToast.smali`, `adb/*.smali` | Permission self-repair through the car's own adbd: what is missing, the background thread, the Settings text; `adb/` is generated from `adbclient/` (do not edit by hand). |
+| `Lang.smali`, `LangDialog.smali` | Interface language: `Lang.t(english)` lookup in `assets/lang/*.tsv`, the Settings language picker. |
 | `Ui.smali`                | Shared look: colours, rounded/pressable backgrounds, glass cards, text and pill helpers, switch/checkbox tints, page gradient. Sizes are px (the displays run at 160 dpi). |
 | `Wake.smali`              | Wakes the passenger screen (screensaver DISMISS, screen-rest reset, own cover). |
 | `ChildMode.smali`         | Child-mode flag mirror (`sync`, `locked`), `lockedHere`, and the main-screen takeover (`enter`, `takeOver`, `exit`, `openGrid`). |
@@ -204,7 +261,7 @@ missing.
 
 ## Preferences (SharedPreferences file `apps`)
 
-`wheel` (unused now), `autoOpen`, `passToMain` (default on), `passFromMain` (default off), `bubbleAuto` (default on), `bubbleSecs` (default 8), `autoClose`, `closeMusic`, `overheat`, `kid`, `pin`, `kidApps` (set),
+`wheel` (unused now), `autoOpen`, `passToMain` (default on), `passFromMain` (default off), `bubbleAuto` (default on), `bubbleSecs` (default 8), `resumeLast` (default on), `healAdb` (default on), `healAt`, `healResult`, `lang` (uz / ru / es / en / zh, unset = automatic), `setup` (marker), `autoClose`, `closeMusic`, `overheat`, `kid`, `pin`, `kidApps` (set),
 `hidden` (set), `barHidden`, `running` (set), `lastPassenger`, `onMain`, `wallpaper` (0 = black, 1..11).
 The bubble's position is stored in the `bubble` file (`x`, `y`).
 
@@ -227,6 +284,10 @@ Debug log tags: `LPCompanion`, `PassengerBubble`, `MainBubble`, `PassengerApps`,
 - `source/apktool.yml` keeps `resources.arsc` uncompressed (`doNotCompress: arsc`), required for Android R+.
 - There is no Java source: the UI is built in code, so a style change means editing smali. Shared pieces
   live in `Ui`.
+- apktool's assembler does not check that a called method or field exists. A call with the wrong return type (it
+  happened with `addPill` in 2.25/2.26) only fails on the car as NoSuchMethodError. Run
+  `powershell -ExecutionPolicy Bypass -File xref-check.ps1 -Dir source\smali` after every change: it checks every
+  reference to the app's own classes against a definition.
 - apktool's assembler does not run the verifier. Test every build on the car and watch
   `adb logcat | findstr "AndroidRuntime VerifyError"`. Two rules that bit before: a method that uses `p0`/`p1`
   in ordinary `invoke-*` calls must keep `.locals` at 14 or less (registers above v15 cannot be encoded), and a
