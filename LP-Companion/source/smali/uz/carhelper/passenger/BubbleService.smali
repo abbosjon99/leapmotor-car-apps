@@ -146,35 +146,14 @@
     move-result-object v6
     invoke-direct {v5, v6, v3}, Luz/carhelper/passenger/PassengerWatcher;-><init>(Landroid/content/Context;Landroid/hardware/display/DisplayManager;)V
     invoke-virtual {v3, v5, v2}, Landroid/hardware/display/DisplayManager;->registerDisplayListener(Landroid/hardware/display/DisplayManager$DisplayListener;Landroid/os/Handler;)V
-    # act as Migu (media type 13) toward the car's media app - but not when LP Music is
-    # installed, so the wheel keys route to LP Music instead of to us
-    invoke-static {p0}, Luz/carhelper/passenger/WheelReceiver;->yieldToMusic(Landroid/content/Context;)Z
-    move-result v3
-    if-nez v3, :skip_migu
-    new-instance v3, Luz/carhelper/passenger/MiguBridge;
-    invoke-virtual {p0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
-    move-result-object v4
-    invoke-direct {v3, v4, v2}, Luz/carhelper/passenger/MiguBridge;-><init>(Landroid/content/Context;Landroid/os/Handler;)V
-    invoke-virtual {v2, v3}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
-    :skip_migu
+    # music control lives entirely in LP Music now; LP Companion only shows the now-playing
+    # widget. No MiguBridge / wheel-key handling here.
     # put the Back accessibility service back if the car dropped it (e.g. after a restart)
     new-instance v3, Luz/carhelper/passenger/BackRepair;
     invoke-virtual {p0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
     move-result-object v4
     invoke-direct {v3, v4, v2}, Luz/carhelper/passenger/BackRepair;-><init>(Landroid/content/Context;Landroid/os/Handler;)V
     invoke-virtual {v2, v3}, Landroid/os/Handler;->post(Ljava/lang/Runnable;)Z
-    # second wheel-key channel: com.leapmotor.steerwheelcontrol.media, while this service runs
-    :try_start_s
-    new-instance v3, Luz/carhelper/passenger/SteerWheelReceiver;
-    invoke-direct {v3}, Luz/carhelper/passenger/SteerWheelReceiver;-><init>()V
-    new-instance v4, Landroid/content/IntentFilter;
-    const-string v5, "com.leapmotor.steerwheelcontrol.media"
-    invoke-direct {v4, v5}, Landroid/content/IntentFilter;-><init>(Ljava/lang/String;)V
-    invoke-virtual {p0, v3, v4}, Landroid/content/Context;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;
-    iput-object v3, p0, Luz/carhelper/passenger/BubbleService;->steer:Landroid/content/BroadcastReceiver;
-    :try_end_s
-    .catch Ljava/lang/Exception; {:try_start_s .. :try_end_s} :catch_s
-    :catch_s
     :try_start_t
     const-string v3, "power"
     invoke-virtual {p0, v3}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;

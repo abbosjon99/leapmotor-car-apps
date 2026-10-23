@@ -94,7 +94,7 @@
 
     new-instance v5, Landroid/widget/TextView;
     invoke-direct {v5, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const-string v6, "Open on passenger screen"
+    const-string v6, "LP Companion by abbosjon99"
     instance-of v7, p0, Luz/carhelper/passenger/SettingsActivity;
     if-eqz v7, :title_ok
     const-string v6, "Tap apps to hide or show them"
@@ -139,8 +139,8 @@
     const-string v8, "#closemusic"
     invoke-direct {p0, v4, v6, v7, v8}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
     :pills_common
-    # no Close apps in kid mode
-    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    # no Close apps while child mode filters the passenger screen
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
     move-result v5
     if-nez v5, :no_closeall
     const-string v5, "Close apps"
@@ -190,6 +190,13 @@
     const/high16 v10, 0x40400000
     invoke-direct {v7, v8, v9, v10}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
     invoke-virtual {v5, v6, v7}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    # hide the now-playing widget while child mode is active on the passenger screen
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
+    move-result v7
+    if-eqz v7, :np_shown
+    const/16 v7, 0x8
+    invoke-virtual {v6, v7}, Landroid/view/View;->setVisibility(I)V
+    :np_shown
 
     # the two buttons container, weight 2 (40%)
     new-instance v6, Landroid/widget/LinearLayout;
@@ -273,7 +280,7 @@
     move-result v10
     if-nez v10, :loop
     const/4 v12, 0x0
-    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
     move-result v10
     if-nez v10, :not_hidden
     invoke-interface {v1, v9}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
@@ -610,7 +617,7 @@
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :not_settings
-    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
     move-result v1
     if-eqz v1, :open_settings
     const-string v1, "settings"
@@ -800,10 +807,60 @@
     return-void
 .end method
 
+# every sideloaded (non-system) launchable package except this one
+.method private allSideloaded()Ljava/util/HashSet;
+    .locals 4
+    new-instance v0, Ljava/util/HashSet;
+    invoke-direct {v0}, Ljava/util/HashSet;-><init>()V
+    invoke-virtual {p0}, Landroid/app/Activity;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v1
+    new-instance v2, Landroid/content/Intent;
+    const-string v3, "android.intent.action.MAIN"
+    invoke-direct {v2, v3}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const-string v3, "android.intent.category.LAUNCHER"
+    invoke-virtual {v2, v3}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
+    const/4 v3, 0x0
+    invoke-virtual {v1, v2, v3}, Landroid/content/pm/PackageManager;->queryIntentActivities(Landroid/content/Intent;I)Ljava/util/List;
+    move-result-object v1
+    invoke-interface {v1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+    move-result-object v1
+    :loop
+    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+    move-result v2
+    if-eqz v2, :end
+    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+    move-result-object v2
+    check-cast v2, Landroid/content/pm/ResolveInfo;
+    iget-object v2, v2, Landroid/content/pm/ResolveInfo;->activityInfo:Landroid/content/pm/ActivityInfo;
+    iget-object v3, v2, Landroid/content/pm/ActivityInfo;->applicationInfo:Landroid/content/pm/ApplicationInfo;
+    iget v3, v3, Landroid/content/pm/ApplicationInfo;->flags:I
+    and-int/lit8 v3, v3, 0x1
+    if-nez v3, :loop
+    iget-object v2, v2, Landroid/content/pm/ActivityInfo;->packageName:Ljava/lang/String;
+    invoke-virtual {p0}, Landroid/app/Activity;->getPackageName()Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-nez v3, :loop
+    invoke-virtual {v0, v2}, Ljava/util/HashSet;->add(Ljava/lang/Object;)Z
+    goto :loop
+    :end
+    return-object v0
+.end method
+
 .method private showCloseDialog()V
     .locals 9
+    # main screen lists every sideloaded app; passenger lists only what it opened
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->onMain()Z
+    move-result v0
+    if-eqz v0, :pass_set
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->allSideloaded()Ljava/util/HashSet;
+    move-result-object v1
+    goto :set_ready
+    :pass_set
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->runningSet()Ljava/util/HashSet;
     move-result-object v1
+    :set_ready
     invoke-virtual {v1}, Ljava/util/HashSet;->isEmpty()Z
     move-result v2
     if-eqz v2, :have
@@ -1122,6 +1179,42 @@
     return v0
 .end method
 
+# true when this grid is on the car's MAIN screen (display 0)
+.method private onMain()Z
+    .locals 2
+    :try_start_0
+    invoke-virtual {p0}, Landroid/app/Activity;->getDisplay()Landroid/view/Display;
+    move-result-object v0
+    if-eqz v0, :no
+    invoke-virtual {v0}, Landroid/view/Display;->getDisplayId()I
+    move-result v0
+    if-nez v0, :no
+    const/4 v0, 0x1
+    return v0
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    :catch_0
+    :no
+    const/4 v0, 0x0
+    return v0
+.end method
+
+# child mode filters apps only on the passenger screen; the main screen always shows all
+.method private kidActive()Z
+    .locals 1
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    move-result v0
+    if-eqz v0, :off
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->onMain()Z
+    move-result v0
+    if-nez v0, :off
+    const/4 v0, 0x1
+    return v0
+    :off
+    const/4 v0, 0x0
+    return v0
+.end method
+
 # true when a child-mode PIN has been set
 .method private pinSet()Z
     .locals 4
@@ -1139,10 +1232,10 @@
     return v0
 .end method
 
-# true = kid mode is on and this package isn't ticked "Kids"
+# true = kid mode is active (passenger screen) and this package isn't ticked "Kids"
 .method private kidBlocked(Ljava/lang/String;)Z
     .locals 3
-    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
     move-result v0
     if-eqz v0, :allowed
     const-string v0, "apps"

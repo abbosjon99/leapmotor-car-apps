@@ -40,13 +40,7 @@
             </intent-filter>
             <meta-data android:name="android.accessibilityservice" android:resource="@xml/backservice"/>
         </service>
-        <receiver android:name=".MiguCtrlReceiver" android:exported="true">
-            <intent-filter>
-                <action android:name="com.leapmotor.action.METER.CTRL"/>
-                <action android:name="com.leapmotor.action.VOICE.CTRL"/>
-            </intent-filter>
-        </receiver>
-        <service android:name=".WheelListener" android:exported="true" android:label="LP Companion wheel buttons"
+        <service android:name=".WheelListener" android:exported="true" android:label="LP Companion now playing"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService"/>

@@ -49,12 +49,18 @@
     new-instance v0, Landroid/widget/TextView;
     invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
     invoke-virtual {v0, p2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v1, 0x41b00000
+    const/high16 v1, 0x41600000
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextSize(F)V
-    const v1, -0x616162
+    const v1, -0xbd7a89
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
+    const/4 v1, 0x1
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setAllCaps(Z)V
+    const v1, 0x3dcccccd
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setLetterSpacing(F)V
+    sget-object v1, Landroid/graphics/Typeface;->DEFAULT_BOLD:Landroid/graphics/Typeface;
+    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
     const/4 v1, 0x0
-    const/16 v2, 0x28
+    const/16 v2, 0x34
     invoke-virtual {v0, v1, v2, v1, v1}, Landroid/widget/TextView;->setPadding(IIII)V
     invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     return-void
@@ -85,7 +91,7 @@
     invoke-virtual {v0, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     const v2, -0xb350b0
     const-string v1, " — OK"
-    if-nez p3, :off
+    if-eqz p3, :off
     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     goto :text
     :off
@@ -218,8 +224,10 @@
     invoke-direct {v2, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
     const-string v3, "LP Companion settings"
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v3, 0x42080000
+    const/high16 v3, 0x42100000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
+    sget-object v3, Landroid/graphics/Typeface;->DEFAULT_BOLD:Landroid/graphics/Typeface;
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
     new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
     const/4 v6, 0x0
     const/4 v7, -0x2
@@ -259,7 +267,7 @@
     invoke-direct {v3, p0, v4}, Landroid/content/ComponentName;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-virtual {v2, v3}, Landroid/app/NotificationManager;->isNotificationListenerAccessGranted(Landroid/content/ComponentName;)Z
     move-result v6
-    const-string v2, "Wheel buttons (notification access)"
+    const-string v2, "Now playing (notification access)"
     const-string v4, "adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10"
     invoke-direct {p0, v1, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
 
@@ -288,18 +296,6 @@
     :back_row
     const-string v2, "Back button (accessibility)"
     invoke-direct {p0, v1, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
-
-    # Steering wheel
-    const-string v2, "Steering wheel"
-    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
-    const-string v2, "Wheel buttons control sideloaded music players"
-    const-string v3, "wheel"
-    const/4 v4, 0x0
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
-    move-result-object v5
-    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->wheel:Z
-    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
-    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
 
     # Passenger screen
     const-string v2, "Passenger screen"

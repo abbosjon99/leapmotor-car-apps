@@ -44,6 +44,9 @@
     sget-object v1, Landroid/widget/ImageView$ScaleType;->CENTER_CROP:Landroid/widget/ImageView$ScaleType;
     invoke-virtual {v0, v1}, Landroid/widget/ImageView;->setScaleType(Landroid/widget/ImageView$ScaleType;)V
     iput-object v0, p0, Luz/carhelper/passenger/NowPlaying;->art:Landroid/widget/ImageView;
+    const-string v1, "open"
+    invoke-virtual {v0, v1}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
     new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
     const/16 v2, 0x60
     invoke-direct {v1, v2, v2}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
@@ -57,6 +60,9 @@
     invoke-direct {v0, p1}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
     const/4 v1, 0x1
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    const-string v5, "open"
+    invoke-virtual {v0, v5}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
     new-instance v2, Landroid/widget/TextView;
     invoke-direct {v2, p1}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
     const/high16 v3, 0x41d00000
@@ -239,6 +245,38 @@
     if-nez v0, :have
     return-void
     :have
+    invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
+    move-result-object v1
+    check-cast v1, Ljava/lang/String;
+    const-string v2, "open"
+    invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v2
+    if-eqz v2, :transport
+    # tapping the art/title opens the now-playing app on the passenger screen
+    invoke-virtual {v0}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
+    move-result-object v1
+    iget-object v2, p0, Luz/carhelper/passenger/NowPlaying;->act:Landroid/app/Activity;
+    invoke-virtual {v2}, Landroid/app/Activity;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v2
+    invoke-virtual {v2, v1}, Landroid/content/pm/PackageManager;->getLaunchIntentForPackage(Ljava/lang/String;)Landroid/content/Intent;
+    move-result-object v1
+    if-eqz v1, :open_done
+    const/high16 v2, 0x10000000
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    iget-object v2, p0, Luz/carhelper/passenger/NowPlaying;->act:Landroid/app/Activity;
+    :try_start_o
+    invoke-static {}, Landroid/app/ActivityOptions;->makeBasic()Landroid/app/ActivityOptions;
+    move-result-object v3
+    const/4 v0, 0x3
+    invoke-virtual {v3, v0}, Landroid/app/ActivityOptions;->setLaunchDisplayId(I)Landroid/app/ActivityOptions;
+    invoke-virtual {v3}, Landroid/app/ActivityOptions;->toBundle()Landroid/os/Bundle;
+    move-result-object v3
+    invoke-virtual {v2, v1, v3}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;Landroid/os/Bundle;)V
+    :try_end_o
+    .catch Ljava/lang/Exception; {:try_start_o .. :try_end_o} :open_done
+    :open_done
+    return-void
+    :transport
     invoke-virtual {v0}, Landroid/media/session/MediaController;->getTransportControls()Landroid/media/session/MediaController$TransportControls;
     move-result-object v1
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;

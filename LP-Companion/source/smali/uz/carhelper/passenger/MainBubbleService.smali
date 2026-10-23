@@ -463,6 +463,51 @@
     return-void
 .end method
 
+# on entering child mode: close the passenger app in front if it isn't ticked "Kids"
+.method private closeNonKid()V
+    .locals 9
+    const-string v0, "apps"
+    const/4 v1, 0x0
+    invoke-virtual {p0, v0, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v0
+    const-string v1, "lastPassenger"
+    const/4 v2, 0x0
+    invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
+    if-eqz v1, :done
+    new-instance v2, Ljava/util/HashSet;
+    invoke-direct {v2}, Ljava/util/HashSet;-><init>()V
+    const-string v3, "kidApps"
+    invoke-interface {v0, v3, v2}, Landroid/content/SharedPreferences;->getStringSet(Ljava/lang/String;Ljava/util/Set;)Ljava/util/Set;
+    move-result-object v2
+    invoke-interface {v2, v1}, Ljava/util/Set;->contains(Ljava/lang/Object;)Z
+    move-result v2
+    if-nez v2, :done
+    const/4 v2, 0x1
+    new-array v2, v2, [Ljava/lang/String;
+    const/4 v3, 0x0
+    aput-object v1, v2, v3
+    new-instance v3, Landroid/os/Handler;
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+    move-result-object v4
+    invoke-direct {v3, v4}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+    new-instance v4, Luz/carhelper/passenger/Closer;
+    invoke-virtual {p0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
+    move-result-object v5
+    invoke-direct {v4, v5, v2}, Luz/carhelper/passenger/Closer;-><init>(Landroid/content/Context;[Ljava/lang/String;)V
+    const-wide/16 v5, 0x320
+    invoke-virtual {v3, v4, v5, v6}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+    # forget it as the passenger app
+    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+    move-result-object v0
+    const-string v2, "lastPassenger"
+    invoke-interface {v0, v2}, Landroid/content/SharedPreferences$Editor;->remove(Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+    move-result-object v0
+    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V
+    :done
+    return-void
+.end method
+
 # open LP Companion on the MAIN screen (display 0), able to coexist with the passenger one
 .method private startOnMain(Landroid/content/Intent;)V
     .locals 3
@@ -617,6 +662,10 @@
     move-result-object v1
     invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
     invoke-static {p0, v2}, Luz/carhelper/passenger/ChildMode;->sync(Landroid/content/Context;Z)V
+    # entering child mode: close the passenger app if it isn't allowed in child mode
+    if-eqz v2, :child_no_close
+    invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->closeNonKid()V
+    :child_no_close
     new-instance v1, Landroid/content/Intent;
     const-class v3, Luz/carhelper/passenger/MainActivity;
     invoke-direct {v1, p0, v3}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
