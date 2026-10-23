@@ -116,25 +116,7 @@
     const-string v6, "ic_settings"
     const-string v7, "#settings"
     invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
-    const-string v5, "Go to car"
-    const-string v6, "ic_caros"
-    const-string v7, "#gotocar"
-    invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
-    const-string v5, "Exit"
-    const-string v6, "ic_exit"
-    const-string v7, "#exit"
-    invoke-direct {p0, v4, v5, v6, v7}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
-    # child mode toggle (Enter / Exit)
-    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
-    move-result v5
-    const-string v6, "ic_child"
-    const-string v7, "Enter child mode"
-    const-string v8, "#childenter"
-    if-eqz v5, :child_pill
-    const-string v7, "Exit child mode"
-    const-string v8, "#childexit"
-    :child_pill
-    invoke-direct {p0, v4, v7, v6, v8}, Luz/carhelper/passenger/MainActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/TextView;
+    # child mode and wallpaper live in the grid as tiles now; Go to car moved to Settings; Exit removed
     goto :pills_common
     :settings_screen
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->readAutoClose()Z
@@ -193,6 +175,30 @@
     invoke-virtual {v6, v7, v7, v7, v9}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
     invoke-virtual {v3, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     :skip_np
+
+    # special grid tiles (grid only): child mode toggle + change wallpaper
+    instance-of v4, p0, Luz/carhelper/passenger/SettingsActivity;
+    if-nez v4, :skip_tiles
+    new-instance v4, Landroid/widget/LinearLayout;
+    invoke-direct {v4, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/high16 v5, 0x40a00000
+    invoke-virtual {v4, v5}, Landroid/widget/LinearLayout;->setWeightSum(F)V
+    invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
+    move-result v5
+    const-string v6, "Child mode"
+    const-string v7, "#childenter"
+    if-eqz v5, :tile_child
+    const-string v6, "Exit child mode"
+    const-string v7, "#childexit"
+    :tile_child
+    const-string v8, "ic_child"
+    invoke-direct {p0, v4, v8, v6, v7}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    const-string v6, "ic_image"
+    const-string v7, "Change wallpaper"
+    const-string v8, "#wallpaper"
+    invoke-direct {p0, v4, v6, v7, v8}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    :skip_tiles
 
     # v4 = current row, v5 = item count, v6 = iterator
     const/4 v4, 0x0
@@ -316,7 +322,59 @@
     return-void
 .end method
 
-# ---------- apps-menu wallpaper (swipe horizontally to change) ----------
+# a grid tile with a vector icon + label and a string tag (child mode, change wallpaper)
+.method private addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    .locals 7
+    new-instance v0, Landroid/widget/LinearLayout;
+    invoke-direct {v0, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v1, 0x1
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    const/16 v1, 0x11
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v1, 0x18
+    invoke-virtual {v0, v1, v1, v1, v1}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    invoke-virtual {v0, p4}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+    new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v2, 0x0
+    const/4 v3, -0x2
+    const/high16 v4, 0x3f800000
+    invoke-direct {v1, v2, v3, v4}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {p1, v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    new-instance v1, Landroid/widget/ImageView;
+    invoke-direct {v1, p0}, Landroid/widget/ImageView;-><init>(Landroid/content/Context;)V
+    invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+    move-result-object v2
+    const-string v3, "drawable"
+    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
+    move-result-object v4
+    invoke-virtual {v2, p2, v3, v4}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
+    move-result v2
+    invoke-virtual {v1, v2}, Landroid/widget/ImageView;->setImageResource(I)V
+    new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
+    const/16 v3, 0x90
+    invoke-direct {v2, v3, v3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    const/16 v3, 0x14
+    invoke-virtual {v2, v3, v3, v3, v3}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
+    invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    new-instance v1, Landroid/widget/TextView;
+    invoke-direct {v1, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+    invoke-virtual {v1, p3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    const/high16 v2, 0x41c00000
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextSize(F)V
+    const/16 v2, 0x11
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setGravity(I)V
+    const/4 v2, 0x2
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setMaxLines(I)V
+    const/4 v2, -0x1
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextColor(I)V
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    return-void
+.end method
+
+# ---------- apps-menu wallpaper (tap the Change wallpaper tile to cycle) ----------
 
 .method private wrapWallpaper(Landroid/view/View;)Landroid/view/View;
     .locals 6
@@ -399,6 +457,30 @@
     invoke-virtual {p0}, Landroid/app/Activity;->finish()V
     return-void
     :not_gotocar
+
+    # change wallpaper tile: cycle 0..11 (0 = black, 1..11 = wp_N) and re-render
+    const-string v1, "#wallpaper"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_wallpaper
+    const-string v1, "apps"
+    const/4 v2, 0x0
+    invoke-virtual {p0, v1, v2}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v1
+    const-string v2, "wallpaper"
+    const/4 v3, 0x0
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    move-result v3
+    add-int/lit8 v3, v3, 0x1
+    rem-int/lit8 v3, v3, 0xc
+    invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+    move-result-object v1
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
+    move-result-object v1
+    invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
+    invoke-virtual {p0}, Landroid/app/Activity;->recreate()V
+    return-void
+    :not_wallpaper
 
     # Close apps: popup of sideloaded apps opened on the passenger screen
     const-string v1, "#closeall"

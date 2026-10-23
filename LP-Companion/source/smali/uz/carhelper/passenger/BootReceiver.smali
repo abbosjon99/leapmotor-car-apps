@@ -19,7 +19,7 @@
     invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
     move-result-object v0
     const-string v1, "barHidden"
-    const/4 v2, 0x0
+    const/4 v2, 0x1
     invoke-interface {v0, v1, v2}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     move-result-object v0
     invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V

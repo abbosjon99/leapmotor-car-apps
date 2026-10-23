@@ -358,6 +358,10 @@
     const-string v3, "#vehset"
     const v4, -0xbd7a89
     invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    const-string v2, "Go to car"
+    const-string v3, "#gotocar"
+    const v4, -0xbd7a89
+    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
 
     # Apps shown on the passenger screen
     const-string v2, "Apps shown on the passenger screen"
@@ -621,6 +625,37 @@
     invoke-static {p0, v1}, Luz/carhelper/passenger/PinDialog;->show(Landroid/app/Activity;Ljava/lang/String;)V
     return-void
     :not_setpin
+    const-string v1, "#gotocar"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_gotocar
+    new-instance v1, Landroid/content/Intent;
+    const-string v2, "android.intent.action.MAIN"
+    invoke-direct {v1, v2}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const-string v2, "android.intent.category.LAUNCHER"
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
+    const-string v2, "com.leapmotor.copilotshowapp"
+    const-string v3, "com.leapmotor.copilotshowapp.mvvm.main.MainActivity"
+    invoke-virtual {v1, v2, v3}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    const/high16 v2, 0x10000000
+    invoke-virtual {v1, v2}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    :try_start_gtc
+    invoke-static {}, Landroid/app/ActivityOptions;->makeBasic()Landroid/app/ActivityOptions;
+    move-result-object v2
+    const/4 v3, 0x3
+    invoke-virtual {v2, v3}, Landroid/app/ActivityOptions;->setLaunchDisplayId(I)Landroid/app/ActivityOptions;
+    invoke-virtual {v2}, Landroid/app/ActivityOptions;->toBundle()Landroid/os/Bundle;
+    move-result-object v2
+    invoke-virtual {p0, v1, v2}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;Landroid/os/Bundle;)V
+    :try_end_gtc
+    .catch Ljava/lang/Exception; {:try_start_gtc .. :try_end_gtc} :gtc_fail
+    invoke-virtual {p0}, Landroid/app/Activity;->finish()V
+    return-void
+    :gtc_fail
+    invoke-virtual {p0}, Landroid/app/Activity;->finish()V
+    return-void
+    :not_gotocar
+
     const-string v1, "#vehset"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1

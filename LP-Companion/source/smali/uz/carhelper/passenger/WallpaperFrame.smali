@@ -21,67 +21,9 @@
 .end method
 
 .method public onInterceptTouchEvent(Landroid/view/MotionEvent;)Z
-    .locals 7
-    invoke-virtual {p1}, Landroid/view/MotionEvent;->getActionMasked()I
-    move-result v0
-    if-nez v0, :not_down
-    invoke-virtual {p1}, Landroid/view/MotionEvent;->getX()F
-    move-result v1
-    iput v1, p0, Luz/carhelper/passenger/WallpaperFrame;->downX:F
-    invoke-virtual {p1}, Landroid/view/MotionEvent;->getY()F
-    move-result v1
-    iput v1, p0, Luz/carhelper/passenger/WallpaperFrame;->downY:F
-    const/4 v1, 0x0
-    iput-boolean v1, p0, Luz/carhelper/passenger/WallpaperFrame;->handled:Z
-    return v1
-    :not_down
-    const/4 v1, 0x2
-    if-eq v0, v1, :move
-    const/4 v1, 0x0
-    return v1
-    :move
-    iget-boolean v1, p0, Luz/carhelper/passenger/WallpaperFrame;->handled:Z
-    if-eqz v1, :measure
-    const/4 v1, 0x1
-    return v1
-    :measure
-    invoke-virtual {p1}, Landroid/view/MotionEvent;->getX()F
-    move-result v1
-    iget v2, p0, Luz/carhelper/passenger/WallpaperFrame;->downX:F
-    sub-float/2addr v1, v2
-    invoke-virtual {p1}, Landroid/view/MotionEvent;->getY()F
-    move-result v2
-    iget v3, p0, Luz/carhelper/passenger/WallpaperFrame;->downY:F
-    sub-float/2addr v2, v3
-    invoke-static {v1}, Ljava/lang/Math;->abs(F)F
-    move-result v3
-    invoke-static {v2}, Ljava/lang/Math;->abs(F)F
-    move-result v4
-    const/high16 v5, 0x43160000
-    cmpg-float v6, v3, v5
-    if-ltz v6, :no
-    const/high16 v5, 0x40000000
-    mul-float/2addr v5, v4
-    cmpl-float v6, v3, v5
-    if-lez v6, :no
-    const/4 v6, 0x1
-    const/4 v5, 0x0
-    cmpg-float v5, v1, v5
-    if-ltz v5, :have_step
-    const/4 v6, -0x1
-    :have_step
-    invoke-direct {p0, v6}, Luz/carhelper/passenger/WallpaperFrame;->change(I)V
-    const/4 v6, 0x1
-    iput-boolean v6, p0, Luz/carhelper/passenger/WallpaperFrame;->handled:Z
-    return v6
-    :no
-    const/4 v1, 0x0
-    return v1
-.end method
-
-.method public onTouchEvent(Landroid/view/MotionEvent;)Z
     .locals 1
-    const/4 v0, 0x1
+    # swipe-to-change removed; the grid handles all touches, wallpaper changes from its tile
+    const/4 v0, 0x0
     return v0
 .end method
 

@@ -83,6 +83,9 @@
     const/4 v3, 0x1
     invoke-virtual {p0, v3, v1}, Landroid/app/Service;->startForeground(ILandroid/app/Notification;)V
 
+    # auto-hide the car's passenger sidebar on start
+    invoke-direct {p0}, Luz/carhelper/passenger/BubbleService;->hideBar()V
+
     # passenger display and its size
     const-string v0, "display"
     invoke-virtual {p0, v0}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
@@ -230,6 +233,39 @@
 .end method
 
 # ---------- menu panel ----------
+
+# hide the car's passenger sidebar and remember it hidden (pref "apps"/"barHidden")
+.method private hideBar()V
+    .locals 4
+    const-string v0, "apps"
+    const/4 v1, 0x0
+    invoke-virtual {p0, v0, v1}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v0
+    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+    move-result-object v0
+    const-string v2, "barHidden"
+    const/4 v3, 0x1
+    invoke-interface {v0, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    move-result-object v0
+    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V
+    iput-boolean v3, p0, Luz/carhelper/passenger/BubbleService;->barHidden:Z
+    :try_start_0
+    new-instance v0, Landroid/content/Intent;
+    const-string v1, "com.leapmotor.iqiyi.action.nav.visibility"
+    invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const-string v1, "visibility"
+    const/16 v2, 0x8
+    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->putExtra(Ljava/lang/String;I)Landroid/content/Intent;
+    const-string v1, "package"
+    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
+    move-result-object v2
+    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->sendBroadcast(Landroid/content/Intent;)V
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    :catch_0
+    return-void
+.end method
 
 .method private icon(Ljava/lang/String;)I
     .locals 3
