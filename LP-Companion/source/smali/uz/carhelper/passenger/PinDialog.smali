@@ -380,6 +380,8 @@
     iget-object v2, p0, Luz/carhelper/passenger/PinDialog;->act:Landroid/app/Activity;
     const/4 v3, 0x0
     invoke-static {v2, v3}, Luz/carhelper/passenger/ChildMode;->sync(Landroid/content/Context;Z)V
+    # left from the main screen: refresh the passenger grid straight away too
+    invoke-static {v2}, Luz/carhelper/passenger/ChildMode;->exit(Landroid/content/Context;)V
     invoke-virtual {v2}, Landroid/app/Activity;->recreate()V
     return-void
     :open_settings

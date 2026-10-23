@@ -7,7 +7,7 @@
 # Second AssistiveTouch bubble, on the car's MAIN screen (display 0).
 #            [ turn off passenger screen ]
 # [back]  [ LP Companion (menu) ]  [ child mode toggle ]
-#            [ swap ]
+# [ <- passenger app to main ]   [ -> main app to passenger ]   (gray when there is nothing to move)
 # Back-off rule (universal): when the Back accessibility service is off, Back is
 # dropped, LP Companion shifts left and the centre is blank.
 
@@ -31,6 +31,8 @@
 .field private pctx:Landroid/content/Context;
 .field private pwm:Landroid/view/WindowManager;
 .field private pcover:Landroid/view/View;
+.field public static instance:Luz/carhelper/passenger/MainBubbleService;
+.field private autoRun:Ljava/lang/Runnable;
 
 .method public constructor <init>()V
     .locals 0
@@ -53,6 +55,7 @@
 .method public onCreate()V
     .locals 12
     invoke-super {p0}, Landroid/app/Service;->onCreate()V
+    sput-object p0, Luz/carhelper/passenger/MainBubbleService;->instance:Luz/carhelper/passenger/MainBubbleService;
 
     # silent foreground notification so the service isn't killed
     const-string v0, "notification"
@@ -246,6 +249,20 @@
     return-void
 .end method
 
+# one move button (p2 icon, p3 tag, p4 = target display 0 or 3); grayed when there is no app to move that way
+.method private addMove(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    .locals 2
+    invoke-direct {p0, p1, p2, p3}, Luz/carhelper/passenger/MainBubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
+    move-result-object v0
+    invoke-static {p0, p4}, Luz/carhelper/passenger/Swapper;->canMove(Landroid/content/Context;I)Z
+    move-result v1
+    if-nez v1, :done
+    const v1, 0x3eb33333
+    invoke-virtual {v0, v1}, Landroid/view/View;->setAlpha(F)V
+    :done
+    return-void
+.end method
+
 .method private newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     .locals 2
     iget-object v0, p0, Luz/carhelper/passenger/MainBubbleService;->dctx:Landroid/content/Context;
@@ -309,14 +326,19 @@
     const-string v3, "child"
     invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/MainBubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
 
-    # row 3: swap screens in the middle
+    # row 3: "<-" brings the passenger's app to the main screen, "->" sends the main screen's app to the passenger.
+    # Both always here; a button is gray when there is no app to move that way.
     invoke-direct {p0, v1}, Luz/carhelper/passenger/MainBubbleService;->newRow(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
     move-result-object v4
+    const-string v2, "ic_move_left"
+    const-string v3, "moveleft"
+    const/4 v5, 0x0
+    invoke-direct {p0, v4, v2, v3, v5}, Luz/carhelper/passenger/MainBubbleService;->addMove(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
     invoke-direct {p0, v4}, Luz/carhelper/passenger/MainBubbleService;->addSpacer(Landroid/widget/LinearLayout;)V
-    const-string v2, "ic_swap"
-    const-string v3, "swap"
-    invoke-direct {p0, v4, v2, v3}, Luz/carhelper/passenger/MainBubbleService;->addButton(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)Landroid/widget/ImageView;
-    invoke-direct {p0, v4}, Luz/carhelper/passenger/MainBubbleService;->addSpacer(Landroid/widget/LinearLayout;)V
+    const-string v2, "ic_move_right"
+    const-string v3, "moveright"
+    const/4 v5, 0x3
+    invoke-direct {p0, v4, v2, v3, v5}, Luz/carhelper/passenger/MainBubbleService;->addMove(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
 
     new-instance v3, Landroid/view/WindowManager$LayoutParams;
     const/4 v4, -0x2
@@ -328,6 +350,61 @@
     const/16 v4, 0x33
     iput v4, v3, Landroid/view/WindowManager$LayoutParams;->gravity:I
     iput-object v3, p0, Luz/carhelper/passenger/MainBubbleService;->panelLp:Landroid/view/WindowManager$LayoutParams;
+    return-void
+.end method
+
+# (re)start the menu's auto-close timer; settings bubbleAuto (default on) and bubbleSecs (default 8)
+.method private armAutoClose()V
+    .locals 6
+    iget-object v0, p0, Luz/carhelper/passenger/MainBubbleService;->handler:Landroid/os/Handler;
+    if-eqz v0, :done
+    iget-object v1, p0, Luz/carhelper/passenger/MainBubbleService;->autoRun:Ljava/lang/Runnable;
+    if-nez v1, :have
+    new-instance v1, Luz/carhelper/passenger/AutoClose;
+    const/4 v2, 0x1
+    invoke-direct {v1, v2}, Luz/carhelper/passenger/AutoClose;-><init>(I)V
+    iput-object v1, p0, Luz/carhelper/passenger/MainBubbleService;->autoRun:Ljava/lang/Runnable;
+    :have
+    iget-object v1, p0, Luz/carhelper/passenger/MainBubbleService;->autoRun:Ljava/lang/Runnable;
+    invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+    const-string v2, "apps"
+    const/4 v3, 0x0
+    invoke-virtual {p0, v2, v3}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v2
+    const-string v3, "bubbleAuto"
+    const/4 v4, 0x1
+    invoke-interface {v2, v3, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v3
+    if-eqz v3, :done
+    const-string v3, "bubbleSecs"
+    const/16 v4, 0x8
+    invoke-interface {v2, v3, v4}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    move-result v3
+    mul-int/lit16 v3, v3, 0x3e8
+    int-to-long v4, v3
+    invoke-virtual {v0, v1, v4, v5}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+    :done
+    return-void
+.end method
+
+.method private disarmAutoClose()V
+    .locals 2
+    iget-object v0, p0, Luz/carhelper/passenger/MainBubbleService;->handler:Landroid/os/Handler;
+    iget-object v1, p0, Luz/carhelper/passenger/MainBubbleService;->autoRun:Ljava/lang/Runnable;
+    if-eqz v0, :done
+    if-eqz v1, :done
+    invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+    :done
+    return-void
+.end method
+
+# called by AutoClose when the timer runs out
+.method public static closePanel()V
+    .locals 1
+    sget-object v0, Luz/carhelper/passenger/MainBubbleService;->instance:Luz/carhelper/passenger/MainBubbleService;
+    if-eqz v0, :done
+    invoke-direct {v0}, Luz/carhelper/passenger/MainBubbleService;->hidePanel()V
+    :done
     return-void
 .end method
 
@@ -400,6 +477,7 @@
     invoke-interface {v0, v1, v8}, Landroid/view/ViewManager;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     const/4 v0, 0x1
     iput-boolean v0, p0, Luz/carhelper/passenger/MainBubbleService;->panelShown:Z
+    invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->armAutoClose()V
     invoke-virtual {v1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
     move-result-object v0
     const/high16 v3, 0x3f800000
@@ -422,6 +500,7 @@
 
 .method private hidePanel()V
     .locals 2
+    invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->disarmAutoClose()V
     iget-boolean v0, p0, Luz/carhelper/passenger/MainBubbleService;->panelShown:Z
     if-eqz v0, :done
     const/4 v0, 0x0
@@ -601,6 +680,8 @@
 
 .method public onClick(Landroid/view/View;)V
     .locals 5
+    # any tap in the menu restarts the auto-close timer
+    invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->armAutoClose()V
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
     check-cast v0, Ljava/lang/String;
@@ -622,14 +703,25 @@
     return-void
     :not_uncover
 
-    const-string v1, "swap"
+    const-string v1, "moveleft"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
-    if-eqz v1, :not_swap
+    if-eqz v1, :not_moveleft
     invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->hidePanel()V
-    invoke-static {p0}, Luz/carhelper/passenger/Swapper;->swap(Landroid/content/Context;)V
+    const/4 v1, 0x0
+    invoke-static {p0, v1}, Luz/carhelper/passenger/Swapper;->move(Landroid/content/Context;I)V
     return-void
-    :not_swap
+    :not_moveleft
+
+    const-string v1, "moveright"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_moveright
+    invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->hidePanel()V
+    const/4 v1, 0x3
+    invoke-static {p0, v1}, Luz/carhelper/passenger/Swapper;->move(Landroid/content/Context;I)V
+    return-void
+    :not_moveright
 
     const-string v1, "lp"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -655,21 +747,52 @@
     const-string v3, "kid"
     invoke-interface {v1, v3, v2}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
-    xor-int/lit8 v2, v2, 0x1
+    if-eqz v2, :child_enter
+    # child mode is on: leaving it needs the PIN, asked on the main screen (MainActivity shows the pad)
+    new-instance v1, Landroid/content/Intent;
+    const-class v3, Luz/carhelper/passenger/MainActivity;
+    invoke-direct {v1, p0, v3}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    const-string v3, "exitPin"
+    const/4 v2, 0x1
+    invoke-virtual {v1, v3, v2}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Z)Landroid/content/Intent;
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/MainBubbleService;->startOnMain(Landroid/content/Intent;)V
+    return-void
+    :child_enter
+    # entering needs a PIN to exist, otherwise there would be nothing to leave it with
+    const-string v3, "pin"
+    const-string v4, ""
+    invoke-interface {v1, v3, v4}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3}, Ljava/lang/String;->isEmpty()Z
+    move-result v3
+    if-eqz v3, :pin_exists
+    const-string v3, "Set a password in Settings first"
+    const/4 v1, 0x1
+    invoke-static {p0, v3, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v1
+    invoke-virtual {v1}, Landroid/widget/Toast;->show()V
+    return-void
+    :pin_exists
+    const-string v3, "kid"
+    const/4 v2, 0x1
     invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
     move-result-object v1
     invoke-interface {v1, v3, v2}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     move-result-object v1
     invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
     invoke-static {p0, v2}, Luz/carhelper/passenger/ChildMode;->sync(Landroid/content/Context;Z)V
-    # entering child mode: close the passenger app if it isn't allowed in child mode
-    if-eqz v2, :child_no_close
-    invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->closeNonKid()V
-    :child_no_close
+    # entering child mode: close the passenger app unless it is allowed ("Kids"). An allowed app that is running
+    # stays on screen and no grid is opened over it.
+    if-eqz v2, :child_open
+    invoke-static {p0}, Luz/carhelper/passenger/ChildMode;->takeOver(Landroid/content/Context;)Z
+    move-result v3
+    if-eqz v3, :child_done
+    :child_open
     new-instance v1, Landroid/content/Intent;
     const-class v3, Luz/carhelper/passenger/MainActivity;
     invoke-direct {v1, p0, v3}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-direct {p0, v1}, Luz/carhelper/passenger/MainBubbleService;->startOnPassenger(Landroid/content/Intent;)V
+    :child_done
     const/4 v1, 0x1
     const-string v3, "Child mode on"
     if-eqz v2, :child_toast
@@ -842,8 +965,20 @@
     return v0
 .end method
 
+# take the black "turn off passenger screen" cover away (a launch on the passenger screen wakes it)
+.method public static uncover()V
+    .locals 1
+    sget-object v0, Luz/carhelper/passenger/MainBubbleService;->instance:Luz/carhelper/passenger/MainBubbleService;
+    if-eqz v0, :done
+    invoke-direct {v0}, Luz/carhelper/passenger/MainBubbleService;->hidePassengerCover()V
+    :done
+    return-void
+.end method
+
 .method public onDestroy()V
     .locals 2
+    const/4 v0, 0x0
+    sput-object v0, Luz/carhelper/passenger/MainBubbleService;->instance:Luz/carhelper/passenger/MainBubbleService;
     invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->hidePanel()V
     invoke-direct {p0}, Luz/carhelper/passenger/MainBubbleService;->hidePassengerCover()V
     iget-object v0, p0, Luz/carhelper/passenger/MainBubbleService;->wm:Landroid/view/WindowManager;

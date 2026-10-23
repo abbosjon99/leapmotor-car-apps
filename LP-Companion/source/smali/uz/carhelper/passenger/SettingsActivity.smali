@@ -27,6 +27,11 @@
 .field private closeMusic:Z
 .field private overheat:Z
 .field private autoOpen:Z
+.field private passToMain:Z
+.field private passFromMain:Z
+.field private bubbleAuto:Z
+.field private bubbleSecs:I
+.field private secsPill:Landroid/view/View;
 .field private hidden:Ljava/util/HashSet;
 
 .method public constructor <init>()V
@@ -44,107 +49,365 @@
     return-object v0
 .end method
 
+# small-caps section title in the accent colour
 .method private section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
-    .locals 3
-    new-instance v0, Landroid/widget/TextView;
-    invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    invoke-virtual {v0, p2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v1, 0x41600000
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextSize(F)V
-    const v1, -0xbd7a89
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
-    const/4 v1, 0x1
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setAllCaps(Z)V
-    const v1, 0x3dcccccd
+    .locals 5
+    const/high16 v0, 0x41700000
+    sget v1, Luz/carhelper/passenger/Ui;->ACCENT:I
+    const/4 v2, 0x1
+    invoke-static {p0, p2, v0, v1, v2}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v0
+    invoke-virtual {v0, v2}, Landroid/widget/TextView;->setAllCaps(Z)V
+    const v1, 0x3df5c28f
     invoke-virtual {v0, v1}, Landroid/widget/TextView;->setLetterSpacing(F)V
-    sget-object v1, Landroid/graphics/Typeface;->DEFAULT_BOLD:Landroid/graphics/Typeface;
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
-    const/4 v1, 0x0
-    const/16 v2, 0x34
-    invoke-virtual {v0, v1, v2, v1, v1}, Landroid/widget/TextView;->setPadding(IIII)V
+    const/16 v1, 0x8
+    const/16 v3, 0x2c
+    const/16 v4, 0xe
+    invoke-virtual {v0, v1, v3, v1, v4}, Landroid/widget/TextView;->setPadding(IIII)V
     invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     return-void
 .end method
 
-# switch tagged with pref key p3, left padding p4; caller sets the checked state
+# rounded glass card; rows are added to the returned container
+.method private card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    .locals 4
+    new-instance v0, Landroid/widget/LinearLayout;
+    invoke-direct {v0, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v1, 0x1
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    sget v1, Luz/carhelper/passenger/Ui;->CARD:I
+    sget v2, Luz/carhelper/passenger/Ui;->STROKE:I
+    const/high16 v3, 0x41e00000
+    invoke-static {v1, v2, v3}, Luz/carhelper/passenger/Ui;->rect(IIF)Landroid/graphics/drawable/GradientDrawable;
+    move-result-object v1
+    invoke-virtual {v0, v1}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+    const/4 v1, 0x6
+    invoke-virtual {v0, v1, v1, v1, v1}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    return-object v0
+.end method
+
+# hairline between two rows of a card
+.method private divider(Landroid/widget/LinearLayout;)V
+    .locals 4
+    new-instance v0, Landroid/view/View;
+    invoke-direct {v0, p0}, Landroid/view/View;-><init>(Landroid/content/Context;)V
+    const v1, 0x1affffff
+    invoke-virtual {v0, v1}, Landroid/view/View;->setBackgroundColor(I)V
+    new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v2, -0x1
+    const/4 v3, 0x2
+    invoke-direct {v1, v2, v3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    const/16 v2, 0x1c
+    const/4 v3, 0x0
+    invoke-virtual {v1, v2, v3, v2, v3}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
+    invoke-virtual {p1, v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    return-void
+.end method
+
+# switch row tagged with pref key p3, extra left padding p4; caller sets the checked state
 .method private addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
-    .locals 3
+    .locals 4
     new-instance v0, Landroid/widget/Switch;
     invoke-direct {v0, p0}, Landroid/widget/Switch;-><init>(Landroid/content/Context;)V
     invoke-virtual {v0, p2}, Landroid/widget/Switch;->setText(Ljava/lang/CharSequence;)V
     const/high16 v1, 0x41d00000
     invoke-virtual {v0, v1}, Landroid/widget/Switch;->setTextSize(F)V
-    const/16 v1, 0x14
-    const/4 v2, 0x0
-    invoke-virtual {v0, p4, v1, v2, v1}, Landroid/widget/Switch;->setPadding(IIII)V
+    const/4 v1, -0x1
+    invoke-virtual {v0, v1}, Landroid/widget/Switch;->setTextColor(I)V
+    const/16 v1, 0x1c
+    add-int/2addr v1, p4
+    const/16 v2, 0x1a
+    const/16 v3, 0x1c
+    invoke-virtual {v0, v1, v2, v3, v2}, Landroid/widget/Switch;->setPadding(IIII)V
+    invoke-static {v0}, Luz/carhelper/passenger/Ui;->tintSwitch(Landroid/widget/Switch;)V
     invoke-virtual {v0, p3}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
     invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     return-object v0
 .end method
 
-# status row: green "● label — OK", or red "● label — OFF" with the fix text p4 underneath
+# status row: coloured dot, label, OK / OFF chip; the ADB fix p4 sits underneath when it is off
 .method private healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
-    .locals 4
-    new-instance v0, Ljava/lang/StringBuilder;
-    const-string v1, "●  "
-    invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-    invoke-virtual {v0, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    const v2, -0xb350b0
-    const-string v1, " — OK"
-    if-eqz p3, :off
-    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    goto :text
-    :off
-    const v2, -0xbbcca
-    const-string v1, " — OFF\n     "
-    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-virtual {v0, p4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    :text
-    new-instance v1, Landroid/widget/TextView;
-    invoke-direct {v1, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-    move-result-object v0
-    invoke-virtual {v1, v0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextColor(I)V
-    const/high16 v0, 0x41a00000
-    invoke-virtual {v1, v0}, Landroid/widget/TextView;->setTextSize(F)V
-    const/4 v0, 0x0
-    const/16 v3, 0x8
-    invoke-virtual {v1, v0, v3, v0, v3}, Landroid/widget/TextView;->setPadding(IIII)V
-    const/4 v0, 0x1
-    invoke-virtual {v1, v0}, Landroid/widget/TextView;->setTextIsSelectable(Z)V
-    invoke-virtual {p1, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    .locals 9
+    new-instance v0, Landroid/widget/LinearLayout;
+    invoke-direct {v0, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v2, 0x1
+    invoke-virtual {v0, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    const/16 v2, 0x1c
+    const/16 v3, 0x16
+    invoke-virtual {v0, v2, v3, v2, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    new-instance v1, Landroid/widget/LinearLayout;
+    invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+
+    # v2 = status colour, v3 = chip text
+    sget v2, Luz/carhelper/passenger/Ui;->OK:I
+    const-string v3, "OK"
+    if-nez p3, :colour_done
+    sget v2, Luz/carhelper/passenger/Ui;->BAD:I
+    const-string v3, "OFF"
+    :colour_done
+
+    # dot
+    const-string v4, "●"
+    const/high16 v5, 0x41a00000
+    const/4 v6, 0x0
+    invoke-static {p0, v4, v5, v2, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v4
+    const/16 v5, 0x14
+    invoke-virtual {v4, v6, v6, v5, v6}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v1, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # label, takes the free width
+    const/high16 v5, 0x41d00000
+    const/4 v4, -0x1
+    invoke-static {p0, p2, v5, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v4
+    new-instance v5, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v7, -0x2
+    const/high16 v8, 0x3f800000
+    invoke-direct {v5, v6, v7, v8}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v1, v4, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    # chip tinted with the status colour
+    const/high16 v5, 0x41900000
+    const/4 v7, 0x1
+    invoke-static {p0, v3, v5, v2, v7}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v4
+    const/16 v5, 0x16
+    const/16 v7, 0x8
+    invoke-virtual {v4, v5, v7, v5, v7}, Landroid/widget/TextView;->setPadding(IIII)V
+    const v5, 0xffffff
+    and-int/2addr v5, v2
+    const v7, 0x2e000000
+    or-int/2addr v5, v7
+    const/high16 v8, 0x41a00000
+    invoke-static {v5, v6, v8}, Luz/carhelper/passenger/Ui;->rect(IIF)Landroid/graphics/drawable/GradientDrawable;
+    move-result-object v5
+    invoke-virtual {v4, v5}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+    invoke-virtual {v1, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # how to fix it
+    if-nez p3, :done
+    const/high16 v5, 0x41880000
+    sget v7, Luz/carhelper/passenger/Ui;->TEXT3:I
+    invoke-static {p0, p4, v5, v7, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v4
+    const/4 v5, 0x1
+    invoke-virtual {v4, v5}, Landroid/widget/TextView;->setTextIsSelectable(Z)V
+    sget-object v5, Landroid/graphics/Typeface;->MONOSPACE:Landroid/graphics/Typeface;
+    invoke-virtual {v4, v5}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
+    const/16 v5, 0x28
+    const/16 v7, 0xc
+    invoke-virtual {v4, v5, v7, v6, v6}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v0, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    :done
+    invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     return-void
 .end method
 
-# rounded pill button (Save / Cancel)
-.method private addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
-    .locals 4
-    new-instance v0, Landroid/widget/TextView;
-    invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    invoke-virtual {v0, p2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v1, 0x41d00000
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextSize(F)V
-    const/4 v1, -0x1
-    invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
-    const/16 v1, 0x30
-    const/16 v2, 0x14
-    invoke-virtual {v0, v1, v2, v1, v2}, Landroid/widget/TextView;->setPadding(IIII)V
-    new-instance v1, Landroid/graphics/drawable/GradientDrawable;
-    invoke-direct {v1}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
-    invoke-virtual {v1, p4}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
-    const/high16 v2, 0x42c80000
-    invoke-virtual {v1, v2}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
+# tappable row with a chevron (Re-check, Vehicle settings, Back to car UI)
+.method private navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    .locals 7
+    new-instance v0, Landroid/widget/LinearLayout;
+    invoke-direct {v0, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v1, 0x10
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v1, 0x1c
+    const/16 v2, 0x1a
+    invoke-virtual {v0, v1, v2, v1, v2}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    const/4 v1, 0x0
+    const v2, 0x22ffffff
+    const/high16 v3, 0x41b00000
+    invoke-static {v1, v2, v1, v3}, Luz/carhelper/passenger/Ui;->btn(IIIF)Landroid/graphics/drawable/StateListDrawable;
+    move-result-object v1
     invoke-virtual {v0, v1}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+    const/high16 v1, 0x41d00000
+    const/4 v2, -0x1
+    const/4 v3, 0x0
+    invoke-static {p0, p2, v1, v2, v3}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v1
+    new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v5, -0x2
+    const/high16 v6, 0x3f800000
+    invoke-direct {v2, v3, v5, v6}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    const-string v1, "›"
+    const/high16 v2, 0x42080000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT3:I
+    invoke-static {p0, v1, v2, v4, v3}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v1
+    invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-virtual {v0, p3}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+    invoke-virtual {p1, v0}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    return-void
+.end method
+
+# rounded pill button (Save / Cancel / Set password); p4 = fill, the accent gets a solid look
+.method private addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    .locals 4
+    const v0, 0x44ffffff
+    sget v1, Luz/carhelper/passenger/Ui;->STROKE:I
+    sget v2, Luz/carhelper/passenger/Ui;->ACCENT:I
+    if-ne p4, v2, :styled
+    sget v0, Luz/carhelper/passenger/Ui;->ACCENT_PRESSED:I
+    const/4 v1, 0x0
+    :styled
+    invoke-static {p0, p2, p4, v0, v1}, Luz/carhelper/passenger/Ui;->pill(Landroid/content/Context;Ljava/lang/CharSequence;III)Landroid/widget/TextView;
+    move-result-object v0
     invoke-virtual {v0, p3}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
     invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
     new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
     const/4 v2, -0x2
     invoke-direct {v1, v2, v2}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
-    const/16 v2, 0x18
+    const/16 v2, 0x10
     const/4 v3, 0x0
     invoke-virtual {v1, v2, v3, v3, v3}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
     invoke-virtual {p1, v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    return-object v0
+.end method
+
+# the next menu timer value: 3 -> 5 -> 8 -> 10 -> 15 -> 20 -> 30 -> 60 -> 3
+.method private static nextSecs(I)I
+    .locals 1
+    const/4 v0, 0x5
+    if-lt p0, v0, :r5
+    const/16 v0, 0x8
+    if-lt p0, v0, :r8
+    const/16 v0, 0xa
+    if-lt p0, v0, :r10
+    const/16 v0, 0xf
+    if-lt p0, v0, :r15
+    const/16 v0, 0x14
+    if-lt p0, v0, :r20
+    const/16 v0, 0x1e
+    if-lt p0, v0, :r30
+    const/16 v0, 0x3c
+    if-lt p0, v0, :r60
+    const/4 v0, 0x3
+    return v0
+    :r5
+    const/4 v0, 0x5
+    return v0
+    :r8
+    const/16 v0, 0x8
+    return v0
+    :r10
+    const/16 v0, 0xa
+    return v0
+    :r15
+    const/16 v0, 0xf
+    return v0
+    :r20
+    const/16 v0, 0x14
+    return v0
+    :r30
+    const/16 v0, 0x1e
+    return v0
+    :r60
+    const/16 v0, 0x3c
+    return v0
+.end method
+
+# "8 s"
+.method private static secsText(I)Ljava/lang/String;
+    .locals 2
+    new-instance v0, Ljava/lang/StringBuilder;
+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+    const-string v1, " s"
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v0
+    return-object v0
+.end method
+
+# one app: icon, "shown on the grid" checkbox with the name, and a "Kids" checkbox
+.method private appRow(Landroid/widget/LinearLayout;Landroid/content/pm/ResolveInfo;Landroid/content/pm/PackageManager;)V
+    .locals 8
+    iget-object v0, p2, Landroid/content/pm/ResolveInfo;->activityInfo:Landroid/content/pm/ActivityInfo;
+    iget-object v0, v0, Landroid/content/pm/ActivityInfo;->packageName:Ljava/lang/String;
+
+    # hairline before every row but the first
+    invoke-virtual {p1}, Landroid/view/ViewGroup;->getChildCount()I
+    move-result v1
+    if-eqz v1, :first
+    invoke-direct {p0, p1}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    :first
+
+    new-instance v1, Landroid/widget/LinearLayout;
+    invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v2, 0x18
+    const/16 v3, 0x10
+    invoke-virtual {v1, v2, v3, v2, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+
+    # icon
+    new-instance v2, Landroid/widget/ImageView;
+    invoke-direct {v2, p0}, Landroid/widget/ImageView;-><init>(Landroid/content/Context;)V
+    invoke-virtual {p2, p3}, Landroid/content/pm/ResolveInfo;->loadIcon(Landroid/content/pm/PackageManager;)Landroid/graphics/drawable/Drawable;
+    move-result-object v3
+    invoke-virtual {v2, v3}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
+    new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
+    const/16 v4, 0x40
+    invoke-direct {v3, v4, v4}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    # shown checkbox + name (unticked = hidden from the grid)
+    new-instance v2, Landroid/widget/CheckBox;
+    invoke-direct {v2, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
+    invoke-virtual {p2, p3}, Landroid/content/pm/ResolveInfo;->loadLabel(Landroid/content/pm/PackageManager;)Ljava/lang/CharSequence;
+    move-result-object v3
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setText(Ljava/lang/CharSequence;)V
+    const/high16 v3, 0x41d00000
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setTextSize(F)V
+    const/4 v3, -0x1
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setTextColor(I)V
+    const/16 v3, 0x14
+    const/4 v4, 0x0
+    invoke-virtual {v2, v3, v4, v4, v4}, Landroid/widget/CheckBox;->setPadding(IIII)V
+    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
+    invoke-virtual {v3, v0}, Ljava/util/HashSet;->contains(Ljava/lang/Object;)Z
+    move-result v3
+    xor-int/lit8 v3, v3, 0x1
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setChecked(Z)V
+    invoke-static {v2}, Luz/carhelper/passenger/Ui;->tintBox(Landroid/widget/CompoundButton;)V
+    invoke-virtual {v2, v0}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v2, p0}, Landroid/widget/CheckBox;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v5, -0x2
+    const/high16 v6, 0x3f800000
+    invoke-direct {v3, v4, v5, v6}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    # "Kids" checkbox, tag "kid:<package>"
+    new-instance v2, Landroid/widget/CheckBox;
+    invoke-direct {v2, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
+    const-string v3, "Kids"
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setText(Ljava/lang/CharSequence;)V
+    const/high16 v3, 0x41b00000
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setTextSize(F)V
+    sget v3, Luz/carhelper/passenger/Ui;->TEXT2:I
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setTextColor(I)V
+    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->kidApps:Ljava/util/HashSet;
+    invoke-virtual {v3, v0}, Ljava/util/HashSet;->contains(Ljava/lang/Object;)Z
+    move-result v3
+    invoke-virtual {v2, v3}, Landroid/widget/CheckBox;->setChecked(Z)V
+    invoke-static {v2}, Luz/carhelper/passenger/Ui;->tintBox(Landroid/widget/CompoundButton;)V
+    new-instance v3, Ljava/lang/StringBuilder;
+    const-string v4, "kid:"
+    invoke-direct {v3, v4}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+    invoke-virtual {v3, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v2, v3}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
+    invoke-virtual {v2, p0}, Landroid/widget/CheckBox;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-virtual {p1, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     return-void
 .end method
 
@@ -178,6 +441,25 @@
     invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
     iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
+    # passenger move buttons: "<-" push to main defaults on, "->" bring over defaults off (v4 = true, v3 = false here)
+    const-string v2, "passToMain"
+    invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->passToMain:Z
+    const-string v2, "passFromMain"
+    invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
+    # bubble menu auto-close: on by default, 8 s (v4 = true here)
+    const-string v2, "bubbleAuto"
+    invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
+    const-string v2, "bubbleSecs"
+    const/16 v4, 0x8
+    invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
+    move-result v2
+    iput v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
     const-string v2, "kid"
     invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
@@ -204,59 +486,81 @@
     invoke-direct {v5, v2}, Ljava/util/HashSet;-><init>(Ljava/util/Collection;)V
     iput-object v5, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
 
-    # v0 = ScrollView, v1 = page
+    # v0 = ScrollView on a navy gradient, v1 = page (centred, max 1200 px wide)
     new-instance v0, Landroid/widget/ScrollView;
     invoke-direct {v0, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V
+    invoke-static {}, Luz/carhelper/passenger/Ui;->pageBg()Landroid/graphics/drawable/GradientDrawable;
+    move-result-object v2
+    invoke-virtual {v0, v2}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+    const/4 v2, 0x0
+    invoke-virtual {v0, v2}, Landroid/view/View;->setVerticalScrollBarEnabled(Z)V
     new-instance v1, Landroid/widget/LinearLayout;
     invoke-direct {v1, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
     const/4 v2, 0x1
     invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const/16 v2, 0x30
-    invoke-virtual {v1, v2, v2, v2, v2}, Landroid/widget/LinearLayout;->setPadding(IIII)V
-    invoke-virtual {v0, v1}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V
+    const/16 v3, 0x28
+    const/16 v4, 0x48
+    invoke-virtual {v1, v2, v3, v2, v4}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    new-instance v2, Landroid/widget/FrameLayout$LayoutParams;
+    const/16 v3, 0x4b0
+    const/4 v4, -0x2
+    invoke-direct {v2, v3, v4}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V
+    const/4 v3, 0x1
+    iput v3, v2, Landroid/widget/FrameLayout$LayoutParams;->gravity:I
+    invoke-virtual {v0, v1, v2}, Landroid/widget/ScrollView;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
-    # header: title + Cancel + Save
+    # header: title block + Cancel + Save
     new-instance v4, Landroid/widget/LinearLayout;
     invoke-direct {v4, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
     const/16 v2, 0x10
     invoke-virtual {v4, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
-    new-instance v2, Landroid/widget/TextView;
-    invoke-direct {v2, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const-string v3, "LP Companion settings"
-    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v3, 0x42100000
-    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
-    sget-object v3, Landroid/graphics/Typeface;->DEFAULT_BOLD:Landroid/graphics/Typeface;
-    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;)V
-    new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
-    const/4 v6, 0x0
-    const/4 v7, -0x2
-    const/high16 v8, 0x3f800000
-    invoke-direct {v3, v6, v7, v8}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
-    invoke-virtual {v4, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v2, 0x1
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    const-string v2, "Settings"
+    const/high16 v3, 0x42200000
+    const/4 v6, -0x1
+    const/4 v7, 0x1
+    invoke-static {p0, v2, v3, v6, v7}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    const-string v2, "LP Companion"
+    const/high16 v3, 0x41900000
+    sget v6, Luz/carhelper/passenger/Ui;->TEXT3:I
+    const/4 v7, 0x0
+    invoke-static {p0, v2, v3, v6, v7}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v3, 0x0
+    const/4 v6, -0x2
+    const/high16 v7, 0x3f800000
+    invoke-direct {v2, v3, v6, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v4, v5, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     const-string v2, "Cancel"
     const-string v3, "#cancel"
     const v6, 0x2effffff
     invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
     const-string v2, "Save"
     const-string v3, "#save"
-    const v6, -0xe1771b
+    sget v6, Luz/carhelper/passenger/Ui;->ACCENT:I
     invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
     invoke-virtual {v1, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     # Status: one row per grant, green = on, red = off + the ADB command that fixes it.
-    # Re-evaluated every time Settings opens; the Re-check pill reopens it to refresh now.
+    # Re-evaluated every time Settings opens; "Re-check" reopens it to refresh now.
     const-string v2, "Status"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
-    const-string v2, "Re-check"
-    const-string v3, "#recheck"
-    const v4, -0xbd7a89
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
     invoke-static {p0}, Landroid/provider/Settings;->canDrawOverlays(Landroid/content/Context;)Z
     move-result v6
     const-string v2, "Bubble (overlay)"
     const-string v4, "adb shell appops set --user 10 uz.carhelper.passenger SYSTEM_ALERT_WINDOW allow"
-    invoke-direct {p0, v1, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
 
     const-string v2, "notification"
     invoke-virtual {p0, v2}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
@@ -269,7 +573,8 @@
     move-result v6
     const-string v2, "Now playing (notification access)"
     const-string v4, "adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10"
-    invoke-direct {p0, v1, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
 
     const-string v2, "android.permission.WRITE_SECURE_SETTINGS"
     invoke-virtual {p0, v2}, Landroid/content/Context;->checkSelfPermission(Ljava/lang/String;)I
@@ -280,7 +585,8 @@
     :wss_row
     const-string v2, "Self-repair after restart"
     const-string v4, "adb shell pm grant --user 10 uz.carhelper.passenger android.permission.WRITE_SECURE_SETTINGS"
-    invoke-direct {p0, v1, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
 
     # Back: if it's off, try to switch it on right now
     sget-object v3, Luz/carhelper/passenger/BackService;->instance:Luz/carhelper/passenger/BackService;
@@ -295,35 +601,111 @@
     const-string v4, "Switching on now — reopen this page in a few seconds"
     :back_row
     const-string v2, "Back button (accessibility)"
-    invoke-direct {p0, v1, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Re-check status"
+    const-string v3, "#recheck"
+    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
 
     # Passenger screen
     const-string v2, "Passenger screen"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
     const-string v2, "Open LP Companion automatically when the passenger screen turns on"
     const-string v3, "autoOpen"
     const/4 v4, 0x0
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
     move-result-object v5
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
 
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Passenger bubble: push its app to the main screen  ←"
+    const-string v3, "passToMain"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->passToMain:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Passenger bubble: bring the main screen's app over  →"
+    const-string v3, "passFromMain"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+
+    # Bubble menu: closes itself after a few seconds (both bubbles); the button steps through 3 / 5 / 8 / 10 / 15 / 20 / 30 / 60 s
+    const-string v2, "Bubble menu"
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
+    const-string v2, "Close the bubble menu automatically"
+    const-string v3, "bubbleAuto"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v2, 0x1c
+    const/16 v3, 0x12
+    const/16 v4, 0x14
+    invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    const-string v2, "Close it after"
+    const/high16 v3, 0x41d00000
+    const/4 v4, -0x1
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v4, -0x2
+    const/high16 v7, 0x3f800000
+    invoke-direct {v3, v6, v4, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v5, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    iget v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-static {v2}, Luz/carhelper/passenger/SettingsActivity;->secsText(I)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "#bubbleSecs"
+    const v4, 0x2effffff
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    move-result-object v6
+    iput-object v6, p0, Luz/carhelper/passenger/SettingsActivity;->secsPill:Landroid/view/View;
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
+    if-nez v2, :pill_on
+    const v2, 0x3eb33333
+    invoke-virtual {v6, v2}, Landroid/view/View;->setAlpha(F)V
+    :pill_on
+    invoke-virtual {v8, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
     # Closing apps
     const-string v2, "Closing apps"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
     const-string v2, "Close the previous app when another one is opened"
     const-string v3, "autoClose"
     const/4 v4, 0x0
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
     move-result-object v5
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->autoClose:Z
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
     const-string v2, "Also close music apps"
     const-string v3, "closeMusic"
-    const/16 v4, 0x40
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    const/16 v4, 0x28
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
     move-result-object v6
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->closeMusic:Z
     invoke-virtual {v6, v2}, Landroid/widget/Switch;->setChecked(Z)V
@@ -335,10 +717,12 @@
     # Protection
     const-string v2, "Protection"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
     const-string v2, "Overload protection: close passenger apps if CPU or RAM is overloaded"
     const-string v3, "overheat"
     const/4 v4, 0x0
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
     move-result-object v5
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
@@ -347,34 +731,63 @@
     # Child mode: entering/leaving is done from the grid; here you only set the PIN
     const-string v2, "Child mode"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
-    const-string v2, "Set password"
-    const-string v3, "#setpin"
-    const v4, -0xe1771b
-    invoke-direct {p0, v1, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
-
-    # Vehicle section: two pills side by side
-    const-string v2, "Vehicle"
-    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
     new-instance v5, Landroid/widget/LinearLayout;
     invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
-    const/4 v2, 0x0
-    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
-    invoke-virtual {v1, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    const/16 v2, 0x10
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v2, 0x1c
+    const/16 v3, 0x12
+    const/16 v4, 0x14
+    invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
+    const-string v2, "Password to leave child mode"
+    const/high16 v3, 0x41d00000
+    const/4 v4, -0x1
+    const/4 v6, 0x0
+    invoke-static {p0, v2, v3, v4, v6}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v4, -0x2
+    const/high16 v7, 0x3f800000
+    invoke-direct {v3, v6, v4, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v5, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    const-string v2, "Set password"
+    const-string v3, "#setpin"
+    sget v4, Luz/carhelper/passenger/Ui;->ACCENT:I
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-virtual {v8, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+
+    # Vehicle
+    const-string v2, "Vehicle"
+    invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v8
     const-string v2, "Vehicle settings"
     const-string v3, "#vehset"
-    const v4, -0xbd7a89
-    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
     const-string v2, "Back to car UI"
     const-string v3, "#gotocar"
-    const v4, -0xb1661c
-    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)V
+    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/SettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
 
     # Apps shown on the passenger screen
     const-string v2, "Apps shown on the passenger screen"
     invoke-direct {p0, v1, v2}, Luz/carhelper/passenger/SettingsActivity;->section(Landroid/widget/LinearLayout;Ljava/lang/String;)V
+    const-string v2, "Untick an app to hide it from the grid. Tick Kids to allow it in child mode."
+    const/high16 v3, 0x41900000
+    sget v4, Luz/carhelper/passenger/Ui;->TEXT3:I
+    const/4 v5, 0x0
+    invoke-static {p0, v2, v3, v4, v5}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x8
+    const/16 v4, 0x10
+    invoke-virtual {v2, v3, v5, v3, v4}, Landroid/widget/TextView;->setPadding(IIII)V
+    invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/SettingsActivity;->card(Landroid/widget/LinearLayout;)Landroid/widget/LinearLayout;
+    move-result-object v4
 
-    # v5 = hidden packages, v6 = PackageManager, v7 = sorted launchable activities, v8 = iterator
-    iget-object v5, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
+    # v6 = PackageManager, v7 = sorted launchable activities, v8 = iterator
     invoke-virtual {p0}, Landroid/app/Activity;->getPackageManager()Landroid/content/pm/PackageManager;
     move-result-object v6
     new-instance v2, Landroid/content/Intent;
@@ -409,102 +822,14 @@
     invoke-virtual {v11, v10}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v11
     if-nez v11, :loop
-
-    # row: icon + checkbox (checked = shown)
-    new-instance v11, Landroid/widget/LinearLayout;
-    invoke-direct {v11, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
-    const/16 v12, 0x10
-    invoke-virtual {v11, v12}, Landroid/widget/LinearLayout;->setGravity(I)V
-    const/4 v12, 0x0
-    const/16 v13, 0xc
-    invoke-virtual {v11, v12, v13, v12, v13}, Landroid/widget/LinearLayout;->setPadding(IIII)V
-
-    new-instance v12, Landroid/widget/ImageView;
-    invoke-direct {v12, p0}, Landroid/widget/ImageView;-><init>(Landroid/content/Context;)V
-    invoke-virtual {v9, v6}, Landroid/content/pm/ResolveInfo;->loadIcon(Landroid/content/pm/PackageManager;)Landroid/graphics/drawable/Drawable;
-    move-result-object v13
-    invoke-virtual {v12, v13}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
-    new-instance v13, Landroid/widget/LinearLayout$LayoutParams;
-    const/16 v2, 0x48
-    invoke-direct {v13, v2, v2}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
-    invoke-virtual {v11, v12, v13}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
-
-    new-instance v12, Landroid/widget/CheckBox;
-    invoke-direct {v12, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
-    invoke-virtual {v9, v6}, Landroid/content/pm/ResolveInfo;->loadLabel(Landroid/content/pm/PackageManager;)Ljava/lang/CharSequence;
-    move-result-object v13
-    invoke-virtual {v12, v13}, Landroid/widget/CheckBox;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v13, 0x41d00000
-    invoke-virtual {v12, v13}, Landroid/widget/CheckBox;->setTextSize(F)V
-    const/16 v13, 0x18
-    const/4 v2, 0x0
-    invoke-virtual {v12, v13, v2, v2, v2}, Landroid/widget/CheckBox;->setPadding(IIII)V
-    invoke-virtual {v5, v10}, Ljava/util/HashSet;->contains(Ljava/lang/Object;)Z
-    move-result v13
-    xor-int/lit8 v13, v13, 0x1
-    invoke-virtual {v12, v13}, Landroid/widget/CheckBox;->setChecked(Z)V
-    invoke-virtual {v12, v10}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
-    invoke-virtual {v12, p0}, Landroid/widget/CheckBox;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
-    new-instance v13, Landroid/widget/LinearLayout$LayoutParams;
-    const/4 v2, 0x0
-    const/4 v3, -0x2
-    const/high16 v4, 0x3f800000
-    invoke-direct {v13, v2, v3, v4}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
-    invoke-virtual {v11, v12, v13}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
-
-    # "Kids" checkbox on the right, tag "kid:<package>"
-    new-instance v12, Landroid/widget/CheckBox;
-    invoke-direct {v12, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V
-    const-string v13, "Kids"
-    invoke-virtual {v12, v13}, Landroid/widget/CheckBox;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v13, 0x41b00000
-    invoke-virtual {v12, v13}, Landroid/widget/CheckBox;->setTextSize(F)V
-    iget-object v13, p0, Luz/carhelper/passenger/SettingsActivity;->kidApps:Ljava/util/HashSet;
-    invoke-virtual {v13, v10}, Ljava/util/HashSet;->contains(Ljava/lang/Object;)Z
-    move-result v13
-    invoke-virtual {v12, v13}, Landroid/widget/CheckBox;->setChecked(Z)V
-    new-instance v13, Ljava/lang/StringBuilder;
-    const-string v2, "kid:"
-    invoke-direct {v13, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
-    invoke-virtual {v13, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-virtual {v13}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-    move-result-object v13
-    invoke-virtual {v12, v13}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
-    invoke-virtual {v12, p0}, Landroid/widget/CheckBox;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
-    invoke-virtual {v11, v12}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
-    invoke-virtual {v1, v11}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    invoke-direct {p0, v4, v9, v6}, Luz/carhelper/passenger/SettingsActivity;->appRow(Landroid/widget/LinearLayout;Landroid/content/pm/ResolveInfo;Landroid/content/pm/PackageManager;)V
     goto :loop
 
     :end
     invoke-virtual {p0, v0}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
-
-    # gate removed: child mode is unlocked from the grid with the PIN pad
-    const/4 v2, 0x0
-    if-eqz v2, :no_gate
-    iget-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->storedPin:Ljava/lang/String;
-    invoke-virtual {v2}, Ljava/lang/String;->isEmpty()Z
-    move-result v2
-    if-nez v2, :no_gate
-    new-instance v2, Landroid/widget/EditText;
-    invoke-direct {v2, p0}, Landroid/widget/EditText;-><init>(Landroid/content/Context;)V
-    const/16 v3, 0x12
-    invoke-virtual {v2, v3}, Landroid/widget/EditText;->setInputType(I)V
-    iput-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->gateEdit:Landroid/widget/EditText;
-    new-instance v3, Landroid/app/AlertDialog$Builder;
-    invoke-direct {v3, p0}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
-    const-string v4, "Kid mode is on — enter PIN"
-    invoke-virtual {v3, v4}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
-    invoke-virtual {v3, v2}, Landroid/app/AlertDialog$Builder;->setView(Landroid/view/View;)Landroid/app/AlertDialog$Builder;
-    const/4 v4, 0x0
-    invoke-virtual {v3, v4}, Landroid/app/AlertDialog$Builder;->setCancelable(Z)Landroid/app/AlertDialog$Builder;
-    const-string v4, "Unlock"
-    invoke-virtual {v3, v4, p0}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
-    const-string v4, "Cancel"
-    invoke-virtual {v3, v4, p0}, Landroid/app/AlertDialog$Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
-    invoke-virtual {v3}, Landroid/app/AlertDialog$Builder;->show()Landroid/app/AlertDialog;
-    :no_gate
     return-void
 .end method
+
 
 # PIN dialog: Unlock with the right PIN keeps the page open; anything else leaves
 .method public onClick(Landroid/content/DialogInterface;I)V
@@ -575,6 +900,38 @@
     return-void
     :not_autoopen
 
+    const-string v1, "bubbleAuto"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_bubble_auto
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
+    iget-object v1, p0, Luz/carhelper/passenger/SettingsActivity;->secsPill:Landroid/view/View;
+    if-eqz v1, :ba_done
+    const/high16 v0, 0x3f800000
+    if-nez p2, :ba_alpha
+    const v0, 0x3eb33333
+    :ba_alpha
+    invoke-virtual {v1, v0}, Landroid/view/View;->setAlpha(F)V
+    :ba_done
+    return-void
+    :not_bubble_auto
+
+    const-string v1, "passToMain"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_pass_to_main
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->passToMain:Z
+    return-void
+    :not_pass_to_main
+
+    const-string v1, "passFromMain"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_pass_from_main
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
+    return-void
+    :not_pass_from_main
+
     const-string v1, "closeMusic"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
@@ -623,6 +980,20 @@
     .locals 4
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
+    const-string v1, "#bubbleSecs"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_bubble_secs
+    iget v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-static {v1}, Luz/carhelper/passenger/SettingsActivity;->nextSecs(I)I
+    move-result v1
+    iput v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-static {v1}, Luz/carhelper/passenger/SettingsActivity;->secsText(I)Ljava/lang/String;
+    move-result-object v1
+    check-cast p1, Landroid/widget/TextView;
+    invoke-virtual {p1, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    return-void
+    :not_bubble_secs
     const-string v1, "#setpin"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
@@ -710,6 +1081,18 @@
     const-string v2, "autoOpen"
     iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->autoOpen:Z
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "passToMain"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passToMain:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "passFromMain"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "bubbleAuto"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "bubbleSecs"
+    iget v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
     const-string v2, "hidden"
     iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;

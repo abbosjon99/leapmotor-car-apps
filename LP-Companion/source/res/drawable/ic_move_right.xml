@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Send to the screen on the right": mirror of ic_move_left. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:strokeColor="#FFFFFFFF" android:strokeWidth="1.8"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M9,9.2V8A3,3 0 0 1 12,5H19A3,3 0 0 1 22,8V16A3,3 0 0 1 19,19H12A3,3 0 0 1 9,16V14.8"/>
+    <path
+        android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="0.9"
+        android:strokeLineJoin="round"
+        android:pathData="M2,10.9H11.8V7.6L18.4,12L11.8,16.4V13.1H2Z"/>
+</vector>

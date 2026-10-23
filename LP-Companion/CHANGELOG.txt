@@ -226,3 +226,194 @@ LP Companion 2.14 / 2.15  (UI overhaul + main-screen bubble)
   - New "Vehicle settings" pill opens the car's Android Settings (android.settings.SETTINGS).
   - versionCode 23 / versionName 2.15.
   Undo: install LP-Companion-2.13.apk with -r.
+
+LP Companion 2.16  (2026-10-23; written up from the git commit message)
+  - The car's passenger sidebar is hidden when the app starts (BubbleService.hideBar; BootReceiver now
+    defaults barHidden = true). The header's bar pill shows "Show bar" after start.
+  - Child mode and Change wallpaper became tiles in the grid (the header pills are gone). The wallpaper tile
+    cycles 0..11 (0 = black, 1..11 = wp_N); the swipe-to-change gesture was removed.
+  - "Go to car" moved into Settings; the header's Exit button was removed.
+  Undo: install LP-Companion-2.15.apk.
+
+LP Companion 2.17  (2026-10-23; from the commit message)
+  - App tiles and the now-playing widget about 20% smaller. The widget takes 60% of its row, with Child mode
+    and Change wallpaper as compact buttons beside it.
+  - Runs on both screens at once: MainActivity is resizeableActivity and launches use
+    NEW_TASK | MULTIPLE_TASK, so a passenger-screen and a main-screen instance coexist. The main bubble's menu
+    button opens the grid on the MAIN screen; its child toggle takes effect at once.
+  - New Theme helper: the PIN pad and the wallpaper scrim follow the system day/night setting.
+  - Fixes: the Change wallpaper tile had no icon (arguments swapped). Swap never moved the app (NEW_TASK |
+    RESET_TASK_IF_NEEDED just reuses the task on this car); it now uses NEW_TASK | MULTIPLE_TASK.
+  Undo: install LP-Companion-2.16.apk.
+
+LP Companion 2.18  (2026-10-23, with LP Music 2.15; from the commit message)
+  - Bigger now-playing and tile text. "Close apps" no longer closes the grid itself (it recreates it). Swap
+    only moves an app that is actually running on the passenger screen.
+  - Universal child mode: LP Companion mirrors the flag to Settings.Secure "lp_companion_child" (ChildMode
+    helper, synced on every toggle and on service start); LP Music reads it and locks its launcher and player.
+  - Status errors are re-evaluated every time Settings opens; "Re-check" reopens it.
+  - LP Companion yielded the steering-wheel keys to LP Music when it was installed (superseded in 2.19).
+  - The Child mode tile is grayed out when no PIN is set; changing the PIN needs the current PIN first.
+    "Vehicle settings" and "Back to car UI" sit side by side.
+  - Not changed: an app moved to the main screen covering the top/bottom bars (the moved app's own window).
+  Undo: install LP-Companion-2.17.apk.
+
+LP Companion 2.19  (2026-10-23; from the commit message)
+  - Status check fix: a GRANTED permission showed red OFF; now green OK.
+  - Child mode only filters the passenger screen; the main-screen grid always shows every app (the Child
+    mode tile still toggles the shared state). "Close apps" on the main screen lists every sideloaded app.
+  - Tapping the now-playing cover/title opens that player on the passenger screen. Entering child mode from
+    the main bubble closes the passenger app in front if it is not ticked "Kids". The widget was meant to be
+    hidden in child mode, but a 1 s refresh showed it again (fixed in 2.22).
+  - Header title "LP Companion by abbosjon99"; Settings section headers in bold accent capitals.
+  - MUSIC CONTROL REMOVED from LP Companion: no MiguBridge, SteerWheelReceiver unregistered, MiguCtrlReceiver
+    off the manifest, the "Steering wheel" Settings section gone. Playback control (wheel keys, the car's
+    media widget) is LP Music's job now; LP Companion keeps only the now-playing card, which drives whatever
+    MediaSession is active. The old classes stay in the source as dead code (see README).
+  Undo: install LP-Companion-2.18.apk.
+
+LP Companion 2.20  (2026-10-23)  versionCode 28
+  LOOK (new shared helper Ui.smali; sizes are px, the displays run at 160 dpi)
+  - Grid: frosted glass tiles over the wallpaper, bold "LP Companion" title with a small "by abbosjon99",
+    header pills with a pressed state, a dark now-playing card with rounded cover and round control buttons.
+  - Settings: navy gradient page, grouped glass cards, OK/OFF chips with the ADB fix underneath, blue
+    switches and checkboxes, "Re-check status" and the Vehicle entries as chevron rows, "Set password" as an
+    accent button beside its label, a hint line over the app checklist.
+  - "Close apps" is a custom dark popup (CloseDialog): icon + name + x per app, Cancel, red "Close all".
+    It replaces the stock AlertDialog list and fits the 720 px passenger screen.
+  SYNC
+  - Wallpaper and child-mode changes now reach the grid on the other screen live (shared-preferences
+    listener in MainActivity; a child-mode change recreates the grid so a stale grid cannot leak apps).
+  - Turning child mode ON from the main screen's grid tile now takes over the passenger screen at once
+    (ChildMode.enter): the passenger app in front is closed unless ticked "Kids", and a fresh filtered grid
+    opens there. Leaving child mode from the main screen refreshes the passenger grid (ChildMode.exit). The
+    main bubble already did this; the tile and the PIN pad did not.
+  WAKE (Wake.smali, see README)
+  - Opening an app from the grid, tapping the now-playing cover/title, Swap to the passenger screen and the
+    child-mode takeover now wake the passenger screen: broadcast com.leapmotor.system.service.DISMISS (hides
+    the car's photo screensaver), reset Settings.Global display_1_state / display_2_state to 0 when the car
+    had put the screen to rest, and remove LP Companion's own black cover (BubbleService.uncover,
+    MainBubbleService.uncover). Needed because starting an activity on display 3 does not clear either state.
+  - Checked on the car: with the screensaver showing, tapping an app on the grid cleared it and the app
+    appeared. The screen-rest path was not exercised.
+  Undo: install LP-Companion-2.19.apk. Android refuses an older versionCode over a newer one, so use
+    adb install --no-incremental --install-reason 64 -r -d LP-Companion-2.19.apk   (-d not tried on this car)
+  or  adb uninstall uz.carhelper.passenger  first. That wipes the app's settings, wallpaper choice and PIN;
+  then run the one-time grants from the README again. The Wake changes leave nothing behind on the car
+  (it only writes 0 back to the two display_N_state settings). If the passenger screen ever stays blank:
+  adb shell settings put global display_1_state 0   (and display_2_state).
+
+LP Companion 2.21  (2026-10-23)  versionCode 29
+  - Tighter tile sizes (smaller padding, margins and icons) so all seven apps fit in two rows on the 720 px
+    passenger screen; the first 2.20 layout needed scrolling.
+  Undo: install LP-Companion-2.20.apk (same downgrade note as 2.20).
+
+LP Companion 2.22  (2026-10-23)  versionCode 30
+  NOW-PLAYING CARD (NowPlaying.smali rewritten)
+  - Rounded cover, bold title, artist, a thin progress bar (position moved on while playing, over the track's
+    duration; hidden when there is no duration), ghost prev/next buttons and a large filled white
+    play/pause button. The card is tinted with the cover's average colour (cover squeezed to one pixel, low
+    opacity over a dark base, rebuilt only when the track or cover changes).
+  CHILD MODE
+  - The now-playing card is hidden for good in child mode on the passenger screen (no controls, no way into
+    the music app): ChildMode.lockedHere is checked on every 1 s refresh and on every tap. Before, the
+    initial hide was undone by the first refresh. The main screen is not restricted.
+  - The main bubble's child button now needs the PIN to LEAVE child mode: it opens the grid on the main
+    screen with extra "exitPin" and MainActivity shows the PIN pad (first start only, not on recreate).
+    Entering child mode from that button now needs a PIN to exist ("Set a password in Settings first"), like
+    the grid tile. The "Exit child mode" tile already asked for the PIN.
+  - Checked on the car: the widget is hidden on the passenger screen in child mode while music plays, the
+    new card shows on the main screen, and tapping the child button in child mode opens the PIN pad (closed
+    with Cancel). Not tried: entering the correct PIN.
+  Undo: install LP-Companion-2.21.apk (same downgrade note as 2.20). Child mode itself is unchanged by an
+  undo; to get out of it without the PIN use: adb shell pm clear --user 10 uz.carhelper.passenger  (this
+  resets ALL LP Companion settings; run the one-time grants again).
+
+LP Companion 2.23  (2026-10-23)  versionCode 31
+  MOVING APPS BETWEEN THE SCREENS (replaces the single Swap button)
+  - Why: Swap launched with NEW_TASK | MULTIPLE_TASK, which makes a brand-new task every time and leaves the old
+    one running. Yandex Music Lite (standard launch mode) ended up open on BOTH screens (the car showed three
+    Yandex tasks, two of them visible). Checked on the car with Opera Mini: a launch with
+    NEW_TASK | RESET_TASK_IF_NEEDED and no MULTIPLE_TASK moves the app's existing task to the other display
+    (display 0 -> 3 -> 0, same task id, no second task). Android only places a task on a display; it cannot be
+    "moved" with any other public call.
+  - Swapper.move(ctx, 0 or 3) does that launch, wakes the passenger screen when the app goes there, keeps the
+    "running" / "lastPassenger" / "onMain" records, and covers the screen the app left (passenger: the LP grid,
+    main: the car's Home) so an app that already had a second task on the target screen cannot keep showing
+    where it was. Swapper.canMove tells the panels whether there is an app to move that way.
+  - Main bubble: two buttons in the bottom row. "<-" brings the passenger's app to the main screen, "->" sends
+    the main screen's app to the passenger screen. Each is grayed when there is no such app (only apps LP
+    Companion opened or moved are known).
+  - Passenger bubble: "<-" pushes its app to the main screen (Settings > Passenger screen, "push its app to the
+    main screen", default ON); "->" brings the main screen's app over (default OFF). A disabled button is not
+    shown; one alone is centred. Both are off in child mode (grayed, tap gives a toast).
+  - New icons ic_move_left / ic_move_right: a rounded screen whose edge opens where a bold arrow enters it, so
+    they no longer look like the Back button. (ic_swap is no longer used.)
+  - Settings: two new switches in the Passenger screen card (prefs passToMain, passFromMain).
+  Undo: install LP-Companion-2.22.apk (same downgrade note as 2.20). The new prefs are simply ignored by 2.22.
+
+LP Companion 2.24  (2026-10-23)  versionCode 32
+  - Fix: a moved app got a second activity instance stacked on top of the old one (the Yandex task showed
+    sz=2 with the passenger-sized instance underneath). Swapper built its intent from getLaunchIntentForPackage,
+    which also sets pkg=; that differs from the task's root intent, so Android starts a new instance on top.
+    It now builds the same intent a grid tap uses (action MAIN, category LAUNCHER, component only). Checked on
+    the car with Opera Mini using that intent form: moved 0 -> 3 -> 0 with the task staying at one activity, and
+    Android answered "Activity not started, its current task has been brought to the front".
+  - A task that already has two activities from the 2.23 swaps keeps them until the app is force-stopped.
+  - Reported on the car: a pulled app "ignores the navbar and topbar". Findings: the system gives every app on
+    the main screen the full display frame plus insets for the top bar (120 px) and bottom bar (144 px); Opera
+    gets the same frame and flags as Yandex. Yandex Music's normal screens respect the insets (its mini-player
+    sat above the bottom bar) but its "В авто" player screen is edge-to-edge and draws its own clock under the
+    car's top bar. That is the app's own layout; LP Companion cannot change another app's insets (the car has
+    no freeform windows, so launch bounds are ignored).
+  Undo: install LP-Companion-2.23.apk (same downgrade note as 2.20).
+
+LP Companion 2.25  (2026-10-23)  versionCode 33
+  - Bubble menu closes by itself: both bubbles' panels now close after a few seconds of no touching
+    (new AutoClose runnable, re-armed on every tap in the panel). Settings > "Bubble menu": a switch
+    "Close the bubble menu automatically" (pref bubbleAuto, default ON) and "Close it after" (pref bubbleSecs,
+    default 8 s; the pill cycles 3 / 5 / 8 / 10 / 15 / 20 / 30 / 60 s). The passenger panel is also rebuilt every
+    time it opens (it was cached, so changing the move-arrow switches did not show until the service restarted).
+  - Wallpaper looked too blurry/hazy: the photos are only 1280x720 and the grid put a heavy black dim and a
+    frosted white tile layer over them. Dim is now light (night 0x4d / day 0x26, was 0x9a / 0x66) and the tiles
+    and header pills are smoked dark glass (fill 0x66000000, thin light edge) so the picture stays crisp around
+    them. The photos themselves are still low resolution, so they stay soft on the 2560x1440 screen; a sharper
+    look needs higher-resolution wallpaper files (drop-in: res/drawable wp_1..wp_11).
+  - Entering child mode from the main screen no longer throws the passenger out of an allowed app. New
+    ChildMode.takeOver: if the app in front on the passenger screen is ticked "Kids" and is running, nothing is
+    closed and no grid is opened (the open grids switch to the filtered list by themselves); if it is not a kid app
+    it is closed and the filtered grid opens; with no app in front the grid opens as before. Leaving child mode
+    no longer launches a new grid on the passenger screen (the existing one follows the pref).
+  - "Close apps" on the main screen lists only apps that are actually running (what LP Companion started on
+    either screen: the "running" set plus "onMain"), not every sideloaded app. Empty list: toast "No running apps to
+    close".
+  - Closing ONE app in the "Close apps" popup (either screen) now removes that row and keeps the popup open;
+    it closes itself only when the last row is gone, or on Cancel / Close all. (CloseDialog.dismiss, the list and
+    scroll views are kept in fields; MainActivity.closeAppsKeep closes without recreating the grid.)
+  - Checked on the car: build and install clean, both bubbles present, no crash, new look on the main grid, the
+    main "Close apps" list showed only the running YouTube ReVanced. NOT yet exercised on the car: popup staying
+    open after a single close with two or more rows, the bubble auto-close timing, Settings > Bubble menu, and
+    the child-mode takeover.
+  Undo: install LP-Companion-2.24.apk (same downgrade note as 2.20). The new prefs bubbleAuto / bubbleSecs are
+  simply ignored by 2.24.
+
+LP Companion 2.26  (2026-10-23)  versionCode 34
+  - Reported on the car: Yandex Music and YouTube were both running but "Close apps" on the main screen did not
+    list them. 2.25 only knew the apps LP Companion itself had opened. Now the main-screen list (MainActivity.
+    runningOnMain) also contains every sideloaded app that has an active MediaSession (a player started by the
+    car launcher, LP Music or the wheel shows up) and, if this firmware lets us see other apps' processes,
+    every sideloaded app with a process. Checked on the car: ActivityManager.getRunningAppProcesses() only
+    returns LP Companion's own process on this firmware (log tag LPCompanion "process list shows other apps = 0"),
+    so detection there is media sessions plus LP's own records (passenger "running" set and "onMain").
+    A paused/idle app with no media session that LP did not start is still not known. (An exact list would need
+    the DUMP and PACKAGE_USAGE_STATS permissions granted over ADB and parsing `dumpsys activity processes`;
+    not done.)
+  - Apps unticked in Settings ("shown on the grid") and LP Music (uz.carhelper.music, whose media session is
+    always present) are left out of that list.
+  - Fix: closing an app from the MAIN screen's Close apps did nothing visible to an app that is showing on the
+    passenger screen (YouTube kept playing, only LP's record of it was dropped): LP Companion's grid is not in
+    front of it and Android will not kill an app that is still on screen. When the app closed is the one LP put on
+    the passenger screen (pref lastPassenger), the LP grid is now put in front of it on the passenger screen first
+    (Swapper.grid, now public), then the normal stop + kill runs. closeAppsKeep also forgets lastPassenger / onMain
+    for any app it closes.
+  Undo: install LP-Companion-2.25.apk (same downgrade note as 2.20).

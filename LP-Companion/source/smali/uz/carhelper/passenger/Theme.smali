@@ -73,9 +73,10 @@
     invoke-static {p0}, Luz/carhelper/passenger/Theme;->night(Landroid/content/Context;)Z
     move-result v0
     if-eqz v0, :day
-    const v0, -0x66000000
+    # light dimming only: the wallpaper is a low-resolution photo and a heavy dim makes it look hazy
+    const v0, 0x4d000000
     return v0
     :day
-    const v0, 0x66000000
+    const v0, 0x26000000
     return v0
 .end method
