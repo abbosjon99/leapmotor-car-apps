@@ -32,7 +32,7 @@
 .end method
 
 .method public onDisplayChanged(I)V
-    .locals 9
+    .locals 12
     const/4 v0, 0x3
     if-eq p1, v0, :passenger
     return-void
@@ -72,15 +72,15 @@
     move-result v4
     if-eqz v4, :bail
 
-    # debounce: at most once per 2 s
+    # debounce: at most once per 2 s (wide pairs v6:v7, v8:v9, v10:v11 - no overlap)
     invoke-static {}, Landroid/os/SystemClock;->uptimeMillis()J
-    move-result-wide v4
-    iget-wide v6, p0, Luz/carhelper/passenger/PassengerWatcher;->lastOpen:J
-    sub-long v8, v4, v6
-    const-wide/16 v6, 0x7d0
-    cmp-long v6, v8, v6
-    if-ltz v6, :bail
-    iput-wide v4, p0, Luz/carhelper/passenger/PassengerWatcher;->lastOpen:J
+    move-result-wide v6
+    iget-wide v8, p0, Luz/carhelper/passenger/PassengerWatcher;->lastOpen:J
+    sub-long v10, v6, v8
+    const-wide/16 v8, 0x7d0
+    cmp-long v4, v10, v8
+    if-ltz v4, :bail
+    iput-wide v6, p0, Luz/carhelper/passenger/PassengerWatcher;->lastOpen:J
 
     new-instance v4, Landroid/content/Intent;
     const-class v5, Luz/carhelper/passenger/MainActivity;
