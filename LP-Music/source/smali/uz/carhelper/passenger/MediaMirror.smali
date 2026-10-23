@@ -2,9 +2,13 @@
 .super Ljava/lang/Object;
 .implements Ljava/lang/Runnable;
 
-# Every 1 s: copy the playing sideloaded player's title/artist/album/art and play state into
-# our own MediaSession, so the car's dock card (which binds our MediaBrowserService) shows it.
-# When no sideloaded player is the target, the session goes inactive.
+# Used to copy the playing player's title/artist/art/state into our own MediaSession. Not any more:
+# nothing on the car reads that session, and Android's car media service (CAR.MEDIA, com.android.car)
+# treats a playing session as the new media source and pauses the real player: every time Yandex
+# Music started, the log showed "Changing media source ... uz.carhelper.music" and Yandex gave up
+# audio focus a few ms later, then resumed, then paused again (play/pause flapping). See FINDINGS.md.
+# So the session stays inactive. What is left, every 1 s: remember which player is in use
+# ("music"/"lastPlayer") so OpenPlayerActivity can reopen it.
 
 .field private final ctx:Landroid/content/Context;
 .field private final handler:Landroid/os/Handler;
@@ -17,19 +21,6 @@
     iput-object p2, p0, Luz/carhelper/passenger/MediaMirror;->handler:Landroid/os/Handler;
     iput-object p3, p0, Luz/carhelper/passenger/MediaMirror;->session:Landroid/media/session/MediaSession;
     return-void
-.end method
-
-# metadata string or "" (never null)
-.method private static s(Landroid/media/MediaMetadata;Ljava/lang/String;)Ljava/lang/String;
-    .locals 1
-    if-eqz p0, :empty
-    invoke-virtual {p0, p1}, Landroid/media/MediaMetadata;->getString(Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v0
-    if-eqz v0, :empty
-    return-object v0
-    :empty
-    const-string v0, ""
-    return-object v0
 .end method
 
 .method public run()V
@@ -53,98 +44,36 @@
 .end method
 
 .method private update()V
-    .locals 10
-    iget-object v9, p0, Luz/carhelper/passenger/MediaMirror;->session:Landroid/media/session/MediaSession;
+    .locals 4
+    # our session is never active (see the header)
+    iget-object v0, p0, Luz/carhelper/passenger/MediaMirror;->session:Landroid/media/session/MediaSession;
+    const/4 v1, 0x0
+    invoke-virtual {v0, v1}, Landroid/media/session/MediaSession;->setActive(Z)V
+
     iget-object v0, p0, Luz/carhelper/passenger/MediaMirror;->ctx:Landroid/content/Context;
-    # LP Music gate: if off, or yielding to a playing DiPlay, go inactive and stop mirroring
     invoke-static {v0}, Luz/carhelper/passenger/MusicGate;->shouldHandle(Landroid/content/Context;)Z
     move-result v1
     if-nez v1, :gate_ok
-    const/4 v1, 0x0
-    invoke-virtual {v9, v1}, Landroid/media/session/MediaSession;->setActive(Z)V
     return-void
     :gate_ok
     invoke-static {v0}, Luz/carhelper/passenger/WheelReceiver;->getSessions(Landroid/content/Context;)Ljava/util/List;
-    move-result-object v0
-    invoke-static {v0}, Luz/carhelper/passenger/WheelReceiver;->findTarget(Ljava/util/List;)Landroid/media/session/MediaController;
-    move-result-object v0
-    if-nez v0, :have
-    const/4 v1, 0x0
-    invoke-virtual {v9, v1}, Landroid/media/session/MediaSession;->setActive(Z)V
+    move-result-object v1
+    invoke-static {v1}, Luz/carhelper/passenger/WheelReceiver;->findTarget(Ljava/util/List;)Landroid/media/session/MediaController;
+    move-result-object v1
+    if-nez v1, :have
     return-void
-
     :have
     # remember this player so the car's media card can resume it after it closes
-    iget-object v1, p0, Luz/carhelper/passenger/MediaMirror;->ctx:Landroid/content/Context;
     const-string v2, "music"
     const/4 v3, 0x0
-    invoke-virtual {v1, v2, v3}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
-    move-result-object v1
-    invoke-interface {v1}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
-    move-result-object v1
+    invoke-virtual {v0, v2, v3}, Landroid/content/Context;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+    move-result-object v0
+    invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;
+    move-result-object v0
     const-string v2, "lastPlayer"
-    invoke-virtual {v0}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
+    invoke-virtual {v1}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
     move-result-object v3
-    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
-    invoke-interface {v1}, Landroid/content/SharedPreferences$Editor;->apply()V
-    invoke-static {v0}, Luz/carhelper/passenger/WheelReceiver;->isPlaying(Landroid/media/session/MediaController;)Z
-    move-result v1
-    invoke-virtual {v0}, Landroid/media/session/MediaController;->getMetadata()Landroid/media/MediaMetadata;
-    move-result-object v2
-
-    new-instance v3, Landroid/media/MediaMetadata$Builder;
-    invoke-direct {v3}, Landroid/media/MediaMetadata$Builder;-><init>()V
-    const-string v4, "android.media.metadata.TITLE"
-    invoke-static {v2, v4}, Luz/carhelper/passenger/MediaMirror;->s(Landroid/media/MediaMetadata;Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v5
-    invoke-virtual {v3, v4, v5}, Landroid/media/MediaMetadata$Builder;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/media/MediaMetadata$Builder;
-    const-string v4, "android.media.metadata.ARTIST"
-    invoke-static {v2, v4}, Luz/carhelper/passenger/MediaMirror;->s(Landroid/media/MediaMetadata;Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v5
-    invoke-virtual {v3, v4, v5}, Landroid/media/MediaMetadata$Builder;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/media/MediaMetadata$Builder;
-    const-string v4, "android.media.metadata.ALBUM"
-    invoke-static {v2, v4}, Luz/carhelper/passenger/MediaMirror;->s(Landroid/media/MediaMetadata;Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v5
-    invoke-virtual {v3, v4, v5}, Landroid/media/MediaMetadata$Builder;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/media/MediaMetadata$Builder;
-    const-string v4, "android.media.metadata.DISPLAY_TITLE"
-    invoke-static {v2, v4}, Luz/carhelper/passenger/MediaMirror;->s(Landroid/media/MediaMetadata;Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v5
-    invoke-virtual {v3, v4, v5}, Landroid/media/MediaMetadata$Builder;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/media/MediaMetadata$Builder;
-
-    # album art, only if the player has one
-    if-eqz v2, :noart
-    const-string v4, "android.media.metadata.ALBUM_ART"
-    invoke-virtual {v2, v4}, Landroid/media/MediaMetadata;->getBitmap(Ljava/lang/String;)Landroid/graphics/Bitmap;
-    move-result-object v5
-    if-eqz v5, :noart
-    invoke-virtual {v3, v4, v5}, Landroid/media/MediaMetadata$Builder;->putBitmap(Ljava/lang/String;Landroid/graphics/Bitmap;)Landroid/media/MediaMetadata$Builder;
-    :noart
-    invoke-virtual {v3}, Landroid/media/MediaMetadata$Builder;->build()Landroid/media/MediaMetadata;
-    move-result-object v3
-    invoke-virtual {v9, v3}, Landroid/media/session/MediaSession;->setMetadata(Landroid/media/MediaMetadata;)V
-
-    # playback state: mirror position and play/pause
-    const-wide/16 v4, 0x0
-    invoke-virtual {v0}, Landroid/media/session/MediaController;->getPlaybackState()Landroid/media/session/PlaybackState;
-    move-result-object v6
-    if-eqz v6, :nopos
-    invoke-virtual {v6}, Landroid/media/session/PlaybackState;->getPosition()J
-    move-result-wide v4
-    :nopos
-    new-instance v6, Landroid/media/session/PlaybackState$Builder;
-    invoke-direct {v6}, Landroid/media/session/PlaybackState$Builder;-><init>()V
-    const-wide/16 v7, 0x237
-    invoke-virtual {v6, v7, v8}, Landroid/media/session/PlaybackState$Builder;->setActions(J)Landroid/media/session/PlaybackState$Builder;
-    const/4 v7, 0x2
-    if-eqz v1, :state_set
-    const/4 v7, 0x3
-    :state_set
-    const/high16 v8, 0x3f800000
-    invoke-virtual {v6, v7, v4, v5, v8}, Landroid/media/session/PlaybackState$Builder;->setState(IJF)Landroid/media/session/PlaybackState$Builder;
-    invoke-virtual {v6}, Landroid/media/session/PlaybackState$Builder;->build()Landroid/media/session/PlaybackState;
-    move-result-object v6
-    invoke-virtual {v9, v6}, Landroid/media/session/MediaSession;->setPlaybackState(Landroid/media/session/PlaybackState;)V
-    const/4 v0, 0x1
-    invoke-virtual {v9, v0}, Landroid/media/session/MediaSession;->setActive(Z)V
+    invoke-interface {v0, v2, v3}, Landroid/content/SharedPreferences$Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences$Editor;
+    invoke-interface {v0}, Landroid/content/SharedPreferences$Editor;->apply()V
     return-void
 .end method

@@ -52,6 +52,33 @@
     return v0
 .end method
 
+# true while the car's own media center has media type 13 (what MiguBridge announces) as its last
+# played source: Settings.Global LAST_PLAY_MEDIA_TYPE == 13. Then MultiMedia routes every wheel
+# press itself, as METER.CTRL / VOICE.CTRL (MiguCtrlReceiver), so the raw steerwheelcontrol.media
+# channel (SteerWheelReceiver) must stay out of it or the two fight over play/pause.
+.method public static carRoutes(Landroid/content/Context;)Z
+    .locals 3
+    :try_start_0
+    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+    move-result-object v0
+    const-string v1, "LAST_PLAY_MEDIA_TYPE"
+    const/4 v2, -0x1
+    invoke-static {v0, v1, v2}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
+    move-result v0
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    const/16 v1, 0xd
+    if-ne v0, v1, :no
+    const/4 v0, 0x1
+    return v0
+    :no
+    const/4 v0, 0x0
+    return v0
+    :catch_0
+    const/4 v0, 0x0
+    return v0
+.end method
+
 .method public static diplayInstalled(Landroid/content/Context;)Z
     .locals 3
     invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;

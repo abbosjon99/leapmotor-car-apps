@@ -2,8 +2,12 @@
 .super Landroid/content/BroadcastReceiver;
 
 # Car -> "Migu" (media type 13) commands, forwarded to the active sideloaded player:
-#   com.leapmotor.action.METER.CTRL  value "1" = previous, "2" = next, "3" = play/pause toggle
-#   com.leapmotor.action.VOICE.CTRL  value JSON {"type":"play"|"pause"|"next"|"pre"...}
+#   com.leapmotor.action.METER.CTRL  value "1" = previous, "2" = next, "3" = play/pause toggle,
+#                                    keyEventType "steeringWheel" | "backRow" (ignored), playMediaType int 13
+#   com.leapmotor.action.VOICE.CTRL  value JSON {"type":"play"|"pause"|"stop"|"next"|"nextOne"|"pre"|"preOne",...},
+#                                    playMediaType int 13
+# These are what the car's MultiMedia app sends for the steering wheel, the dock card buttons and
+# voice once our type-13 announce (MiguBridge) is its current source. See FINDINGS.md.
 # METER.CTRL presses go through KeyDedup ("meter" channel); voice commands don't.
 # Logged under tag LPWheelKeys.
 # Only for playMediaType 13 (what MiguBridge announces). Off when the "wheel" setting is off.
@@ -85,24 +89,55 @@
     if-eq v5, v4, :do_next
     goto :do_toggle
 
-    # voice / play-pause (VOICE.CTRL): JSON with "type"
+    # voice / dock / play-pause (VOICE.CTRL): JSON {"type": ..., "state": -1, ...}
+    # the car's own sources send play | pause | stop; the voice assistant also sends
+    # nextOne | preOne. "stop" only pauses: the player's session should stay alive.
     :voice
-    const-string v4, "\"type\":\"pause\""
-    invoke-virtual {v0, v4}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
-    move-result v4
-    if-nez v4, :do_pause
-    const-string v4, "\"type\":\"play\""
-    invoke-virtual {v0, v4}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
-    move-result v4
-    if-nez v4, :do_play
-    const-string v4, "\"type\":\"next\""
-    invoke-virtual {v0, v4}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
-    move-result v4
-    if-nez v4, :do_next
-    const-string v4, "\"type\":\"pre"
-    invoke-virtual {v0, v4}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
-    move-result v4
-    if-nez v4, :do_prev
+    :try_start_0
+    new-instance v4, Lorg/json/JSONObject;
+    invoke-direct {v4, v0}, Lorg/json/JSONObject;-><init>(Ljava/lang/String;)V
+    const-string v5, "type"
+    const-string v6, ""
+    invoke-virtual {v4, v5, v6}, Lorg/json/JSONObject;->optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v4
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    invoke-virtual {v4}, Ljava/lang/String;->toLowerCase()Ljava/lang/String;
+    move-result-object v4
+    const-string v5, "pause"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_pause
+    const-string v5, "stop"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_pause
+    const-string v5, "play"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_play
+    const-string v5, "next"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_next
+    const-string v5, "nextone"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_next
+    const-string v5, "pre"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_prev
+    const-string v5, "preone"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_prev
+    const-string v5, "previous"
+    invoke-virtual {v5, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v5
+    if-nez v5, :do_prev
+    return-void
+    :catch_0
     return-void
 
     :do_next
@@ -125,6 +160,8 @@
 
     # e.g. "com.leapmotor.action.METER.CTRL 2 -> ru.yandex.music" (also under LPWheelKeys for testing)
     :log
+    # tell the car the new play state quickly (MiguBridge announces every 0.5 s for a moment)
+    invoke-static {}, Luz/carhelper/passenger/MiguBridge;->kick()V
     const-string v4, "LPWheelKeys"
     new-instance v5, Ljava/lang/StringBuilder;
     invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V

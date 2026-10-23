@@ -6,6 +6,8 @@
 # dock card can show the song and its controls come back to that player (via MediaCb).
 # Also hosts the type-13 Migu announce (MiguBridge) and the steerwheelcontrol key channel.
 
+# true while the service is up and enabled (read by the settings screen's Status card)
+.field public static running:Z
 .field private session:Landroid/media/session/MediaSession;
 .field private handler:Landroid/os/Handler;
 .field private steer:Landroid/content/BroadcastReceiver;
@@ -51,6 +53,8 @@
     invoke-virtual {p0}, Landroid/app/Service;->stopSelf()V
     return-void
     :lp_enabled
+    const/4 v0, 0x1
+    sput-boolean v0, Luz/carhelper/passenger/MediaBrowser;->running:Z
 
     # our MediaSession
     new-instance v0, Landroid/media/session/MediaSession;
@@ -123,6 +127,8 @@
 
 .method public onDestroy()V
     .locals 2
+    const/4 v0, 0x0
+    sput-boolean v0, Luz/carhelper/passenger/MediaBrowser;->running:Z
     iget-object v0, p0, Luz/carhelper/passenger/MediaBrowser;->steer:Landroid/content/BroadcastReceiver;
     if-eqz v0, :no_steer
     :try_start_0

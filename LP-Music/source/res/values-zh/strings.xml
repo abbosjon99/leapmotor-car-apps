@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st_title">设置</string>
+    <string name="st_cancel">取消</string>
+    <string name="st_save">保存</string>
+    <string name="sec_status">状态</string>
+    <string name="sec_playback">播放</string>
+    <string name="sec_language">语言</string>
+    <string name="sec_vehicle">车辆</string>
+    <string name="row_listener">正在播放（通知访问权限）</string>
+    <string name="row_service">LP Music 服务（显示歌曲，接收方向盘和语音控制）</string>
+    <string name="row_old">旧版 LP Music（uz.carhelper.music）已卸载</string>
+    <string name="st_ok">正常</string>
+    <string name="st_off">关闭</string>
+    <string name="fix_svc_off">已关闭 — 请打开下方的“LP Music 已开启”并点击“保存”</string>
+    <string name="fix_svc_start">正在启动 — 几秒后点击“重新检查”</string>
+    <string name="st_recheck">重新检查状态</string>
+    <string name="sw_enabled">LP Music 已开启：在车机上显示正在播放的应用，并通过方向盘、音乐卡片和语音进行控制</string>
+    <string name="sw_yield">DiPlay 播放时，将方向盘按键交给它</string>
+    <string name="nav_vehicle">车辆设置</string>
+    <string name="toast_saved">已保存</string>
+    <string name="toast_child">儿童模式已开启 — 已被 LP Companion 锁定</string>
+</resources>

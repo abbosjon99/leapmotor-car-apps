@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st_title">Sozlamalar</string>
+    <string name="st_cancel">Bekor qilish</string>
+    <string name="st_save">Saqlash</string>
+    <string name="sec_status">Holat</string>
+    <string name="sec_playback">Ijro</string>
+    <string name="sec_language">Til</string>
+    <string name="sec_vehicle">Avtomobil</string>
+    <string name="row_listener">Hozir ijro etilmoqda (bildirishnomalarga ruxsat)</string>
+    <string name="row_service">LP Music xizmati (qoʻshiqni koʻrsatadi, rul va ovoz buyruqlarini qabul qiladi)</string>
+    <string name="row_old">Eski LP Music (uz.carhelper.music) oʻchirilgan</string>
+    <string name="st_ok">OK</string>
+    <string name="st_off">OʻCHIQ</string>
+    <string name="fix_svc_off">Oʻchirilgan — pastdagi “LP Music yoqilgan” ni yoqing va Saqlash tugmasini bosing</string>
+    <string name="fix_svc_start">Ishga tushmoqda — bir necha soniyadan keyin “Qayta tekshirish” tugmasini bosing</string>
+    <string name="st_recheck">Holatni qayta tekshirish</string>
+    <string name="sw_enabled">LP Music yoqilgan: ijro etilayotgan ilovani avtomobilda koʻrsatish va rul, musiqa kartasi hamda ovoz orqali boshqarish</string>
+    <string name="sw_yield">DiPlay ijro etayotganda rul tugmalarini unga berish</string>
+    <string name="nav_vehicle">Avtomobil sozlamalari</string>
+    <string name="toast_saved">Saqlandi</string>
+    <string name="toast_child">Bolalar rejimi yoqilgan — LP Companion tomonidan bloklangan</string>
+</resources>

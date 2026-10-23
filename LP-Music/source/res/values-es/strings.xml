@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st_title">Ajustes</string>
+    <string name="st_cancel">Cancelar</string>
+    <string name="st_save">Guardar</string>
+    <string name="sec_status">Estado</string>
+    <string name="sec_playback">Reproducción</string>
+    <string name="sec_language">Idioma</string>
+    <string name="sec_vehicle">Vehículo</string>
+    <string name="row_listener">Reproduciendo ahora (acceso a notificaciones)</string>
+    <string name="row_service">Servicio de LP Music (muestra la canción y recibe volante y voz)</string>
+    <string name="row_old">LP Music antiguo (uz.carhelper.music) eliminado</string>
+    <string name="st_ok">OK</string>
+    <string name="st_off">NO</string>
+    <string name="fix_svc_off">Desactivado — activa «LP Music activado» abajo y pulsa Guardar</string>
+    <string name="fix_svc_start">Iniciando — pulsa Volver a comprobar en unos segundos</string>
+    <string name="st_recheck">Volver a comprobar el estado</string>
+    <string name="sw_enabled">LP Music activado: mostrar la app que suena en el coche y controlarla con el volante, la tarjeta de música y la voz</string>
+    <string name="sw_yield">Ceder los botones del volante a DiPlay mientras reproduce</string>
+    <string name="nav_vehicle">Ajustes del vehículo</string>
+    <string name="toast_saved">Guardado</string>
+    <string name="toast_child">El modo infantil está activado — bloqueado por LP Companion</string>
+</resources>

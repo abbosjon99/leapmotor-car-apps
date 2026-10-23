@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LP Music</string>
+    <string name="st_title">Settings</string>
+    <string name="st_cancel">Cancel</string>
+    <string name="st_save">Save</string>
+    <string name="sec_status">Status</string>
+    <string name="sec_playback">Playback</string>
+    <string name="sec_language">Language</string>
+    <string name="sec_vehicle">Vehicle</string>
+    <string name="row_listener">Now playing (notification access)</string>
+    <string name="row_service">LP Music service (announces the song, takes wheel and voice)</string>
+    <string name="row_old">Old LP Music (uz.carhelper.music) removed</string>
+    <string name="st_ok">OK</string>
+    <string name="st_off">OFF</string>
+    <string name="fix_svc_off">Turned off — switch on “LP Music on” below and press Save</string>
+    <string name="fix_svc_start">Starting now — press Re-check in a few seconds</string>
+    <string name="st_recheck">Re-check status</string>
+    <string name="sw_enabled">LP Music on: show the playing app on the car and handle the wheel, dock and voice buttons</string>
+    <string name="sw_yield">Give the wheel buttons to DiPlay while it’s playing</string>
+    <string name="nav_vehicle">Vehicle settings</string>
+    <string name="toast_saved">Saved</string>
+    <string name="toast_child">Child mode is on — locked by LP Companion</string>
 </resources>

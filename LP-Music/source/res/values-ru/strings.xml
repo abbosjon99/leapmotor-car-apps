@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st_title">Настройки</string>
+    <string name="st_cancel">Отмена</string>
+    <string name="st_save">Сохранить</string>
+    <string name="sec_status">Состояние</string>
+    <string name="sec_playback">Воспроизведение</string>
+    <string name="sec_language">Язык</string>
+    <string name="sec_vehicle">Автомобиль</string>
+    <string name="row_listener">Сейчас играет (доступ к уведомлениям)</string>
+    <string name="row_service">Служба LP Music (показывает трек, принимает кнопки руля и голос)</string>
+    <string name="row_old">Старый LP Music (uz.carhelper.music) удалён</string>
+    <string name="st_ok">ОК</string>
+    <string name="st_off">ВЫКЛ</string>
+    <string name="fix_svc_off">Выключено — включите «LP Music включён» ниже и нажмите «Сохранить»</string>
+    <string name="fix_svc_start">Запускается — через несколько секунд нажмите «Проверить снова»</string>
+    <string name="st_recheck">Проверить снова</string>
+    <string name="sw_enabled">LP Music включён: показывать играющее приложение на экране автомобиля и управлять им кнопками руля, карточкой музыки и голосом</string>
+    <string name="sw_yield">Отдавать кнопки руля DiPlay, пока он играет</string>
+    <string name="nav_vehicle">Настройки автомобиля</string>
+    <string name="toast_saved">Сохранено</string>
+    <string name="toast_child">Включён детский режим — заблокировано в LP Companion</string>
+</resources>

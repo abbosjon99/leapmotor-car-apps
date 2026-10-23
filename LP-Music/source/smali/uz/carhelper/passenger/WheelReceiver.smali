@@ -69,6 +69,7 @@
 .end method
 
 # first playing non-car session, else the first (most recent) non-car session, else null
+# (our own session is skipped too)
 .method static findTarget(Ljava/util/List;)Landroid/media/session/MediaController;
     .locals 5
     const/4 v4, 0x0
@@ -84,6 +85,15 @@
     invoke-virtual {v1}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
     move-result-object v2
     invoke-static {v2}, Luz/carhelper/passenger/WheelReceiver;->isCar(Ljava/lang/String;)Z
+    move-result v3
+    if-nez v3, :loop
+    # never target our own mirror session (MediaMirror): it would announce and control itself
+    const-string v3, "com.migu.car.music"
+    invoke-virtual {v3, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-nez v3, :loop
+    const-string v3, "uz.carhelper.music"
+    invoke-virtual {v3, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
     if-nez v3, :loop
     invoke-static {v1}, Luz/carhelper/passenger/WheelReceiver;->isPlaying(Landroid/media/session/MediaController;)Z

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="uz.carhelper.music">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.migu.car.music">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <!-- freemme Media Session Aggregator: how the car's dock discovers audio apps (see NetEase/Migu) -->
-    <uses-permission android:name="freemme.permission.msa"/>
-    <uses-permission android:name="freemme.permission.msa.SECURITY_ACCESS"/>
     <queries>
         <!-- so MusicGate can see whether DiPlay is installed -->
         <package android:name="com.shihab.diplay"/>
+        <!-- so the settings Status card can warn when the old LP Music package is still installed -->
+        <package android:name="uz.carhelper.music"/>
         <intent>
             <action android:name="android.intent.action.MAIN"/>
             <category android:name="android.intent.category.LAUNCHER"/>
@@ -18,9 +17,6 @@
     </queries>
     <application android:appCategory="audio" android:label="@string/app_name" android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false">
-        <!-- Dock now-playing card discovery: the car's media aggregator reads these to find our session service -->
-        <meta-data android:name="MediaSessionServiceName" android:value="uz.carhelper.passenger.MediaBrowser"/>
-        <meta-data android:name="MediaControllerTag" android:value="MediaSession"/>
         <activity android:name="uz.carhelper.passenger.MusicSettingsActivity" android:exported="true"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
@@ -29,13 +25,23 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- the car launches Migu with this action ("open app", source switch): open the playing player instead -->
         <activity android:name="uz.carhelper.passenger.OpenPlayerActivity" android:exported="true"
-            android:theme="@android:style/Theme.NoDisplay"/>
-        <service android:name="uz.carhelper.passenger.MediaBrowser" android:exported="true">
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService"/>
+                <action android:name="com.migu.car.music.ACTION_START"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-        </service>
+        </activity>
+        <!-- no MediaBrowserService intent-filter: Android's car media service picks any playing browser service
+             as the media source and then pauses the real player (FINDINGS.md section 9) -->
+        <service android:name="uz.carhelper.passenger.MediaBrowser" android:exported="false"/>
+        <!-- MultiMedia binds this (ComponentName com.migu.car.music / com.migu.car.music.launcher.SourceService)
+             before it answers the dock's favourite lookup; see FINDINGS.md section 4 -->
+        <service android:name="com.migu.car.music.launcher.SourceService" android:exported="true"/>
+        <!-- the dock card loads the announced cover (MediaBody.imagUrl) from here; see CoverProvider -->
+        <provider android:name="uz.carhelper.passenger.CoverProvider" android:authorities="com.migu.car.music.cover"
+            android:exported="true"/>
         <service android:name="uz.carhelper.passenger.WheelListener" android:exported="true"
             android:label="LP Music wheel buttons"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
@@ -52,6 +58,9 @@
         <receiver android:name="uz.carhelper.passenger.BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <!-- the car's own boot broadcasts (MultiMedia / Migu register for these too) -->
+                <action android:name="com.leapmotor.action.BOOT_COMPLETED"/>
+                <action android:name="com.leapmotoraction.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
     </application>

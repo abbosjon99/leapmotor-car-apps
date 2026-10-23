@@ -1,7 +1,8 @@
 .class public Luz/carhelper/passenger/SteerWheelReceiver;
 .super Landroid/content/BroadcastReceiver;
 
-# Second wheel-key channel ("steer"), next to the Migu METER.CTRL one ("meter").
+# Second wheel-key channel ("steer"), next to the Migu METER.CTRL one ("meter"). It only acts while
+# the car does NOT route the press itself (MusicGate.carRoutes: last played car source is not 13).
 # The car broadcasts com.leapmotor.steerwheelcontrol.media with int extra "action":
 #   1 = previous, 4 = next, 7 = play/pause, 0 = release (ignored).
 # Registered by BubbleService while it runs (not in the manifest). Each press goes through
@@ -40,6 +41,17 @@
     if-eq v0, v2, :mapped
     return-void
     :mapped
+
+    # the car already routes this press to us as METER.CTRL / VOICE.CTRL while type 13 is its source;
+    # acting here too made play/pause fight with the car's own command (see FINDINGS.md section 8)
+    invoke-static {p1}, Luz/carhelper/passenger/MusicGate;->carRoutes(Landroid/content/Context;)Z
+    move-result v2
+    if-eqz v2, :steer_go
+    const-string v5, "LPWheelKeys"
+    const-string v6, "channel=steer: car routes type 13, left to METER/VOICE"
+    invoke-static {v5, v6}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    return-void
+    :steer_go
 
     invoke-static {p1}, Luz/carhelper/passenger/WheelReceiver;->getSessions(Landroid/content/Context;)Ljava/util/List;
     move-result-object v2
