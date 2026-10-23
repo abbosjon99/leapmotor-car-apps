@@ -161,11 +161,17 @@
 
     invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
-    # now-playing bar (grid only, reflects any active media source)
+    # now-playing widget (60%) with child mode + change wallpaper beside it (40%) - grid only
     instance-of v5, p0, Luz/carhelper/passenger/SettingsActivity;
     if-nez v5, :skip_np
-    new-instance v5, Luz/carhelper/passenger/NowPlaying;
-    invoke-direct {v5, p0}, Luz/carhelper/passenger/NowPlaying;-><init>(Landroid/app/Activity;)V
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v6, 0x0
+    invoke-virtual {v5, v6}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    const/16 v6, 0x10
+    invoke-virtual {v5, v6}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/high16 v6, 0x40a00000
+    invoke-virtual {v5, v6}, Landroid/widget/LinearLayout;->setWeightSum(F)V
     new-instance v6, Landroid/widget/LinearLayout$LayoutParams;
     const/4 v7, -0x1
     const/4 v8, -0x2
@@ -174,31 +180,46 @@
     const/16 v9, 0x10
     invoke-virtual {v6, v7, v7, v7, v9}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
     invoke-virtual {v3, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
-    :skip_np
 
-    # special grid tiles (grid only): child mode toggle + change wallpaper
-    instance-of v4, p0, Luz/carhelper/passenger/SettingsActivity;
-    if-nez v4, :skip_tiles
-    new-instance v4, Landroid/widget/LinearLayout;
-    invoke-direct {v4, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
-    const/high16 v5, 0x40a00000
-    invoke-virtual {v4, v5}, Landroid/widget/LinearLayout;->setWeightSum(F)V
-    invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    # the music widget, weight 3 (60%)
+    new-instance v6, Luz/carhelper/passenger/NowPlaying;
+    invoke-direct {v6, p0}, Luz/carhelper/passenger/NowPlaying;-><init>(Landroid/app/Activity;)V
+    new-instance v7, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v8, 0x0
+    const/4 v9, -0x2
+    const/high16 v10, 0x40400000
+    invoke-direct {v7, v8, v9, v10}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v5, v6, v7}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
+    # the two buttons container, weight 2 (40%)
+    new-instance v6, Landroid/widget/LinearLayout;
+    invoke-direct {v6, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v7, 0x0
+    invoke-virtual {v6, v7}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    const/16 v7, 0x11
+    invoke-virtual {v6, v7}, Landroid/widget/LinearLayout;->setGravity(I)V
+    new-instance v7, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v8, 0x0
+    const/4 v9, -0x2
+    const/high16 v10, 0x40000000
+    invoke-direct {v7, v8, v9, v10}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v5, v6, v7}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidOn()Z
-    move-result v5
-    const-string v6, "Child mode"
-    const-string v7, "#childenter"
-    if-eqz v5, :tile_child
-    const-string v6, "Exit child mode"
-    const-string v7, "#childexit"
-    :tile_child
-    const-string v8, "ic_child"
-    invoke-direct {p0, v4, v8, v6, v7}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-    const-string v6, "ic_image"
-    const-string v7, "Change wallpaper"
-    const-string v8, "#wallpaper"
-    invoke-direct {p0, v4, v6, v7, v8}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-    :skip_tiles
+    move-result v7
+    const-string v8, "Child mode"
+    const-string v9, "#childenter"
+    if-eqz v7, :np_child
+    const-string v8, "Exit child mode"
+    const-string v9, "#childexit"
+    :np_child
+    const-string v10, "ic_child"
+    invoke-direct {p0, v6, v10, v8, v9}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    const-string v8, "Change wallpaper"
+    const-string v9, "#wallpaper"
+    const-string v10, "ic_image"
+    invoke-direct {p0, v6, v10, v8, v9}, Luz/carhelper/passenger/MainActivity;->addTile(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    :skip_np
 
     # v4 = current row, v5 = item count, v6 = iterator
     const/4 v4, 0x0
@@ -272,7 +293,7 @@
     invoke-virtual {v10, v11}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const/16 v11, 0x11
     invoke-virtual {v10, v11}, Landroid/widget/LinearLayout;->setGravity(I)V
-    const/16 v11, 0x18
+    const/16 v11, 0x13
     invoke-virtual {v10, v11, v11, v11, v11}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     new-instance v11, Landroid/content/ComponentName;
     iget-object v12, v8, Landroid/content/pm/ActivityInfo;->name:Ljava/lang/String;
@@ -295,7 +316,7 @@
     move-result-object v12
     invoke-virtual {v11, v12}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
     new-instance v12, Landroid/widget/LinearLayout$LayoutParams;
-    const/16 v13, 0x90
+    const/16 v13, 0x73
     invoke-direct {v12, v13, v13}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
     invoke-virtual {v10, v11, v12}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
@@ -304,7 +325,7 @@
     invoke-virtual {v7, v0}, Landroid/content/pm/ResolveInfo;->loadLabel(Landroid/content/pm/PackageManager;)Ljava/lang/CharSequence;
     move-result-object v12
     invoke-virtual {v11, v12}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v12, 0x41c00000
+    const/high16 v12, 0x41980000
     invoke-virtual {v11, v12}, Landroid/widget/TextView;->setTextSize(F)V
     const/16 v12, 0x11
     invoke-virtual {v11, v12}, Landroid/widget/TextView;->setGravity(I)V
@@ -331,7 +352,7 @@
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const/16 v1, 0x11
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setGravity(I)V
-    const/16 v1, 0x18
+    const/16 v1, 0x10
     invoke-virtual {v0, v1, v1, v1, v1}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     invoke-virtual {v0, p4}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
     invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
@@ -353,16 +374,16 @@
     move-result v2
     invoke-virtual {v1, v2}, Landroid/widget/ImageView;->setImageResource(I)V
     new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
-    const/16 v3, 0x90
+    const/16 v3, 0x60
     invoke-direct {v2, v3, v3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
-    const/16 v3, 0x14
+    const/16 v3, 0xa
     invoke-virtual {v2, v3, v3, v3, v3}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
     invoke-virtual {v0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
     new-instance v1, Landroid/widget/TextView;
     invoke-direct {v1, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
     invoke-virtual {v1, p3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-    const/high16 v2, 0x41c00000
+    const/high16 v2, 0x41980000
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextSize(F)V
     const/16 v2, 0x11
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setGravity(I)V
@@ -394,7 +415,8 @@
     invoke-virtual {v1, v0, v3}, Landroid/widget/FrameLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     new-instance v3, Landroid/view/View;
     invoke-direct {v3, p0}, Landroid/view/View;-><init>(Landroid/content/Context;)V
-    const v4, -0x66000000
+    invoke-static {p0}, Luz/carhelper/passenger/Theme;->scrim(Landroid/content/Context;)I
+    move-result v4
     invoke-virtual {v3, v4}, Landroid/view/View;->setBackgroundColor(I)V
     new-instance v4, Landroid/widget/FrameLayout$LayoutParams;
     invoke-direct {v4, v2, v2}, Landroid/widget/FrameLayout$LayoutParams;-><init>(II)V

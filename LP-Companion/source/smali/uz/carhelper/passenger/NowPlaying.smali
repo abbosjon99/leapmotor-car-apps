@@ -28,7 +28,7 @@
     invoke-virtual {p0, v0}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const/16 v0, 0x10
     invoke-virtual {p0, v0}, Landroid/widget/LinearLayout;->setGravity(I)V
-    const/16 v0, 0x18
+    const/16 v0, 0x14
     invoke-virtual {p0, v0, v0, v0, v0}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     new-instance v0, Landroid/graphics/drawable/GradientDrawable;
     invoke-direct {v0}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
@@ -45,9 +45,9 @@
     invoke-virtual {v0, v1}, Landroid/widget/ImageView;->setScaleType(Landroid/widget/ImageView$ScaleType;)V
     iput-object v0, p0, Luz/carhelper/passenger/NowPlaying;->art:Landroid/widget/ImageView;
     new-instance v1, Landroid/widget/LinearLayout$LayoutParams;
-    const/16 v2, 0x78
+    const/16 v2, 0x60
     invoke-direct {v1, v2, v2}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
-    const/16 v3, 0x10
+    const/16 v3, 0xd
     const/4 v4, 0x0
     invoke-virtual {v1, v4, v4, v3, v4}, Landroid/widget/LinearLayout$LayoutParams;->setMargins(IIII)V
     invoke-virtual {p0, v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
@@ -59,7 +59,7 @@
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setOrientation(I)V
     new-instance v2, Landroid/widget/TextView;
     invoke-direct {v2, p1}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const/high16 v3, 0x41e00000
+    const/high16 v3, 0x41b00000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
     const/4 v3, -0x1
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
@@ -68,7 +68,7 @@
     invoke-virtual {v0, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     new-instance v2, Landroid/widget/TextView;
     invoke-direct {v2, p1}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-    const/high16 v3, 0x41900000
+    const/high16 v3, 0x41600000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
     const v3, -0x555556
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
@@ -110,12 +110,12 @@
     invoke-virtual {v2, p1, v3, v4}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
     move-result v2
     invoke-virtual {v1, v2}, Landroid/widget/ImageView;->setImageResource(I)V
-    const/16 v2, 0x12
+    const/16 v2, 0xe
     invoke-virtual {v1, v2, v2, v2, v2}, Landroid/widget/ImageView;->setPadding(IIII)V
     invoke-virtual {v1, p2}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
     invoke-virtual {v1, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
     new-instance v2, Landroid/widget/LinearLayout$LayoutParams;
-    const/16 v3, 0x60
+    const/16 v3, 0x50
     invoke-direct {v2, v3, v3}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
     invoke-virtual {p0, v1, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
     return-object v1

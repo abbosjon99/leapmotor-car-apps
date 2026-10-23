@@ -439,12 +439,39 @@
 
 .method private startOnPassenger(Landroid/content/Intent;)V
     .locals 3
-    const/high16 v0, 0x10000000
+    # NEW_TASK | MULTIPLE_TASK: fresh instance (applies kid mode at once) that can sit
+    # alongside a main-screen instance
+    const/high16 v0, 0x18000000
     invoke-virtual {p1, v0}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
     :try_start_0
     invoke-static {}, Landroid/app/ActivityOptions;->makeBasic()Landroid/app/ActivityOptions;
     move-result-object v0
     const/4 v1, 0x3
+    invoke-virtual {v0, v1}, Landroid/app/ActivityOptions;->setLaunchDisplayId(I)Landroid/app/ActivityOptions;
+    invoke-virtual {v0}, Landroid/app/ActivityOptions;->toBundle()Landroid/os/Bundle;
+    move-result-object v0
+    invoke-virtual {p0, p1, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;Landroid/os/Bundle;)V
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    return-void
+    :catch_0
+    move-exception v0
+    const-string v1, "MainBubble"
+    invoke-virtual {v0}, Ljava/lang/Throwable;->toString()Ljava/lang/String;
+    move-result-object v0
+    invoke-static {v1, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
+    return-void
+.end method
+
+# open LP Companion on the MAIN screen (display 0), able to coexist with the passenger one
+.method private startOnMain(Landroid/content/Intent;)V
+    .locals 3
+    const/high16 v0, 0x18000000
+    invoke-virtual {p1, v0}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    :try_start_0
+    invoke-static {}, Landroid/app/ActivityOptions;->makeBasic()Landroid/app/ActivityOptions;
+    move-result-object v0
+    const/4 v1, 0x0
     invoke-virtual {v0, v1}, Landroid/app/ActivityOptions;->setLaunchDisplayId(I)Landroid/app/ActivityOptions;
     invoke-virtual {v0}, Landroid/app/ActivityOptions;->toBundle()Landroid/os/Bundle;
     move-result-object v0
@@ -567,7 +594,7 @@
     new-instance v1, Landroid/content/Intent;
     const-class v2, Luz/carhelper/passenger/MainActivity;
     invoke-direct {v1, p0, v2}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
-    invoke-direct {p0, v1}, Luz/carhelper/passenger/MainBubbleService;->startOnPassenger(Landroid/content/Intent;)V
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/MainBubbleService;->startOnMain(Landroid/content/Intent;)V
     return-void
     :not_lp
 

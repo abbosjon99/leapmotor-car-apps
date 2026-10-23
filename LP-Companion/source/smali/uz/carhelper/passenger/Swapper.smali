@@ -55,8 +55,9 @@
     const-string v4, "That app is no longer installed"
     goto :toast
     :launch
-    # NEW_TASK | RESET_TASK_IF_NEEDED, same as a launcher tap
-    const/high16 v7, 0x10200000
+    # NEW_TASK | MULTIPLE_TASK: reparents the running task to the target display
+    # (plain NEW_TASK just reuses it in place on this car, so the app never moved)
+    const/high16 v7, 0x18000000
     invoke-virtual {v6, v7}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
     :try_start_0
     invoke-static {}, Landroid/app/ActivityOptions;->makeBasic()Landroid/app/ActivityOptions;

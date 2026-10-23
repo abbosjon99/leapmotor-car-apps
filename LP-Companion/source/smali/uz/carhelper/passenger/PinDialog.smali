@@ -81,13 +81,15 @@
     invoke-virtual {v1, p2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
     const/high16 v2, 0x41d00000
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextSize(F)V
-    const/4 v2, -0x1
+    invoke-static {v0}, Luz/carhelper/passenger/Theme;->dlgText(Landroid/content/Context;)I
+    move-result v2
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setTextColor(I)V
     const/16 v2, 0x11
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setGravity(I)V
     new-instance v2, Landroid/graphics/drawable/GradientDrawable;
     invoke-direct {v2}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
-    const v3, 0x33ffffff
+    invoke-static {v0}, Luz/carhelper/passenger/Theme;->dlgKey(Landroid/content/Context;)I
+    move-result v3
     invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
     const/high16 v3, 0x41800000
     invoke-virtual {v2, v3}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
@@ -136,7 +138,8 @@
     invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const/16 v2, 0x28
     invoke-virtual {v1, v2, v2, v2, v2}, Landroid/widget/LinearLayout;->setPadding(IIII)V
-    const v2, -0xe5e5e6
+    invoke-static {v0}, Luz/carhelper/passenger/Theme;->dlgBg(Landroid/content/Context;)I
+    move-result v2
     invoke-virtual {v1, v2}, Landroid/view/View;->setBackgroundColor(I)V
 
     # title
@@ -153,7 +156,8 @@
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
     const/high16 v3, 0x41c00000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
-    const/4 v3, -0x1
+    invoke-static {v0}, Luz/carhelper/passenger/Theme;->dlgText(Landroid/content/Context;)I
+    move-result v3
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
     const/16 v3, 0x11
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setGravity(I)V
@@ -164,7 +168,8 @@
     invoke-direct {v2, v0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
     const/high16 v3, 0x42000000
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextSize(F)V
-    const/4 v3, -0x1
+    invoke-static {v0}, Luz/carhelper/passenger/Theme;->dlgText(Landroid/content/Context;)I
+    move-result v3
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setTextColor(I)V
     const/16 v3, 0x11
     invoke-virtual {v2, v3}, Landroid/widget/TextView;->setGravity(I)V
