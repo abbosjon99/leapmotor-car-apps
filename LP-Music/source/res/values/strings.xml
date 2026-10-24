@@ -10,15 +10,22 @@
     <string name="sec_vehicle">Vehicle</string>
     <string name="row_listener">Now playing (notification access)</string>
     <string name="row_service">LP Music service (announces the song, takes wheel and voice)</string>
-    <string name="row_old">Old LP Music (uz.carhelper.music) removed</string>
     <string name="st_ok">OK</string>
     <string name="st_off">OFF</string>
     <string name="fix_svc_off">Turned off — switch on “LP Music on” below and press Save</string>
     <string name="fix_svc_start">Starting now — press Re-check in a few seconds</string>
     <string name="st_recheck">Re-check status</string>
+    <string name="btn_fix">Fix permissions</string>
+    <string name="perm_ok">All permissions are already granted</string>
     <string name="sw_enabled">LP Music on: show the playing app on the car and handle the wheel, dock and voice buttons</string>
     <string name="sw_yield">Give the wheel buttons to DiPlay while it’s playing</string>
     <string name="nav_vehicle">Vehicle settings</string>
     <string name="toast_saved">Saved</string>
     <string name="toast_child">Child mode is on — locked by LP Companion</string>
+    <string name="btn_open_player">Open playing app</string>
+    <string name="np_empty">Nothing is playing</string>
+    <string name="np_empty_hint">Start a song in any music app</string>
+    <string name="toast_no_player">No playing app found</string>
+    <string name="toast_no_page">Could not open the Notification access page</string>
+    <string name="warn_perm">Notification access is off — tap to turn it on</string>
 </resources>

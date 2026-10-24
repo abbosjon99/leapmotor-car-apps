@@ -5,8 +5,6 @@
     <queries>
         <!-- so MusicGate can see whether DiPlay is installed -->
         <package android:name="com.shihab.diplay"/>
-        <!-- so the settings Status card can warn when the old LP Music package is still installed -->
-        <package android:name="uz.carhelper.music"/>
         <intent>
             <action android:name="android.intent.action.MAIN"/>
             <category android:name="android.intent.category.LAUNCHER"/>
@@ -17,7 +15,8 @@
     </queries>
     <application android:appCategory="audio" android:label="@string/app_name" android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="false">
-        <activity android:name="uz.carhelper.passenger.MusicSettingsActivity" android:exported="true"
+        <!-- the launcher entry (app-list icon and the car's dock-card tap): the home screen with the now-playing widget -->
+        <activity android:name="uz.carhelper.passenger.MusicHomeActivity" android:exported="true"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
             <intent-filter>
@@ -25,6 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- opened from the home screen's Settings button; exported so it can also be started with adb -->
+        <activity android:name="uz.carhelper.passenger.MusicSettingsActivity" android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"/>
         <!-- the car launches Migu with this action ("open app", source switch): open the playing player instead -->
         <activity android:name="uz.carhelper.passenger.OpenPlayerActivity" android:exported="true"
             android:theme="@android:style/Theme.NoDisplay">
@@ -61,6 +64,9 @@
                 <!-- the car's own boot broadcasts (MultiMedia / Migu register for these too) -->
                 <action android:name="com.leapmotor.action.BOOT_COMPLETED"/>
                 <action android:name="com.leapmotoraction.BOOT_COMPLETED"/>
+                <!-- head-unit "quick boot" (wake from deep sleep) -->
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
             </intent-filter>
         </receiver>
     </application>

@@ -3,12 +3,14 @@
 .implements Landroid/widget/CompoundButton$OnCheckedChangeListener;
 .implements Landroid/view/View$OnClickListener;
 
-# LP Music's screen (also the launcher activity), styled like LP Companion's Settings tab (shared Ui helper).
+# LP Music's Settings page (opened from the home screen's Settings button, MusicHomeActivity), styled like LP
+# Companion's Settings tab (shared Ui helper).
 # All text comes from Lang (English / Russian / Spanish / Uzbek / Chinese), see Lang.smali.
 #   Status:   one row per requirement, green OK / red OFF + the ADB command that fixes it
 #             - notification access (getActiveSessions, without it LP Music sees no player)
 #             - the LP Music service running (opening this page starts it when it is enabled but down)
-#             - the old uz.carhelper.music package removed (two LP Music apps would fight over the wheel)
+#             and two buttons: Re-check status, and Fix permissions (opens the car's Notification access page;
+#             dimmed while nothing is missing)
 #   Playback: [switch] enabled - master on/off; Save starts or stops the media service
 #             [switch] yield   - give the wheel keys to DiPlay while it is playing (only when DiPlay is installed)
 #   Language: five chips; a tap applies at once (prefs "music"/"lang") and reopens the page, keeping the
@@ -463,36 +465,39 @@
     invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/MusicSettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/MusicSettingsActivity;->divider(Landroid/widget/LinearLayout;)V
 
-    # the old package must be gone: two LP Music apps would both announce and both act on the wheel
-    const/4 v6, 0x1
-    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
-    move-result-object v3
-    const-string v4, "uz.carhelper.music"
-    invoke-virtual {v4, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-    move-result v3
-    if-nez v3, :old_row
-    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
-    move-result-object v2
-    const/4 v5, 0x0
-    :try_start_old
-    invoke-virtual {v2, v4, v5}, Landroid/content/pm/PackageManager;->getPackageInfo(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;
-    const/4 v6, 0x0
-    :try_end_old
-    .catch Ljava/lang/Exception; {:try_start_old .. :try_end_old} :old_caught
-    :old_caught
-    :old_row
-    const-string v4, "adb uninstall uz.carhelper.music"
-    const-string v2, "row_old"
-    invoke-static {p0, v2}, Luz/carhelper/passenger/Lang;->s(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v2
-    invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/MusicSettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
-    invoke-direct {p0, v8}, Luz/carhelper/passenger/MusicSettingsActivity;->divider(Landroid/widget/LinearLayout;)V
-
+    # the two buttons at the bottom of the Status card, side by side: Re-check status, and Fix permissions, which
+    # opens the car's Notification access page (dimmed, and only a toast, while nothing is missing)
+    new-instance v5, Landroid/widget/LinearLayout;
+    invoke-direct {v5, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v5, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const/16 v2, 0xc
+    const/16 v3, 0x12
+    const/16 v4, 0x14
+    invoke-virtual {v5, v2, v3, v4, v3}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     const-string v2, "st_recheck"
     invoke-static {p0, v2}, Luz/carhelper/passenger/Lang;->s(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
     move-result-object v2
     const-string v3, "#recheck"
-    invoke-direct {p0, v8, v2, v3}, Luz/carhelper/passenger/MusicSettingsActivity;->navRow(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;)V
+    const v4, 0x2effffff
+    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/MusicSettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    invoke-static {p0}, Luz/carhelper/passenger/Perm;->missing(Landroid/content/Context;)Z
+    move-result v3
+    const-string v2, "btn_fix"
+    invoke-static {p0, v2}, Luz/carhelper/passenger/Lang;->s(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v4, "#perm"
+    if-nez v3, :fix_tag
+    const-string v4, "#permdone"
+    :fix_tag
+    const v7, 0x2effffff
+    invoke-direct {p0, v5, v2, v4, v7}, Luz/carhelper/passenger/MusicSettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    move-result-object v6
+    if-nez v3, :fix_lit
+    const v4, 0x3eb33333
+    invoke-virtual {v6, v4}, Landroid/view/View;->setAlpha(F)V
+    :fix_lit
+    invoke-virtual {v8, v5}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
     # Playback
     const-string v2, "sec_playback"
@@ -608,6 +613,17 @@
     return-void
 .end method
 
+.method private toast(Ljava/lang/String;)V
+    .locals 2
+    invoke-static {p0, p1}, Luz/carhelper/passenger/Lang;->s(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v0
+    const/4 v1, 0x0
+    invoke-static {p0, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+    move-result-object v0
+    invoke-virtual {v0}, Landroid/widget/Toast;->show()V
+    return-void
+.end method
+
 .method public onClick(Landroid/view/View;)V
     .locals 4
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
@@ -636,6 +652,26 @@
     invoke-virtual {p0}, Landroid/app/Activity;->recreate()V
     return-void
     :not_recheck
+    const-string v1, "#perm"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_perm
+    invoke-static {p0}, Luz/carhelper/passenger/Perm;->open(Landroid/content/Context;)Z
+    move-result v1
+    if-nez v1, :perm_done
+    const-string v1, "toast_no_page"
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/MusicSettingsActivity;->toast(Ljava/lang/String;)V
+    :perm_done
+    return-void
+    :not_perm
+    const-string v1, "#permdone"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_permdone
+    const-string v1, "perm_ok"
+    invoke-direct {p0, v1}, Luz/carhelper/passenger/MusicSettingsActivity;->toast(Ljava/lang/String;)V
+    return-void
+    :not_permdone
     const-string v1, "#vehset"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1

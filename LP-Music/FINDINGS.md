@@ -137,6 +137,59 @@ Checked on the car with 2.16 (logcat):
 - 2.18: the mirror `MediaSession` is never activated and the `MediaBrowserService` intent-filter is gone (service
   not exported), which stops the Yandex Music play/pause flapping (section 9). `MediaMirror` now only remembers the
   last player for `OpenPlayerActivity`.
+- 2.22: coming back after the car's deep sleep / restart. `BootReceiver` also listens for `QUICKBOOT_POWERON`
+  (`android.intent.action.` and `com.htc.intent.action.`, the usual head-unit wake broadcasts), and
+  `WheelListener.onListenerConnected` starts `MediaBrowser` when it is not running (the system rebinds an enabled
+  notification listener after every restart even if no boot broadcast reaches the app). Not checked on the car: which
+  of these the car actually sends on a deep-sleep wake, and whether Android 12 allows the foreground-service start from
+  the listener (wrapped in try/catch; if refused, only the broadcast paths work).
+- 2.23 and 2.24 (tried, installed and then dropped again in 2.25; kept here for what they showed): tapping the dock media card opens the playing app. From the car's launcher code: the card's click handler
+  (`SmartDockService$15.onItemClick`, Migu type) calls `openAppbySd("com.migu.car.music")` -> `AppUtils.openApp(ctx, pkg,
+  name, 0, view)` -> `openAppByPackageName`, which starts the package's launcher activity (MAIN + LAUNCHER, NEW_TASK, display
+  0). That is the same call an icon tap in the app list makes, so the two cannot be told apart from inside the app. LP Music's
+  launcher activity is now `LaunchActivity` (NoDisplay): `OpenPlayerActivity.openLive` starts the playing (else most recent)
+  non-car player's launcher intent; with no player session, or in child mode, it starts `MusicSettingsActivity` as before.
+  Consequence in 2.23: while any player session exists the LP Music icon opens that player too, not Settings.
+- 2.24: the app-list icon opens Settings again, the dock card still opens the player. Both launches are the same intent
+  (act MAIN, cat LAUNCHER, flg 0x10000000, cmp LaunchActivity, from uid 1001000 / com.android.launcher3), and both go
+  through `AppUtils.openAppWithSysAnim` -> `content://com.android.launcher3.eventProvider startLaunchIntentsWrapper`
+  (`openMainApp` even picks the first MAIN/LAUNCHER activity of the package, so a second launcher entry or a MAIN/INFO
+  activity cannot separate them). What does differ is the screen the tap came from. Logged on the car at 14:57:43
+  (app-list tap): `CAR.AM updateTasks: display_0_top_activity value = LaunchActivity valueOrigin =
+  com.android.launcher3/com.leapmotor.appcenter.activity.AppListActivity`, and the launcher's own `callingPid` was the main
+  launcher process (the dock card runs in the `com.android.launcher3:smartdock` process). The app cannot see the caller's pid,
+  but it can read Settings.Global `display_0_top_activity`: at the time `LaunchActivity.onCreate` ran it still held
+  `AppListActivity` (the car rewrote it to our activity about 30 ms after our own launch of Yandex). `TopTracker` reads it
+  and, to be safe against that race, the service remembers the last value that was not ours. Rule: previous top contains
+  `AppListActivity` -> Settings, anything else (home screen = where the dock card sits) -> player. Edge: a card tap made
+  while the app list is on top would open Settings. Not yet checked for the dock-card tap (no capture of it).
+- 2.25: built from the 2.22 sources (no `LaunchActivity` / `TopTracker`). The launcher activity is now `MusicHomeActivity`,
+  a home screen with the now-playing widget (`NowPlaying`, borrowed from LP Companion), an Open playing app button and a
+  Settings button, on a faint music backdrop; both the app-list icon and the dock-card tap open it, so there is nothing
+  to tell apart. Settings lost the "old LP Music removed" row (and the `queries` entry for `uz.carhelper.music`), and
+  its Status card got a **Fix permissions** button next to Re-check. Checked read-only on the car: it has the stock
+  Notification access page, `com.android.car.settings.common.CarSettingActivities$NotificationAccessActivity`, answering
+  `android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS` (and `..._DETAIL_SETTINGS`), so the button just opens it and the
+  user switches "LP Music wheel buttons" on: no adb client and no INTERNET permission (the parent's Heal / adb client
+  was looked at and left out on purpose). Wheel, dock and voice commands never needed adb or that page: they arrive as
+  broadcasts; the notification access only lets LP Music see the player (`getActiveSessions`). Checked on the car (2.27, 15:33-15:36):
+  the home screen, the widget (matches the player state), the Open playing app button and the Settings page rendered
+  cleanly on the main screen; then notification access was switched off over adb (`disallow_listener`) and the app force-stopped
+  (the car's MultiMedia rebinds `SourceService` at once, the media service and listener stay down), and the user recovered it from
+  the app: opening LP Music restarted the service, the red warning opened the car's `NotificationAccessActivity`, switching
+  "LP Music wheel buttons" on put the entry back into `enabled_notification_listeners`, `WheelListener` / `MediaBrowser` were
+  running again and the type-13 announce resumed. Not seen: the warning bar and the "Nothing is playing" card on screen
+  (the user did that step), the other four languages on the home screen.
+- 2.26: the app icon is a black note on white (it was white on teal).
+- 2.27: the dock card's heart button acts as Previous. The card (launcher3 `SmartDockAdapter`) has only play/pause,
+  next and the heart (`ivFavorite`, launcher drawables `ic_like_def` / `ic_like_sel` / `ic_like_unable`), no previous
+  button, and an app cannot change those icons. A heart press goes `onFavStateChange` -> `controlCurFav(type, !fav)` ->
+  MultiMedia -> our `ISourceController.collectionAction` (code 5); `SourceService$Ctl` now calls
+  `MiguCtrlReceiver.previous` (skipToPrevious on the announced player, then `MiguBridge.kick`) and answers
+  `isSuccess true, isCollection false`. Checked on the car (15:30, Yandex Music Lite): three presses, each logged
+  `LPWheelKeys: dock heart (collectionAction) -> previous` and answered `{"isCollection":false,"isLogin":true,"isSuccess":true}`;
+  the car did not flip the heart (a screenshot of the card shows an outlined, unfilled heart). The player decides what
+  Previous means: the first two presses restarted the same song, the third (1.3 s after the second) went to the earlier song.
 - Unchanged: type 13, 1.5 s tick otherwise, `playMediaType` int gate, 1/2/3 mapping, KeyDedup.
 
 ## 7. Unknowns

@@ -9,15 +9,22 @@
     <string name="sec_vehicle">Avtomobil</string>
     <string name="row_listener">Hozir ijro etilmoqda (bildirishnomalarga ruxsat)</string>
     <string name="row_service">LP Music xizmati (qoʻshiqni koʻrsatadi, rul va ovoz buyruqlarini qabul qiladi)</string>
-    <string name="row_old">Eski LP Music (uz.carhelper.music) oʻchirilgan</string>
     <string name="st_ok">OK</string>
     <string name="st_off">OʻCHIQ</string>
     <string name="fix_svc_off">Oʻchirilgan — pastdagi “LP Music yoqilgan” ni yoqing va Saqlash tugmasini bosing</string>
     <string name="fix_svc_start">Ishga tushmoqda — bir necha soniyadan keyin “Qayta tekshirish” tugmasini bosing</string>
     <string name="st_recheck">Holatni qayta tekshirish</string>
+    <string name="btn_fix">Ruxsatlarni tuzatish</string>
+    <string name="perm_ok">Barcha ruxsatlar allaqachon berilgan</string>
     <string name="sw_enabled">LP Music yoqilgan: ijro etilayotgan ilovani avtomobilda koʻrsatish va rul, musiqa kartasi hamda ovoz orqali boshqarish</string>
     <string name="sw_yield">DiPlay ijro etayotganda rul tugmalarini unga berish</string>
     <string name="nav_vehicle">Avtomobil sozlamalari</string>
     <string name="toast_saved">Saqlandi</string>
     <string name="toast_child">Bolalar rejimi yoqilgan — LP Companion tomonidan bloklangan</string>
+    <string name="btn_open_player">Ijro etilayotgan ilovani ochish</string>
+    <string name="np_empty">Hozir hech narsa ijro etilmayapti</string>
+    <string name="np_empty_hint">Istalgan musiqa ilovasida qoʻshiqni yoqing</string>
+    <string name="toast_no_player">Ijro etilayotgan ilova topilmadi</string>
+    <string name="toast_no_page">Bildirishnomalarga ruxsat sahifasini ochib boʻlmadi</string>
+    <string name="warn_perm">Bildirishnomalarga ruxsat oʻchiq — yoqish uchun bosing</string>
 </resources>

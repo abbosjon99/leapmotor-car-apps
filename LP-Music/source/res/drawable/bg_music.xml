@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:type="linear" android:angle="270" android:startColor="#FF152036" android:endColor="#FF06080E"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient android:type="radial" android:centerX="0.84" android:centerY="0.12" android:gradientRadius="70%p" android:startColor="#2E3D8BFF" android:endColor="#003D8BFF"/>
+        </shape>
+    </item>
+    <item android:drawable="@drawable/bg_music_art"/>
+</layer-list>

@@ -7,15 +7,18 @@
 #   2 registerCallback(ISourceCallBack)  keep the binder
 #   3 unregisterCallback()
 #   4 getCollectionStutas(String id)  -> reply through the callback (Reply)
-#   5 collectionAction(String id, boolean collect) -> reply "not successful"
+#   5 collectionAction(String id, boolean collect) -> the dock card's heart button: used as "previous track"
+#                                      (MiguCtrlReceiver.previous), reply "success, not a favourite"
 # Replies go to ISourceCallBack code 1 (onSuccess(String json)) as a ResponseFavBean JSON.
 
 .field private cb:Landroid/os/IBinder;
+.field private final ctx:Landroid/content/Context;
 .field private final main:Landroid/os/Handler;
 
-.method constructor <init>()V
+.method constructor <init>(Landroid/content/Context;)V
     .locals 2
     invoke-direct {p0}, Landroid/os/Binder;-><init>()V
+    iput-object p1, p0, Lcom/migu/car/music/launcher/SourceService$Ctl;->ctx:Landroid/content/Context;
     new-instance v0, Landroid/os/Handler;
     invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
     move-result-object v1
@@ -99,7 +102,11 @@
     move-result-object v1
     invoke-virtual {p2}, Landroid/os/Parcel;->readInt()I
     invoke-virtual {p3}, Landroid/os/Parcel;->writeNoException()V
-    const/4 v2, 0x0
+    # the heart on the dock card is used as "previous track"; the answer says success and "not a favourite", so the
+    # heart never fills in
+    iget-object v2, p0, Lcom/migu/car/music/launcher/SourceService$Ctl;->ctx:Landroid/content/Context;
+    invoke-static {v2}, Luz/carhelper/passenger/MiguCtrlReceiver;->previous(Landroid/content/Context;)V
+    const/4 v2, 0x1
     const/4 v3, 0x0
     invoke-direct {p0, v1, v2, v3}, Lcom/migu/car/music/launcher/SourceService$Ctl;->answer(Ljava/lang/String;ZZ)V
     const/4 v1, 0x1

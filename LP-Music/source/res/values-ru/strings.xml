@@ -9,15 +9,22 @@
     <string name="sec_vehicle">Автомобиль</string>
     <string name="row_listener">Сейчас играет (доступ к уведомлениям)</string>
     <string name="row_service">Служба LP Music (показывает трек, принимает кнопки руля и голос)</string>
-    <string name="row_old">Старый LP Music (uz.carhelper.music) удалён</string>
     <string name="st_ok">ОК</string>
     <string name="st_off">ВЫКЛ</string>
     <string name="fix_svc_off">Выключено — включите «LP Music включён» ниже и нажмите «Сохранить»</string>
     <string name="fix_svc_start">Запускается — через несколько секунд нажмите «Проверить снова»</string>
     <string name="st_recheck">Проверить снова</string>
+    <string name="btn_fix">Исправить разрешения</string>
+    <string name="perm_ok">Все разрешения уже выданы</string>
     <string name="sw_enabled">LP Music включён: показывать играющее приложение на экране автомобиля и управлять им кнопками руля, карточкой музыки и голосом</string>
     <string name="sw_yield">Отдавать кнопки руля DiPlay, пока он играет</string>
     <string name="nav_vehicle">Настройки автомобиля</string>
     <string name="toast_saved">Сохранено</string>
     <string name="toast_child">Включён детский режим — заблокировано в LP Companion</string>
+    <string name="btn_open_player">Открыть приложение плеера</string>
+    <string name="np_empty">Сейчас ничего не играет</string>
+    <string name="np_empty_hint">Включите песню в любом музыкальном приложении</string>
+    <string name="toast_no_player">Играющее приложение не найдено</string>
+    <string name="toast_no_page">Не удалось открыть страницу доступа к уведомлениям</string>
+    <string name="warn_perm">Доступ к уведомлениям выключен — нажмите, чтобы включить</string>
 </resources>

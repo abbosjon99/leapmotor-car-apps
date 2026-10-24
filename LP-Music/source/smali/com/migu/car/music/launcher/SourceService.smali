@@ -21,7 +21,7 @@
     .locals 1
     invoke-super {p0}, Landroid/app/Service;->onCreate()V
     new-instance v0, Lcom/migu/car/music/launcher/SourceService$Ctl;
-    invoke-direct {v0}, Lcom/migu/car/music/launcher/SourceService$Ctl;-><init>()V
+    invoke-direct {v0, p0}, Lcom/migu/car/music/launcher/SourceService$Ctl;-><init>(Landroid/content/Context;)V
     iput-object v0, p0, Lcom/migu/car/music/launcher/SourceService;->ctl:Lcom/migu/car/music/launcher/SourceService$Ctl;
     return-void
 .end method

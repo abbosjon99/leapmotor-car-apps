@@ -18,6 +18,32 @@
     return-void
 .end method
 
+# The dock card's heart button: the car sends it to SourceService as ISourceController.collectionAction (see
+# SourceService$Ctl), and LP Music uses it as "previous track". Public because SourceService is in another package.
+.method public static previous(Landroid/content/Context;)V
+    .locals 3
+    :try_start_0
+    invoke-static {p0}, Luz/carhelper/passenger/MusicGate;->shouldHandle(Landroid/content/Context;)Z
+    move-result v0
+    if-eqz v0, :done
+    invoke-static {p0}, Luz/carhelper/passenger/WheelReceiver;->getSessions(Landroid/content/Context;)Ljava/util/List;
+    move-result-object v0
+    invoke-static {v0}, Luz/carhelper/passenger/WheelReceiver;->findTarget(Ljava/util/List;)Landroid/media/session/MediaController;
+    move-result-object v0
+    if-eqz v0, :done
+    invoke-virtual {v0}, Landroid/media/session/MediaController;->getTransportControls()Landroid/media/session/MediaController$TransportControls;
+    move-result-object v1
+    invoke-virtual {v1}, Landroid/media/session/MediaController$TransportControls;->skipToPrevious()V
+    invoke-static {}, Luz/carhelper/passenger/MiguBridge;->kick()V
+    const-string v1, "LPWheelKeys"
+    const-string v2, "dock heart (collectionAction) -> previous"
+    invoke-static {v1, v2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :done
+    :done
+    return-void
+.end method
+
 .method public onReceive(Landroid/content/Context;Landroid/content/Intent;)V
     .locals 7
     # LP Music gate: off, or yielding to a playing DiPlay
