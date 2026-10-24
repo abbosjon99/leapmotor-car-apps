@@ -7,7 +7,7 @@ sdkInfo:
   minSdkVersion: 26
   targetSdkVersion: 30
 versionInfo:
-  versionCode: 36
-  versionName: '2.28'
+  versionCode: 37
+  versionName: 'p1.0'
 doNotCompress:
 - arsc

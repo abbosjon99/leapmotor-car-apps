@@ -9,7 +9,7 @@ button and voice commands the car sends back. How the car does this, and why, is
 `MediaSession` / `MediaBrowserService` made the car's media service pause the real player
 (FINDINGS.md section 9), so the session stays inactive.
 
-Package: **`com.migu.car.music`** (since 2.19; before that `uz.carhelper.music`)  ·  version 2.28  ·
+Package: **`com.migu.car.music`** (since 2.19; before that `uz.carhelper.music`)  ·  version **p1.0** (the build that was 2.28; the numbers 2.15-2.28 in these notes are the earlier versions)  ·
 signed with LP Companion's key.
 
 It takes Migu's package name on purpose: the car has neither Migu nor NetEase, and its media app only
