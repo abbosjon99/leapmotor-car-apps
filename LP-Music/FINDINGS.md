@@ -190,6 +190,16 @@ Checked on the car with 2.16 (logcat):
   `LPWheelKeys: dock heart (collectionAction) -> previous` and answered `{"isCollection":false,"isLogin":true,"isSuccess":true}`;
   the car did not flip the heart (a screenshot of the card shows an outlined, unfilled heart). The player decides what
   Previous means: the first two presses restarted the same song, the third (1.3 s after the second) went to the earlier song.
+- 2.28: a track whose player gives no cover now announces the playing app's launcher icon as the cover. Found on the car
+  (15:56-15:59, Yandex Music Lite): for tracks without a `ALBUM_ART` / `ART` bitmap (and for the first moment of a track before
+  the art arrives) `MiguBridge` sent `imagUrl ""` plus a 1x1 placeholder JPEG (839 bytes), and the dock card's Glide logged
+  `Load failed for  with size [80x80]` for each such announce (six in that window), leaving the card blank; tracks with art
+  loaded fine (a valid 8163-byte `cover.jpg` was served). `MiguBridge.appIcon` draws `getApplicationIcon(pkg)` into a 300 px bitmap
+  on a dark square (cached per package) and the normal cover path takes it from there (hash URL, `cover.jpg`, 200 px bitmap
+  extra); when real art arrives later the announce changes and replaces it. Only bitmaps are read: a player that gives only
+  an art URI (`ALBUM_ART_URI`) still counts as "no cover". LP Music's own widget shows the same icon in that case.
+  The widget's song name is 64 and the artist 48 (1.6 x the old 40 and 30), the song name may take two lines, and the
+  column is 1600 px wide (was 1280) so long names still fit.
 - Unchanged: type 13, 1.5 s tick otherwise, `playMediaType` int gate, 1/2/3 mapping, KeyDedup.
 
 ## 7. Unknowns

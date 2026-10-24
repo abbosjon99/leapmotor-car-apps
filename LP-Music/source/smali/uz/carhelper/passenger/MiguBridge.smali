@@ -24,6 +24,9 @@
 # number of quick 0.5 s ticks left after a car command (see kick)
 .field private fastLeft:I
 .field private static sInstance:Luz/carhelper/passenger/MiguBridge;
+# the playing app's icon as a 300 px bitmap, kept for the next ticks (see appIcon)
+.field private static iconPkg:Ljava/lang/String;
+.field private static iconBmp:Landroid/graphics/Bitmap;
 
 .method public constructor <init>(Landroid/content/Context;Landroid/os/Handler;)V
     .locals 0
@@ -99,6 +102,45 @@
     invoke-virtual {p0, v1, p1, v0}, Landroid/graphics/Bitmap;->compress(Landroid/graphics/Bitmap$CompressFormat;ILjava/io/OutputStream;)Z
     invoke-virtual {v0}, Ljava/io/ByteArrayOutputStream;->toByteArray()[B
     move-result-object v0
+    return-object v0
+.end method
+
+# The playing app's launcher icon as a 300 px bitmap on a dark square, used as the cover when the player gives none
+# (a track without art would otherwise announce an empty imagUrl, which the dock card's Glide fails to load).
+# Cached per package; null when the icon cannot be drawn.
+.method private static appIcon(Landroid/content/Context;Ljava/lang/String;)Landroid/graphics/Bitmap;
+    .locals 5
+    sget-object v0, Luz/carhelper/passenger/MiguBridge;->iconPkg:Ljava/lang/String;
+    if-eqz v0, :build
+    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :build
+    sget-object v0, Luz/carhelper/passenger/MiguBridge;->iconBmp:Landroid/graphics/Bitmap;
+    return-object v0
+    :build
+    :try_start_0
+    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v0
+    invoke-virtual {v0, p1}, Landroid/content/pm/PackageManager;->getApplicationIcon(Ljava/lang/String;)Landroid/graphics/drawable/Drawable;
+    move-result-object v0
+    const/16 v1, 0x12c
+    sget-object v2, Landroid/graphics/Bitmap$Config;->ARGB_8888:Landroid/graphics/Bitmap$Config;
+    invoke-static {v1, v1, v2}, Landroid/graphics/Bitmap;->createBitmap(IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+    move-result-object v2
+    new-instance v3, Landroid/graphics/Canvas;
+    invoke-direct {v3, v2}, Landroid/graphics/Canvas;-><init>(Landroid/graphics/Bitmap;)V
+    const v4, 0xff20242f
+    invoke-virtual {v3, v4}, Landroid/graphics/Canvas;->drawColor(I)V
+    const/4 v4, 0x0
+    invoke-virtual {v0, v4, v4, v1, v1}, Landroid/graphics/drawable/Drawable;->setBounds(IIII)V
+    invoke-virtual {v0, v3}, Landroid/graphics/drawable/Drawable;->draw(Landroid/graphics/Canvas;)V
+    sput-object p1, Luz/carhelper/passenger/MiguBridge;->iconPkg:Ljava/lang/String;
+    sput-object v2, Luz/carhelper/passenger/MiguBridge;->iconBmp:Landroid/graphics/Bitmap;
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
+    return-object v2
+    :catch_0
+    const/4 v0, 0x0
     return-object v0
 .end method
 
@@ -189,6 +231,13 @@
     invoke-virtual {v3, v9}, Landroid/media/MediaMetadata;->getBitmap(Ljava/lang/String;)Landroid/graphics/Bitmap;
     move-result-object v8
     :art_done
+    # the player gave no cover: use the playing app's own icon, so the card is never blank
+    if-nez v8, :art_ok
+    invoke-virtual {v1}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
+    move-result-object v9
+    invoke-static {v0, v9}, Luz/carhelper/passenger/MiguBridge;->appIcon(Landroid/content/Context;Ljava/lang/String;)Landroid/graphics/Bitmap;
+    move-result-object v8
+    :art_ok
 
     # v9 = bitmap extra (200 px JPEG, or a 1x1 placeholder), v10 = imagUrl for the dock card
     const-string v10, ""

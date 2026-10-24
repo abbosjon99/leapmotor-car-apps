@@ -23,7 +23,7 @@
     <string name="toast_child">Bolalar rejimi yoqilgan — LP Companion tomonidan bloklangan</string>
     <string name="btn_open_player">Ijro etilayotgan ilovani ochish</string>
     <string name="np_empty">Hozir hech narsa ijro etilmayapti</string>
-    <string name="np_empty_hint">Istalgan musiqa ilovasida qoʻshiqni yoqing</string>
+    <string name="np_empty_hint">Musiqa ilovasida qoʻshiq yoqing</string>
     <string name="toast_no_player">Ijro etilayotgan ilova topilmadi</string>
     <string name="toast_no_page">Bildirishnomalarga ruxsat sahifasini ochib boʻlmadi</string>
     <string name="warn_perm">Bildirishnomalarga ruxsat oʻchiq — yoqish uchun bosing</string>

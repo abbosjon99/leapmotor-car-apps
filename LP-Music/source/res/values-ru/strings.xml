@@ -23,7 +23,7 @@
     <string name="toast_child">Включён детский режим — заблокировано в LP Companion</string>
     <string name="btn_open_player">Открыть приложение плеера</string>
     <string name="np_empty">Сейчас ничего не играет</string>
-    <string name="np_empty_hint">Включите песню в любом музыкальном приложении</string>
+    <string name="np_empty_hint">Включите песню в любом плеере</string>
     <string name="toast_no_player">Играющее приложение не найдено</string>
     <string name="toast_no_page">Не удалось открыть страницу доступа к уведомлениям</string>
     <string name="warn_perm">Доступ к уведомлениям выключен — нажмите, чтобы включить</string>

@@ -144,7 +144,7 @@
     const/4 v3, 0x1
     invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->setOrientation(I)V
     new-instance v3, Landroid/widget/LinearLayout$LayoutParams;
-    const/16 v4, 0x500
+    const/16 v4, 0x640
     const/4 v5, -0x2
     invoke-direct {v3, v4, v5}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
     invoke-virtual {v1, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V

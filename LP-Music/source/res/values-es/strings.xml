@@ -23,7 +23,7 @@
     <string name="toast_child">El modo infantil está activado — bloqueado por LP Companion</string>
     <string name="btn_open_player">Abrir la app que suena</string>
     <string name="np_empty">No suena nada</string>
-    <string name="np_empty_hint">Pon una canción en cualquier app de música</string>
+    <string name="np_empty_hint">Pon una canción en cualquier app</string>
     <string name="toast_no_player">No se encontró ninguna app reproduciendo</string>
     <string name="toast_no_page">No se pudo abrir la página de acceso a notificaciones</string>
     <string name="warn_perm">El acceso a notificaciones está desactivado — toca para activarlo</string>

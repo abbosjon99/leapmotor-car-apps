@@ -79,20 +79,23 @@
     invoke-virtual {v0, v1}, Landroid/view/View;->setTag(Ljava/lang/Object;)V
     invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View$OnClickListener;)V
 
+    # song name: 64 (40 x 1.6), up to two lines
     const-string v1, ""
-    const/high16 v2, 0x42200000
+    const/high16 v2, 0x42800000
     const/4 v3, -0x1
     const/4 v4, 0x1
     invoke-static {p1, v1, v2, v3, v4}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
     move-result-object v1
-    invoke-virtual {v1, v4}, Landroid/widget/TextView;->setMaxLines(I)V
+    const/4 v2, 0x2
+    invoke-virtual {v1, v2}, Landroid/widget/TextView;->setMaxLines(I)V
     sget-object v2, Landroid/text/TextUtils$TruncateAt;->END:Landroid/text/TextUtils$TruncateAt;
     invoke-virtual {v1, v2}, Landroid/widget/TextView;->setEllipsize(Landroid/text/TextUtils$TruncateAt;)V
     iput-object v1, p0, Luz/carhelper/passenger/NowPlaying;->title:Landroid/widget/TextView;
     invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
 
+    # artist: 48 (30 x 1.6)
     const-string v1, ""
-    const/high16 v2, 0x41f00000
+    const/high16 v2, 0x42400000
     sget v3, Luz/carhelper/passenger/Ui;->TEXT2:I
     const/4 v4, 0x0
     invoke-static {p1, v1, v2, v3, v4}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
@@ -493,6 +496,22 @@
     invoke-virtual {v2, v3}, Landroid/widget/ImageView;->setImageBitmap(Landroid/graphics/Bitmap;)V
     goto :art_done
     :art_fallback
+    # no cover from the player: show the playing app's own icon (the music note only if that fails)
+    const/4 v4, 0x0
+    invoke-virtual {v2, v4, v4, v4, v4}, Landroid/widget/ImageView;->setPadding(IIII)V
+    :try_start_ic
+    invoke-virtual {v0}, Landroid/media/session/MediaController;->getPackageName()Ljava/lang/String;
+    move-result-object v4
+    iget-object v5, p0, Luz/carhelper/passenger/NowPlaying;->act:Landroid/app/Activity;
+    invoke-virtual {v5}, Landroid/app/Activity;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v5
+    invoke-virtual {v5, v4}, Landroid/content/pm/PackageManager;->getApplicationIcon(Ljava/lang/String;)Landroid/graphics/drawable/Drawable;
+    move-result-object v4
+    invoke-virtual {v2, v4}, Landroid/widget/ImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
+    :try_end_ic
+    .catch Ljava/lang/Exception; {:try_start_ic .. :try_end_ic} :ic_fail
+    goto :art_done
+    :ic_fail
     const/16 v4, 0x3c
     invoke-virtual {v2, v4, v4, v4, v4}, Landroid/widget/ImageView;->setPadding(IIII)V
     const-string v4, "ic_music"

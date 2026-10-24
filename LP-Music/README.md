@@ -9,7 +9,7 @@ button and voice commands the car sends back. How the car does this, and why, is
 `MediaSession` / `MediaBrowserService` made the car's media service pause the real player
 (FINDINGS.md section 9), so the session stays inactive.
 
-Package: **`com.migu.car.music`** (since 2.19; before that `uz.carhelper.music`)  ·  version 2.27  ·
+Package: **`com.migu.car.music`** (since 2.19; before that `uz.carhelper.music`)  ·  version 2.28  ·
 signed with LP Companion's key.
 
 It takes Migu's package name on purpose: the car has neither Migu nor NetEase, and its media app only
@@ -65,7 +65,7 @@ com.migu.car.music`) without touching the main app.
 | `MediaBrowser.smali`   | The app's foreground service (not exported, no `MediaBrowserService` intent-filter): owns an inactive `MediaSession`, runs the announce + steer channel. |
 | `MediaMirror.smali`    | Every 1 s remembers which player is in use (`lastPlayer`) for `OpenPlayerActivity`; keeps our session inactive. |
 | `MediaCb.smali`        | Session callback, play/pause/next/prev/stop forwarded to the player (unreachable while the session is inactive). |
-| `MiguBridge.smali`     | Announces the player to the car as media type 13 (`MEDIA.INFO`: title, artist, album, duration, cover URL + JPEG, play state). |
+| `MiguBridge.smali`     | Announces the player to the car as media type 13 (`MEDIA.INFO`: title, artist, album, duration, cover URL + JPEG, play state). With no cover from the player it uses the playing app's launcher icon (2.28), so the dock card is never blank. |
 | `CoverProvider.smali`  | Serves the current cover as `content://com.migu.car.music.cover/cover.jpg?v=<hash>`; the dock card loads `imagUrl` with Glide. |
 | `MiguCtrlReceiver.smali` | METER.CTRL / VOICE.CTRL (wheel, dock buttons, voice) -> player (METER through `KeyDedup`). |
 | `SteerWheelReceiver.smali` | `com.leapmotor.steerwheelcontrol.media` (action 1/4/7) -> player. |
