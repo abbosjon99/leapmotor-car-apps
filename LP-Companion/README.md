@@ -9,9 +9,9 @@ opened there.
 Package: `uz.carhelper.passenger`  ·  current version: 2.39 (versionCode 47, installed on the car 2026-10-24)
 
 **Music control is not done here any more.** Steering-wheel media keys and the car's media widget moved
-to the sibling app **LP Music** (`uz.carhelper.music`, folder `../LP-Music`). LP Companion only shows and
-drives whatever MediaSession is active (the now-playing card). As of 2026-10-23 LP Music was not installed
-on the car, so LP Companion no longer handles the wheel media keys and nothing in this project does.
+to the sibling app **LP Music** (`com.migu.car.music`, p1.0, folder `../LP-Music`; it was `uz.carhelper.music` before
+LP Music 2.19), which is installed on the car. LP Companion only shows and drives whatever MediaSession is
+active (the now-playing card) and does not handle the wheel media keys.
 
 ## What it does
 
