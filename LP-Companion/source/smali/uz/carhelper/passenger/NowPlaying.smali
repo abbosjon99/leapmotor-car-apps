@@ -8,7 +8,7 @@
 #   rounded cover, bold title, artist, a thin progress bar, prev / play-pause / next.
 # The card is tinted with the cover's average colour (cover squeezed to one pixel, shown at low
 # opacity over a dark base so the text stays readable on any cover).
-# Needs the notification-listener access that WheelListener already grants (getActiveSessions).
+# Needs the notification-listener access that MediaListener already grants (getActiveSessions).
 # Hidden when nothing is playing, and always hidden in child mode on the passenger screen (no music
 # controls and no way into the music app). Refreshes every second while attached.
 

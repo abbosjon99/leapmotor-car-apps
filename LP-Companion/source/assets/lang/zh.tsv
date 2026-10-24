@@ -55,6 +55,7 @@ Open LP Companion automatically when the passenger screen turns on	副驾屏幕�
 When it turns on, go back to the app that was open (instead of the grid)	亮屏时返回之前打开的应用（而不是应用列表）
 Passenger bubble: push its app to the main screen  ←	副驾悬浮球：把其应用推到主屏  ←
 Passenger bubble: bring the main screen's app over  →	副驾悬浮球：把主屏的应用拉过来  →
+Restart an app when it is moved to the main screen (fixes apps drawing under the car's bars; it starts again from its first screen)	将应用移到主屏幕时重新启动（避免内容被车机栏遮挡；应用将从首页重新开始）
 Bubble menu	悬浮球菜单
 Close the bubble menu automatically	自动关闭悬浮球菜单
 Close it after	关闭时间
@@ -64,6 +65,7 @@ Close the previous app when another one is opened	打开新应用时关闭上一
 Also close music apps	同时关闭音乐应用
 Protection	保护
 Overload protection: close passenger apps if CPU or RAM is overloaded	过载保护：CPU 或内存过载时关闭副驾应用
+Show the RAM and temperature status on the grid	在列表中显示内存和温度状态
 Right now:   	当前：   
 not available	不可用
 RAM 	内存 
@@ -108,6 +110,7 @@ Last attempt: 	上次尝试：
 No attempt yet	尚未尝试
 Permissions granted through the car's ADB	已通过车机 ADB 授予权限
 Could not reach the car's ADB (port 5555)	无法连接车机 ADB（端口 5555）
+Could not reach the car's ADB (port 5555). Trying again for about 2 minutes.	无法连接汽车的 ADB（端口 5555）。将再尝试约 2 分钟。
 Allow the connection on the car's screen (Always allow), then try again	请在车机屏幕上允许连接（选择“始终允许”），然后重试
 Could not grant the permissions	无法授予权限
 All permissions are already granted	所有权限均已授予
@@ -188,5 +191,6 @@ Uninstalling…	正在卸载…
 Uninstall this app?	卸载此应用？
 Uninstall	卸载
 The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	车机 ADB 处于无线调试（TLS）模式。需要使用端口 5555 的传统网络 ADB。
-The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	车机 ADB 已关闭或无法连接。请在车机后台页面开启无线 ADB，然后点击“重新检查”。
+The car's ADB is off or not reachable. Turn it on manually in the car's settings, then try again.	汽车的 ADB 已关闭或无法连接。请在车机设置中手动开启，然后重试。
 needs ADB	需要 ADB
+turn ADB on in the car's settings	请在车机设置中开启 ADB

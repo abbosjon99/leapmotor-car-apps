@@ -20,7 +20,7 @@
 
 .method private static bools()[Ljava/lang/String;
     .locals 3
-    const/16 v0, 0xa
+    const/16 v0, 0xc
     new-array v0, v0, [Ljava/lang/String;
     const/4 v1, 0x0
     const-string v2, "wheel"
@@ -51,6 +51,12 @@
     aput-object v2, v0, v1
     const/16 v1, 0x9
     const-string v2, "healAdb"
+    aput-object v2, v0, v1
+    const/16 v1, 0xa
+    const-string v2, "showStatus"
+    aput-object v2, v0, v1
+    const/16 v1, 0xb
+    const-string v2, "moveRestart"
     aput-object v2, v0, v1
     return-object v0
 .end method

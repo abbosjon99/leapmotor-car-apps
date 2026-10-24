@@ -9,7 +9,7 @@
 # What it checks (and the only commands it will ever send, enforced again in AdbRunner.allowed):
 #   WRITE_SECURE_SETTINGS     pm grant --user U <pkg> android.permission.WRITE_SECURE_SETTINGS
 #   draw over other apps      appops set --user U <pkg> SYSTEM_ALERT_WINDOW allow
-#   notification access       cmd notification allow_listener <pkg>/uz.carhelper.passenger.WheelListener U
+#   notification access       cmd notification allow_listener <pkg>/uz.carhelper.passenger.MediaListener U
 # Automatic attempts (pref "healAdb", default on) start when the bubble service starts, at most every 10 minutes, and retry
 # a few times when adbd is not up yet (right after boot). "Fix permissions now" in Settings tries once, any time.
 # The last result is kept in pref "healResult" ("OK|...", "NOCONN|...", "AUTH|...", "FAIL|...", "NONE|...").
@@ -80,7 +80,7 @@
     move-result-object v3
     check-cast v3, Landroid/app/NotificationManager;
     new-instance v4, Landroid/content/ComponentName;
-    const-class v5, Luz/carhelper/passenger/WheelListener;
+    const-class v5, Luz/carhelper/passenger/MediaListener;
     invoke-direct {v4, p0, v5}, Landroid/content/ComponentName;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-virtual {v3, v4}, Landroid/app/NotificationManager;->isNotificationListenerAccessGranted(Landroid/content/ComponentName;)Z
     move-result v3
@@ -89,7 +89,7 @@
     const-string v4, "cmd notification allow_listener "
     invoke-direct {v3, v4}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
     invoke-virtual {v3, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    const-string v4, "/uz.carhelper.passenger.WheelListener "
+    const-string v4, "/uz.carhelper.passenger.MediaListener "
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     invoke-virtual {v3, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
     invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
@@ -216,7 +216,8 @@
     :try_start_0
     iget-object v0, p0, Luz/carhelper/passenger/Heal;->ctx:Landroid/content/Context;
     iget-boolean v1, p0, Luz/carhelper/passenger/Heal;->manual:Z
-    const/4 v2, 0x1
+    # attempts while adbd is not reachable: "Fix permissions now" 8 (every 10 s), automatic 6 (every 45 s)
+    const/16 v2, 0x8
     if-nez v1, :attempts_set
     const/4 v2, 0x6
     :attempts_set
@@ -258,6 +259,16 @@
     add-int/lit8 v3, v3, 0x1
     if-ge v3, v2, :after
     const-wide/32 v5, 0xafc8
+    if-eqz v1, :sleep_go
+    # manual: say once that it keeps trying, then look again every 10 s (the user may be switching ADB on right now)
+    const-wide/16 v5, 0x2710
+    const/4 v7, 0x1
+    if-ne v3, v7, :sleep_go
+    const-string v7, "Could not reach the car's ADB (port 5555). Trying again for about 2 minutes."
+    invoke-static {v7}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v7
+    invoke-static {v0, v7}, Luz/carhelper/passenger/Heal;->say(Landroid/content/Context;Ljava/lang/String;)V
+    :sleep_go
     invoke-static {v5, v6}, Ljava/lang/Thread;->sleep(J)V
     goto :attempt
     :after
@@ -300,6 +311,15 @@
     :try_end_0
     .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
     :catch_0
+    # reload the Settings page if it is open and unchanged, so its Status rows show the repair (1.5 s: the bubbles restart first)
+    new-instance v2, Landroid/os/Handler;
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+    move-result-object v3
+    invoke-direct {v2, v3}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+    new-instance v3, Luz/carhelper/passenger/SettingsRefresh;
+    invoke-direct {v3}, Luz/carhelper/passenger/SettingsRefresh;-><init>()V
+    const-wide/16 v4, 0x5dc
+    invoke-virtual {v2, v3, v4, v5}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
     const-string v2, "Permissions granted through the car's ADB"
     invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
     move-result-object v2

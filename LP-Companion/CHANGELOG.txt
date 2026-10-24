@@ -603,3 +603,193 @@ LP Companion 2.31  (2026-10-23)  versionCode 39
   - Not tested on the car: the real adbd handshake, whether adb_enabled alone brings the port back, how the greyed rows
     look.
   Undo: install LP-Companion-2.30.apk.
+
+
+LP Companion 2.32  (2026-10-24)  versionCode 40
+  BUILT, NOT YET INSTALLED OR TRIED ON THE CAR (offline). Includes 2.27 - 2.31.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.32.apk`
+  - Coming back after the car restarts or wakes from deep sleep. Before, a boot only started the two bubble services once:
+    BubbleService stops itself when the passenger display (3) does not exist yet (or when its window cannot be added) and
+    nothing started it again, so the bubble, and the Back accessibility repair that runs inside it, never came back; and
+    the passenger grid was only opened on an off -> on change of the passenger screen, so nothing opened when the screen
+    was already on at boot. Now (new class Boot, written in Java under adbclient\src\...\boot, built by build-adb.ps1):
+      * triggers: the boot broadcasts BootReceiver now listens for - android.intent.action.BOOT_COMPLETED, the car's own
+        com.leapmotor.action.BOOT_COMPLETED and com.leapmotoraction.BOOT_COMPLETED, and the head-unit quick-boot
+        android.intent.action.QUICKBOOT_POWERON / com.htc.intent.action.QUICKBOOT_POWERON - and, as a second trigger,
+        WheelListener (the notification listener) connecting, which the system does after every process start even if no
+        boot broadcast reached the app (that one only opens the grid if the device started less than 5 minutes ago, so a
+        process restart in the middle of a video never pops the grid).
+      * for 3 minutes after the last trigger, every 3 s: puts the Back accessibility service back into
+        enabled_accessibility_services (needs WRITE_SECURE_SETTINGS, as before); starts BubbleService again once display 3
+        exists, and MainBubbleService, whenever they are not running (at most 6 starts each); and, once display 3 has been
+        ON for 20 s, opens the LP Companion grid there ONCE per boot. Two boot broadcasts less than 2 minutes apart count
+        as one boot. If the passenger screen stays off, nothing is forced: PassengerWatcher opens the grid when it wakes.
+      * the grid is only opened while the existing "Open LP Companion automatically when the passenger screen turns on"
+        setting (autoOpen, default on) is on. No new setting and no new text.
+      * every step is in try/catch; on any failure it does nothing. Android 12 may refuse a foreground-service start from
+        a late tick; the app holds SYSTEM_ALERT_WINDOW (an exemption), and a refusal is only logged.
+      * log tag LPBoot: `adb logcat -s LPBoot` shows which trigger fired ("kick by <action> / listener"), each service
+        start, and when the grid was opened. The first car restart will show which of the boot broadcasts the car really
+        sends; the list was taken from the car's own MultiMedia app and from Migu's manifest, not from a test.
+  - Checked here: the Java compiles against android.jar (platform 31), the 18 mock-adbd test groups pass, the generated adb
+    and apk smali are byte-identical to 2.31, xref-check 100 files / 0 problems, java-keys 84 texts / 0 missing, make-lang
+    192 strings / 0 problems, the built APK decodes with the new manifest actions and the Boot class in the dex.
+  - Not tested on the car: everything about the real restart (which broadcast arrives, whether display 3 exists by then,
+    whether the foreground-service start from a tick is allowed, the ART verifier: run
+    `adb shell cmd package compile -m verify -f uz.carhelper.passenger` once after installing and look at
+    `adb logcat -s AndroidRuntime:E LPBoot`).
+  Undo: install LP-Companion-2.31.apk.
+
+  TESTED ON THE CAR 2026-10-24 (car online, uptime 27 h, nothing else in use; installed over 2.26, so 2.27 - 2.31 ran on the car for the first time):
+  - Installed with `adb install --no-incremental --install-reason 64 -r`; `cmd package compile -m verify -f` finished with status=verify
+    (no VerifyError); no crash in the app's log.
+  - Right after the install the system rebound WheelListener: LPBoot logged "kick by listener (up 99529 s, open=false)", started
+    BubbleService and MainBubbleService 5 s later and was done at +8 s; BackRepair put the Back entry back (it had been dropped by the
+    update). Both bubble windows were on display 0 and display 3.
+  - `am broadcast --user 10 -a com.leapmotor.action.BOOT_COMPLETED -n uz.carhelper.passenger/.BootReceiver` (the car's own action, so
+    this proves BootReceiver accepts it): LPBoot "kick by com.leapmotor.action.BOOT_COMPLETED (open=true)", then 27 s later "opening the
+    grid on the passenger screen" (once), then done. The LP grid, its now-playing widget and the bubble were on display 3 (the car's
+    photo screensaver was covering it; the grid sat under it until the car's DISMISS broadcast).
+  - Not verified: a real reboot / deep sleep (which boot broadcast the car sends, whether display 3 is missing at that moment), the
+    restart of a bubble service that stopped in the middle of the loop (`am stopservice` cannot stop a non-exported service; only the
+    listener-trigger restart after the install was seen). BackRepair ran the same way after the install (it re-added the entry), but not on a real
+    boot. The first real restart will show it: `adb logcat -d -s LPBoot`.
+
+
+LP Companion 2.33  (2026-10-24)  versionCode 41
+  INSTALLED AND TRIED ON THE CAR 2026-10-24 (over 2.32): `cmd package compile -m verify` status=verify, no crash.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.33.apk`
+  - The RAM / temperature chip in the grid header is now optional: Settings > Protection > "Show the RAM and temperature status on
+    the grid" (pref showStatus, default OFF, also in the Settings.Secure backup). Off = the chip is not built and its 5 s updater
+    does not run; the grid rebuilds itself when the switch changes. The "Right now:" line inside Settings > Protection is unchanged.
+  - Temperature: there is no number to show on this car. /sys/class/thermal has no thermal_zone files, there is no battery, and the
+    thermal HAL (`dumpsys thermalservice`) only reports one fixed "test temperature sensor" at 30.8 C. Health already tried the
+    thermal zones and falls back to Android's own thermal status, so the chip says "temp OK / warm / hot" instead of degrees. If a
+    firmware ever exposes zones, the degrees appear on their own.
+  - Settings > Bubble menu > "Close it after": a - / value / + stepper (was one pill that cycled). Steps 3 / 5 / 8 / 10 / 15 s;
+    "-" is dimmed at 3 and "+" at 15; a value saved by an older version (20 / 30 / 60) stays until "-" is tapped (snaps to 15). The
+    three views dim together while "Close the bubble menu automatically" is off.
+  - Settings: the title with Cancel / Save is fixed at the top (a root layout holds the bar and the ScrollView); only the page
+    below scrolls.
+  - 1 new text, translated into uz / ru / es / zh (193 in total). java-keys 84 / 0 missing, xref-check 100 files / 0 problems.
+  - Tried on display 3 (passenger): the page scrolls under a fixed bar; the stepper went 8 -> 10 -> 15 (+ dimmed) and 15 -> ... -> 3
+    (- dimmed), set back to 8; the switch turned the chip on ("RAM 72% . harorat normal") and off again after Save (I restored the
+    original off state). Saved values are unchanged except showStatus, which is off again.
+  Undo: install LP-Companion-2.32.apk.
+
+
+LP Companion 2.34  (2026-10-24)  versionCode 42
+  INSTALLED AND TRIED ON THE CAR 2026-10-24 (over 2.33): `cmd package compile -m verify` ok, no crash.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.34.apk`
+  - WheelListener is now MediaListener (the notification-listener shell the now-playing card needs to list other apps' media
+    sessions; the old name was a leftover from the steering-wheel feature). Same behaviour: it reads no notifications, and its
+    onListenerConnected is still the second Boot.kick trigger. LP Music has its own listener class with the old name in its own
+    package (com.migu.car.music); that one was not touched.
+  - Re-granting the notification access afterwards: Android checks the grant by class name, so the new class has to be listed in
+    Settings.Secure enabled_notification_listeners. New boot/ListenerGrant (Java, generated smali): Boot calls it every tick and it
+    appends MediaListener to the setting through WRITE_SECURE_SETTINGS (other entries untouched); Heal still does the same over the
+    car's adb (cmd notification allow_listener ... MediaListener) as the fallback, and Settings > Status shows the new grant.
+  - A new BootReceiver trigger: android.intent.action.MY_PACKAGE_REPLACED. After an update of the app the receiver restarts what the
+    update stopped (both bubbles, the Back entry, the notification access) and opens NO grid (only boot broadcasts ask for that).
+    Before, an update left the bubbles dead until something opened the app.
+  - Tried on the car: install over 2.33 with nothing launched by hand: LPBoot "kick by MY_PACKAGE_REPLACED (open=false)" and "kick
+    by listener" (the system binds a new listener class of an approved package right away), 6 s later "MediaListener added /
+    listed"; `dumpsys notification` shows ComponentInfo{uz.carhelper.passenger/uz.carhelper.passenger.MediaListener} bound for user
+    10; both bubbles up; the now-playing card in the grid shows the playing track with its buttons (so getActiveSessions works
+    with the new name). A reinstall of the same build found the entry already there and wrote nothing.
+  - Left as it is: the system keeps the old `uz.carhelper.passenger/uz.carhelper.passenger.WheelListener` entry in its own list
+    (it puts it back when the setting is edited). It points at a class that no longer exists and does nothing. Remove it with
+    `adb shell cmd notification disallow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10` if you want the
+    list tidy; do not touch the same-named entry of com.migu.car.music (LP Music's own, still in use).
+  Undo: install LP-Companion-2.33.apk (its WheelListener would need `cmd notification allow_listener` once, or Fix permissions now).
+
+  SELF-REPAIR TESTED ON THE CAR 2026-10-24 15:51 (first real run of the adb client from 2.29 - 2.31 against the car's adbd): with 2.34
+  installed I removed all three permissions Heal restores - `cmd notification disallow_listener` (MediaListener), `appops set
+  SYSTEM_ALERT_WINDOW deny`, `pm revoke WRITE_SECURE_SETTINGS` (user 10) - then `am force-stop` and the car's own
+  com.leapmotor.action.BOOT_COMPLETED broadcast (the nearest thing to a restart from adb). Result, from the log: 0.08 s after the
+  broadcast "adb self-grant: OK|pm grant ... WRITE_SECURE_SETTINGS; appops set ... SYSTEM_ALERT_WINDOW allow; cmd notification
+  allow_listener .../MediaListener 10". No "Allow USB debugging?" box appeared (checked the main screen), so the app's own key is
+  accepted by the car's adbd as it is. Afterwards: permission granted, overlay allowed, MediaListener bound, both bubbles up, and
+  BackService back in enabled_accessibility_services (a force-stop makes Android drop it; BackRepair put it back), and 26 s after the
+  broadcast the grid opened once on the passenger screen. Not tested: adb switched off on the car, a real reboot, the "Allow USB
+  debugging?" path for a key adbd has never seen.
+
+  ADB-ONLY TEST RUN 2026-10-24 (2.34, passenger screen only; results and findings in TEST-SCENARIO.md "Run log"): passed install over the
+  same version, permission removal and repair (grid start repairs by itself; with auto-repair OFF the Status rows go red and "Fix
+  permissions now" repairs), boot broadcast with auto-open off / three broadcasts in 12 s, Back-entry repair (~6 s), grid open from a tile,
+  tile long-press menu, hide / unhide a tile, wallpaper cycle (12 taps return to the start), Show / Hide bar, now-playing pause / play /
+  next / previous / open player, bubble panel + auto-close, Home, Back, Screen off + restore, bubble position kept after a restart,
+  Settings language switch (ru / zh / es / en), timer stepper + Cancel. No crash. Not run: anything that puts an app on the main screen,
+  child mode, installing apps, a real restart, wireless ADB off, a new adb key.
+
+  REAL RESTART 2026-10-24 16:41 (from the car menu): LPBoot shows `kick by listener` at uptime 12 s, `kick by com.leapmotor.action.BOOT_COMPLETED`
+  at 21 s (the standard BOOT_COMPLETED followed at 49 s; the QUICKBOOT actions did not arrive), both bubbles started 5 s after the first kick, and the grid opened
+  once on the passenger screen at ~38 s. Permissions and the Back entry survived this restart; no crash. Deep sleep and firmware update not tried.
+
+
+LP Companion 2.35  (2026-10-24)  versionCode 43
+  INSTALLED AND TRIED ON THE CAR 2026-10-24 (over 2.34): verify ok, no crash.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.35.apk`
+  Why: the ADB-off test of 2.34 looked like "the permission did not come back". The log says it did (overlay allowed again at 16:44:47, two
+  seconds after the car's ADB was switched back on), but the Settings page kept its old red "Bubble (overlay) OFF" row because it only
+  reloads on "Re-check status". Two changes:
+  - After a repair that worked ("OK|..."), Heal reloads the Settings page by itself (new SettingsRefresh, 1.5 s later, after the bubbles
+    restarted), so the Status rows turn green without a tap. Not done when the page has unsaved changes (a `dirty` flag set by any switch,
+    checkbox or the timer stepper): then the page stays as it is and Re-check status is still the way.
+  - "Fix permissions now" no longer gives up after one attempt when the car's ADB cannot be reached: it says once "Could not reach the car's
+    ADB (port 5555). Trying again for about 2 minutes." and looks again every 10 s, 8 attempts (each attempt also waits up to ~8 s for the
+    port). Switch ADB on inside those 2 minutes and the permissions come back by themselves. The automatic repair (boot, grid start) keeps
+    its 6 attempts every 45 s. New text, translated (194 strings).
+  What the ADB-off test showed about the car: the backend page's wireless-ADB switch closes the TCP port (nothing listens on 5555) but leaves
+  Settings.Global adb_enabled at 1, and it turned development_settings_enabled off. The app puts development_settings_enabled back to 1 and
+  waits, but the port only opens when the switch in the backend page is turned on again: the app cannot do that (it never touches adbd or
+  the port), so with ADB off the repair can only wait.
+  Tried on the car (ADB on): overlay removed, Settings open on the buttons, "Fix permissions now": `adb self-grant: OK|appops ...`, and the
+  page reloaded itself with the overlay row green. The ADB-off retry needs the user to switch ADB off and on by hand (TEST-SCENARIO P-5).
+  Undo: install LP-Companion-2.34.apk.
+
+
+LP Companion 2.36  (2026-10-24)  versionCode 44
+  INSTALLED ON THE CAR 2026-10-24 (over 2.35): verify ok, no crash; with ADB on both buttons work as before.
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.36.apk`
+  Asked for by the user after the ADB-off test: without the car's ADB the repair cannot work, so the button must say so.
+  - Settings > Status > "Fix permissions now" is greyed out while the car's ADB cannot be reached, and its label becomes
+    "Fix permissions now  ·  turn ADB on in the car's settings" (translated). A tap shows the toast "The car's ADB is off or not
+    reachable. Turn it on manually in the car's settings, then try again." (changed text, also used by the greyed Install / Uninstall
+    rows). The check is AdbGate, which now covers the button as well as the two Vehicle rows.
+  - AdbGate keeps looking every 3 s while Settings is open (a plain port probe, no switching): the button and the two rows unlock by
+    themselves a few seconds after ADB is switched on in the car's settings, and grey out again if it goes off. No Re-check tap needed.
+  - The first check still tries to switch adb_enabled on when the "Fix permissions" switch is on and the app may do it (unchanged).
+  - 2 new / changed texts in 5 languages (195 strings). java-keys 85, xref 102 files / 0 problems, adb tests pass.
+  - Not yet tried on the car: the greyed state itself (needs the user to switch ADB off in the car's settings with Settings open).
+  Undo: install LP-Companion-2.35.apk.
+
+
+LP Companion 2.37 / 2.38  (2026-10-24)  versionCode 45 / 46  - tried on the car, not kept
+  Asked for by the user: apps moved between the screens (Opera Mini passenger -> main, Yandex Navigator, ContraCam, YouTube) draw under the
+  car's top / bottom bars. Cause found with `dumpsys activity top` (README "Why an app moved ..."): the moved window keeps the InsetsState of
+  the display it was created on (no STATUS_BAR / NAVIGATION_BAR), a fresh start on the main screen gets both.
+  - 2.37: "nudge" (show / hide the keyboard on the moved app to make it recompute insets): no effect, removed again.
+  - 2.38: restart switch, first form = move, then 1.5 s later a second launch with NEW_TASK | CLEAR_TASK. CLEAR_TASK ignores the launch
+    display for any display other than 0 (main -> passenger started the app on display 0), and the second launch CLOSED Opera Mini (its
+    `Default` activity forwards the flags to `MiniActivity` and finishes: "Duplicate finish request" in the log). `am kill` before the move
+    did not help either (Opera's process survives it). Replaced by 2.39.
+  Undo: install LP-Companion-2.36.apk.
+
+
+LP Companion 2.39  (2026-10-24)  versionCode 47
+  INSTALLED AND TRIED ON THE CAR 2026-10-24 (over 2.38): verify ok, no crash; permissions, listener, Back entry intact after the install
+  (LPBoot: `kick by MY_PACKAGE_REPLACED`, `done`).
+  `adb install --no-incremental --install-reason 64 -r LP-Companion-2.39.apk`
+  - New switch Settings > Passenger screen > "Restart an app when it is moved to the main screen" (pref `moveRestart`, default OFF, kept in
+    the backup, translated, 196 strings). OFF = a move is exactly what it was. ON = a move TO THE MAIN SCREEN is a single launch with
+    NEW_TASK | CLEAR_TASK (0x10008000) instead of NEW_TASK | RESET_TASK_IF_NEEDED, so Android starts the app again on display 0 and the new
+    window gets the car's bars; the app starts from its first screen (state is lost). A move to the passenger screen stays the plain move.
+    No second launch, no helper class (the 2.38 `boot/Relaunch` was deleted).
+  - Tried on the car with the switch ON: LPSysUI.START log shows `flg=0x10008000 cmp=ru.yandex.music/...MainScreenActivity` for the moves to
+    the main screen and `flg=0x10200000` for the moves back; the user moved Yandex Music this way and said it works; the main-screen
+    screenshot shows its player between the top bar and the bottom bar. Opera Mini (passenger first -> main) was not finished: the user
+    started using the car in the middle of the test, so M-6 for Opera and M-8 stay open.
+  - java-keys 85 texts, xref 102 files / 0 problems, adb mock tests pass.
+  Not helped by this: YouTube ReVanced and ContraCam request edge-to-edge themselves (a patch of the app is the only fix).
+  Undo: install LP-Companion-2.36.apk (or turn the switch off).

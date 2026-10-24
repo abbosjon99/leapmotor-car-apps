@@ -1,5 +1,5 @@
-# Rebuilds source\smali\uz\carhelper\passenger\adb\*.smali (the adb client) and ...\apk\*.smali (the file manager UI)
-# from the Java in adbclient\src.
+# Rebuilds source\smali\uz\carhelper\passenger\adb\*.smali (the adb client), ...\apk\*.smali (the file manager UI) and
+# ...\boot\*.smali (the start-after-restart loop) from the Java in adbclient\src.
 #   1. javac (Java 8 level): adb client, then the UI against android.jar plus the compile stubs in adbclient\stubs
 #   2. tests of the adb client against a mock adbd (must pass)
 #   3. D8 -> classes.dex (stubs are only on the classpath, never converted)
@@ -23,6 +23,7 @@ if ($LASTEXITCODE -ne 0) { throw 'javac (adb) failed' }
 
 # 1b. the UI, checked against the real Android API
 $uiSources = @(Get-ChildItem "$here\src\uz\carhelper\passenger\apk" -Filter *.java | ForEach-Object { $_.FullName })
+$uiSources += Get-ChildItem "$here\src\uz\carhelper\passenger\boot" -Filter *.java | ForEach-Object { $_.FullName }
 $uiSources += Get-ChildItem "$here\stubs" -Recurse -Filter *.java | ForEach-Object { $_.FullName }
 & "$jdk\javac.exe" --release 8 -Xlint:-options -cp "$android;$out\main" -d "$out\ui" $uiSources
 if ($LASTEXITCODE -ne 0) { throw 'javac (ui) failed' }
@@ -34,9 +35,11 @@ if ($LASTEXITCODE -ne 0) { throw 'javac (tests) failed' }
 & "$jdk\java.exe" -cp "$out\main;$out\test" AdbTests
 if ($LASTEXITCODE -ne 0) { throw 'tests failed - not converting' }
 
-# 3. D8: the adb client and the apk UI classes only (the stubs Ui / Lang / Backup stay out)
+# 3. D8: the adb client, the apk UI classes and the boot starter only (the stubs Ui / Lang / Backup / BackRepair /
+#    Swapper / BubbleService / MainBubbleService stay out)
 $classes = @(Get-ChildItem "$out\main" -Recurse -Filter *.class | ForEach-Object { $_.FullName })
 $classes += Get-ChildItem "$out\ui\uz\carhelper\passenger\apk" -Filter *.class | ForEach-Object { $_.FullName }
+$classes += Get-ChildItem "$out\ui\uz\carhelper\passenger\boot" -Filter *.class | ForEach-Object { $_.FullName }
 & "$jdk\java.exe" -cp "$root\tools\r8.jar" com.android.tools.r8.D8 --release --min-api 26 --lib $android --classpath "$out\ui" --classpath "$out\main" --output "$out\dex" $classes
 if ($LASTEXITCODE -ne 0) { throw 'D8 failed' }
 
@@ -52,7 +55,7 @@ try { $e = $zip.GetEntry('AndroidManifest.xml'); [System.IO.Compression.ZipFileE
 & "$jdk\java.exe" -jar "$root\tools\apktool.jar" d -r -f -o "$out\decoded" $apk
 if ($LASTEXITCODE -ne 0) { throw 'apktool failed' }
 
-foreach ($pkg in 'adb', 'apk') {
+foreach ($pkg in 'adb', 'apk', 'boot') {
     $dest = Join-Path $root "source\smali\uz\carhelper\passenger\$pkg"
     Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $dest | Out-Null

@@ -55,6 +55,7 @@ Open LP Companion automatically when the passenger screen turns on	Yo'lovchi ekr
 When it turns on, go back to the app that was open (instead of the grid)	Yonganda ochiq turgan ilovaga qaytish (ro'yxat o'rniga)
 Passenger bubble: push its app to the main screen  ←	Yo'lovchi pufagi: ilovasini asosiy ekranga yuborish  ←
 Passenger bubble: bring the main screen's app over  →	Yo'lovchi pufagi: asosiy ekrandagi ilovani olib kelish  →
+Restart an app when it is moved to the main screen (fixes apps drawing under the car's bars; it starts again from its first screen)	Ilovani asosiy ekranga ko'chirganda qayta ishga tushirish (avtomobil panellari ostiga chiqib ketishini tuzatadi; ilova boshidan boshlanadi)
 Bubble menu	Pufak menyusi
 Close the bubble menu automatically	Pufak menyusini avtomatik yopish
 Close it after	Yopilish vaqti
@@ -64,6 +65,7 @@ Close the previous app when another one is opened	Boshqasi ochilganda oldingi il
 Also close music apps	Musiqa ilovalarini ham yopish
 Protection	Himoya
 Overload protection: close passenger apps if CPU or RAM is overloaded	Ortiqcha yuklanishdan himoya: CPU yoki RAM haddan tashqari yuklansa, yo'lovchi ilovalarini yopish
+Show the RAM and temperature status on the grid	Ro'yxat tepasida RAM va harorat holatini ko'rsatish
 Right now:   	Hozir:   
 not available	mavjud emas
 RAM 	RAM 
@@ -108,6 +110,7 @@ Last attempt: 	Oxirgi urinish:
 No attempt yet	Hali urinish bo'lmagan
 Permissions granted through the car's ADB	Ruxsatlar avtomobil ADB'si orqali berildi
 Could not reach the car's ADB (port 5555)	Avtomobil ADB'siga ulanib bo'lmadi (5555-port)
+Could not reach the car's ADB (port 5555). Trying again for about 2 minutes.	Avtomobil ADB'siga ulanib bo'lmadi (5555-port). Taxminan 2 daqiqa urinib ko'raman.
 Allow the connection on the car's screen (Always allow), then try again	Avtomobil ekranida ulanishga ruxsat bering («Doim ruxsat berish»), so'ng qayta urinib ko'ring
 Could not grant the permissions	Ruxsatlarni berib bo'lmadi
 All permissions are already granted	Barcha ruxsatlar allaqachon berilgan
@@ -188,5 +191,6 @@ Uninstalling…	O'chirilmoqda…
 Uninstall this app?	Bu ilova o'chirilsinmi?
 Uninstall	O'chirish
 The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	Avtomobil ADB'i simsiz nosozliklarni tuzatish (TLS) rejimida. 5555-portdagi oddiy tarmoq ADB'i kerak.
-The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	Avtomobil ADB'i o'chiq yoki unga ulanib bo'lmaydi. Avtomobilning texnik sahifasida simsiz ADB'ni yoqing, so'ng «Qayta tekshirish»ni bosing.
+The car's ADB is off or not reachable. Turn it on manually in the car's settings, then try again.	Avtomobil ADB'i o'chiq yoki unga ulanib bo'lmaydi. Uni avtomobil sozlamalarida qo'lda yoqing, so'ng qayta urinib ko'ring.
 needs ADB	ADB kerak
+turn ADB on in the car's settings	ADB'ni avtomobil sozlamalarida yoqing

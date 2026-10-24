@@ -172,6 +172,20 @@
     invoke-virtual {v6, v5}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;
     # NEW_TASK | RESET_TASK_IF_NEEDED moves the running task to the other display (no MULTIPLE_TASK: it duplicates)
     const/high16 v7, 0x10200000
+    # Settings > "Restart an app when it is moved to the main screen" (pref moveRestart, default off). A window that was only
+    # moved keeps the insets of the display it was created on (passenger -> main: no car bars, so the app draws under them);
+    # a new window gets the right ones. NEW_TASK | CLEAR_TASK makes Android start the app again instead of moving its window.
+    # Only toward the main screen (p1 == 0): CLEAR_TASK ignores the launch display for any other display (an app sent to
+    # display 3 this way restarted on display 0 in the car), and a restart in place can close apps whose launcher activity
+    # forwards the flags (Opera Mini), so a plain move stays the rule everywhere else.
+    if-nez p1, :keep_flags
+    const-string v3, "moveRestart"
+    const/4 v1, 0x0
+    invoke-interface {v0, v3, v1}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v1
+    if-eqz v1, :keep_flags
+    const v7, 0x10008000
+    :keep_flags
     invoke-virtual {v6, v7}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
     # going to the passenger screen: wake it first
     const/4 v7, 0x3

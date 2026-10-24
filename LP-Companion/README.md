@@ -6,7 +6,7 @@ floating AssistiveTouch-style bubbles on both screens, a Settings page, a now-pl
 PIN-protected child mode and overload protection, and it wakes the passenger screen when something is
 opened there.
 
-Package: `uz.carhelper.passenger`  ·  current version: 2.31 (versionCode 39, built, not yet tried on the car)
+Package: `uz.carhelper.passenger`  ·  current version: 2.39 (versionCode 47, installed on the car 2026-10-24)
 
 **Music control is not done here any more.** Steering-wheel media keys and the car's media widget moved
 to the sibling app **LP Music** (`uz.carhelper.music`, folder `../LP-Music`). LP Companion only shows and
@@ -37,9 +37,9 @@ on the car, so LP Companion no longer handles the wheel media keys and nothing i
   main screen / Open on the passenger screen / Add to (Remove from) Kids / Hide from the grid. Not in child mode on
   the passenger screen; "Open on the main screen" is also left out while child mode is on.
 - Close apps has a blue "All but music" button when a listed app is playing: it closes everything that is not.
-- Header chip (since 2.27, `Health`, `HealthTick`): "RAM 62%  .  54 C", updated every 5 s and coloured by the same
+- Header chip (since 2.27, `Health`, `HealthTick`; shown only when Settings > Protection > "Show the RAM and temperature status on the grid" (`showStatus`, default off, since 2.33) is on): "RAM 62%  .  54 C", updated every 5 s and coloured by the same
   thresholds overload protection uses. Temperature comes from the thermal-zone files if the firmware lets apps read
-  them, otherwise only Android's thermal status is shown. Hidden for the child on the passenger screen.
+  them, otherwise only Android's thermal status is shown (the C01 has no thermal zones and its thermal HAL reports one fixed "test temperature sensor", so on this car the chip says "temp OK"). Hidden for the child on the passenger screen.
 - Look: the wallpaper gets only a light dim (`Theme.scrim`) and the tiles/pills are dark smoked glass
   (`Ui.glass`, `Ui.pillBg`) so the photo stays as sharp as it can be; the bundled photos are only 1280x720.
 - Optional auto-close: opening an app closes the previous one (`autoClose`, plus `closeMusic`).
@@ -63,7 +63,7 @@ on the car, so LP Companion no longer handles the wheel media keys and nothing i
   shifts left.
 - Auto-close (since 2.25): an open panel closes itself after a few seconds without a tap (`AutoClose`
   runnable, re-armed by each tap; Settings > Bubble menu: `bubbleAuto` default on, `bubbleSecs` default 8, choices
-  3/5/8/10/15/20/30/60 s). The passenger panel is rebuilt each time it opens.
+  3/5/8/10/15 s, set with a - / value / + stepper since 2.33). The passenger panel is rebuilt each time it opens.
 - Screen off = an opaque black cover over display 3; tap it to restore. Opening something on the passenger
   screen removes it (see Wake).
 - Moving apps between the screens (since 2.23; bottom row of both panels, icons `ic_move_left` /
@@ -81,9 +81,23 @@ on the car, so LP Companion no longer handles the wheel media keys and nothing i
   running, so an app (Yandex Music Lite) ended up open on both screens. 2.23 still added a second activity inside
   the moved task because its intent carried `pkg=`; 2.24 fixed that. A task that is already damaged this way
   stays so until the app is force-stopped.
+- Why an app moved from the passenger screen can draw under the car's bars (found on the car 2026-10-24): the bars
+  are inset sources of display 0 only, and a window that is merely moved keeps the InsetsState it got on the display
+  it was created on (`dumpsys activity top`, InsetsController of the app: `mDisplayFrame=(0,0-1920,720)` and no
+  STATUS_BAR / NAVIGATION_BAR after the move; a fresh start on the main screen has `(0,0-2560,1440)` plus both bars).
+  Stop/start, a control-target change and showing/hiding the keyboard do not refresh it.
+- Settings > Passenger screen > "Restart an app when it is moved to the main screen" (`moveRestart`, since 2.39, default
+  off): the move to the main screen then uses NEW_TASK | CLEAR_TASK (0x10008000) instead of RESET_TASK_IF_NEEDED, so
+  Android starts the app again on display 0 and its new window gets the bars. The app begins from its first screen. Only
+  toward the main screen: CLEAR_TASK ignores the requested display for any other display (an app sent to display 3 this
+  way started on display 0 in the car), so a move to the passenger screen is always the plain move. Apps whose
+  launcher activity forwards the intent flags to a second activity and finishes (Opera Mini's `Default` -> `MiniActivity`)
+  must not be restarted twice in a row on the same display (the second launch closed Opera in the 2.38 test), which is why
+  this is a single launch and not "move, then restart".
 - Apps decide their own insets. The car gives every app the full display frame plus insets for its top bar
-  (120 px) and bottom bar (144 px) on the main screen. Most apps respect them; a few screens (Yandex Music's
-  "В авто" player) draw edge-to-edge under the bars. LP Companion cannot change another app's layout.
+  (120 px) and bottom bar (144 px) on the main screen. Most apps respect them; a few request edge-to-edge themselves
+  (YouTube ReVanced: `LAYOUT_FULLSCREEN | LAYOUT_HIDE_NAVIGATION | IMMERSIVE_STICKY`, ContraCam: `LAYOUT_FULLSCREEN`,
+  Yandex Music's "В авто" player) and draw under the bars even on a fresh start; only a patch of that app helps.
 
 **Install / uninstall apps** (since 2.30; Settings > Vehicle card, `apk` package): "Install apps from storage" is a
 read-only browser (device storage of the car's user plus mounted USB drives; only folders and plain `.apk`, bundles greyed
@@ -104,7 +118,7 @@ automatically using the car's own ADB" (`healAdb`, default on) turns the automat
 "Allow USB debugging?" for this app: choose Always allow. Needs wifi adb listening on the head unit and the INTERNET
 permission (in the manifest). The client is Java in `adbclient/` with tests against a mock adbd; `adbclient/build-adb.ps1`
 compiles it, runs the tests, converts it with D8 (`tools/r8.jar`, not in git) and writes `source/smali/.../adb/`.
-Not yet tried against the car's real adbd.
+Tried against the car's real adbd on 2026-10-24 (2.34): all three grants came back in under 0.1 s with no prompt; see TEST-SCENARIO.md P-1.
 Since 2.31 the handshake also tries the second signature style and, if adbd asks again after the key, the other public-key
 byte order (remembered in `adbkey.hint`), and says so when the car is in TLS (wireless-debugging) mode. `apk/AdbLink` checks
 that adbd listens before each job and, when allowed (`healAdb` on, WRITE_SECURE_SETTINGS granted), sets `adb_enabled` to 1
@@ -161,7 +175,7 @@ child mode only a Kids app). Part of the "open LP Companion when the passenger s
 - Status: green/red rows for the bubble overlay, notification access, `WRITE_SECURE_SETTINGS` and the Back
   service, each with an OK/OFF chip and the ADB command that fixes it; "Re-check status" reopens the page.
   Opening the page also tries to switch the Back service on.
-- Passenger screen (`autoOpen`, `passToMain`, `passFromMain`), Bubble menu (`bubbleAuto`, `bubbleSecs`), Closing apps (`autoClose`, `closeMusic`), Protection (`overheat`), Child
+- Passenger screen (`autoOpen`, `passToMain`, `passFromMain`), Bubble menu (`bubbleAuto`, `bubbleSecs`), Closing apps (`autoClose`, `closeMusic`), Protection (`overheat`, `showStatus`), Child
   mode (Set password), Vehicle (Vehicle settings, Back to car UI) and the app checklist: one "shown on the
   passenger grid" tick and one "Kids" tick per sideloaded app. There is no steering-wheel section any more.
 
@@ -179,6 +193,7 @@ LP-Companion/
   build.ps1            one-shot build + sign script
   LP-Companion.apk     the last build; every release is also kept as LP-Companion-<version>.apk
   CHANGELOG.txt        full history of every car change + how to undo each
+  TEST-SCENARIO.md     step-by-step test of every feature on the car, with expected results
 ```
 
 The git repo ignores `*.apk`, `build/`, `source/build/` and `tools/` (see `.gitignore`); attach APKs to a
@@ -214,7 +229,7 @@ One-time grants after a fresh install (all survive restarts and `-r` updates):
 
 ```
 adb shell appops set --user 10 uz.carhelper.passenger SYSTEM_ALERT_WINDOW allow
-adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10
+adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.MediaListener 10
 adb shell pm grant --user 10 uz.carhelper.passenger android.permission.WRITE_SECURE_SETTINGS
 ```
 
@@ -249,8 +264,10 @@ missing.
 | `Closer.smali`            | Two-phase close of apps (stop media session, then kill). |
 | `BackService.smali`       | Accessibility service; performs the global Back action. Static `instance` tracks whether it is bound. |
 | `BackRepair.smali`        | Re-adds `BackService` to `enabled_accessibility_services` (keeping other entries) when it is missing. |
-| `BootReceiver.smali`      | After boot: marks the sidebar hidden and starts both bubble services. |
-| `WheelListener.smali`     | Empty notification-listener shell: its grant is what lets `getActiveSessions` work. |
+| `BootReceiver.smali`      | After boot (`BOOT_COMPLETED`, an app update `MY_PACKAGE_REPLACED` (restarts things, opens no grid), the car's `com.leapmotor.action.BOOT_COMPLETED` / `com.leapmotoraction.BOOT_COMPLETED`, `QUICKBOOT_POWERON`): marks the sidebar hidden, starts both bubble services and calls `Boot.kick`. |
+| `boot/ListenerGrant.smali` | Generated (2.34). Lists `MediaListener` in `enabled_notification_listeners` through WRITE_SECURE_SETTINGS when it is missing (Boot calls it every tick); Heal does the same over adb as a fallback. |
+| `boot/Boot.smali`         | Generated from `adbclient/src/.../boot/Boot.java` (2.32). For 3 minutes after a boot signal, every 3 s: re-adds Back, restarts the bubble services if they stopped (display 3 not there yet), and opens the grid on the passenger screen once per boot after display 3 has been on for 20 s (setting `autoOpen`). Log tag `LPBoot`. |
+| `MediaListener.smali`     | (called `WheelListener` until 2.34) Notification-listener shell: its grant is what lets `getActiveSessions` work; `onListenerConnected` is a second `Boot.kick` trigger (the system rebinds it after every process start). |
 | `WheelReceiver.smali`     | Only its static session helpers are live (`getSessions`, `findTarget`, `isPlaying`, `anyCarPlaying`, `yieldToMusic`), used by `NowPlaying`, `Closer`, `OpenPlayerActivity`. The receiver itself is not registered. |
 | `Theme.smali`             | System day/night helper for the PIN pad and wallpaper scrim. |
 | `WallpaperFrame.smali`    | Wallpaper root view; `apply(index)` sets 0 = black, 1..11 = `wp_N`. |

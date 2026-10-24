@@ -28,7 +28,7 @@ public class AdbTests {
         File keyFile = new File(dir, "adbkey");
         String c1 = "pm grant --user 10 uz.carhelper.passenger android.permission.WRITE_SECURE_SETTINGS";
         String c2 = "appops set --user 10 uz.carhelper.passenger SYSTEM_ALERT_WINDOW allow";
-        String c3 = "cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10";
+        String c3 = "cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.MediaListener 10";
         String[] cmds = {c1, c2, c3};
 
         System.out.println("1. first run: unknown key, the user taps Allow after 300 ms");

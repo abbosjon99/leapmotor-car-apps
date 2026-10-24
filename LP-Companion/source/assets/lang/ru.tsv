@@ -55,6 +55,7 @@ Open LP Companion automatically when the passenger screen turns on	Открыв�
 When it turns on, go back to the app that was open (instead of the grid)	При включении возвращаться в открытое приложение (вместо списка)
 Passenger bubble: push its app to the main screen  ←	Пузырёк пассажира: отправить его приложение на главный экран  ←
 Passenger bubble: bring the main screen's app over  →	Пузырёк пассажира: перенести приложение с главного экрана  →
+Restart an app when it is moved to the main screen (fixes apps drawing under the car's bars; it starts again from its first screen)	Перезапускать приложение при переносе на основной экран (исправляет вылезание под панели авто; приложение начнётся с первого экрана)
 Bubble menu	Меню пузырька
 Close the bubble menu automatically	Закрывать меню пузырька автоматически
 Close it after	Закрывать через
@@ -64,6 +65,7 @@ Close the previous app when another one is opened	Закрывать прошл�
 Also close music apps	Закрывать и музыкальные приложения
 Protection	Защита
 Overload protection: close passenger apps if CPU or RAM is overloaded	Защита от перегрузки: закрывать приложения пассажира при перегрузке ЦП или ОЗУ
+Show the RAM and temperature status on the grid	Показывать состояние ОЗУ и температуры в списке
 Right now:   	Сейчас:   
 not available	недоступно
 RAM 	ОЗУ 
@@ -108,6 +110,7 @@ Last attempt: 	Последняя попытка:
 No attempt yet	Попыток ещё не было
 Permissions granted through the car's ADB	Разрешения выданы через ADB автомобиля
 Could not reach the car's ADB (port 5555)	Не удалось подключиться к ADB автомобиля (порт 5555)
+Could not reach the car's ADB (port 5555). Trying again for about 2 minutes.	Не удалось подключиться к ADB автомобиля (порт 5555). Попробую ещё около 2 минут.
 Allow the connection on the car's screen (Always allow), then try again	Разрешите подключение на экране автомобиля («Всегда разрешать») и повторите попытку
 Could not grant the permissions	Не удалось выдать разрешения
 All permissions are already granted	Все разрешения уже выданы
@@ -188,5 +191,6 @@ Uninstalling…	Удаление…
 Uninstall this app?	Удалить это приложение?
 Uninstall	Удалить
 The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	ADB автомобиля работает в режиме беспроводной отладки (TLS). Нужен обычный сетевой ADB на порту 5555.
-The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	ADB автомобиля выключен или недоступен. Включите беспроводной ADB на служебной странице автомобиля и нажмите «Проверить снова».
+The car's ADB is off or not reachable. Turn it on manually in the car's settings, then try again.	ADB автомобиля выключен или недоступен. Включите его вручную в настройках автомобиля и повторите попытку.
 needs ADB	нужен ADB
+turn ADB on in the car's settings	включите ADB в настройках авто

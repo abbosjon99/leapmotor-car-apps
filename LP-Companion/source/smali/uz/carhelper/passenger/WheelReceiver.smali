@@ -7,7 +7,7 @@
 # Target: a playing session that isn't the car's (com.leapmotor.*, Bluetooth); else the most recently
 # active such session (getActiveSessions is ordered newest first). If a car source is playing and
 # the target isn't, the car handles the button alone. Can be turned off in Settings (pref "wheel").
-# Needs WheelListener's notification-listener access (granted over ADB) for getActiveSessions.
+# Needs MediaListener's notification-listener access (granted over ADB) for getActiveSessions.
 
 .method public constructor <init>()V
     .locals 0
@@ -42,7 +42,7 @@
     move-result-object v0
     check-cast v0, Landroid/media/session/MediaSessionManager;
     new-instance v1, Landroid/content/ComponentName;
-    const-class v2, Luz/carhelper/passenger/WheelListener;
+    const-class v2, Luz/carhelper/passenger/MediaListener;
     invoke-direct {v1, p0, v2}, Landroid/content/ComponentName;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-virtual {v0, v1}, Landroid/media/session/MediaSessionManager;->getActiveSessions(Landroid/content/ComponentName;)Ljava/util/List;
     move-result-object v0

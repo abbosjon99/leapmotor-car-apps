@@ -55,6 +55,7 @@ Open LP Companion automatically when the passenger screen turns on	Abrir LP Comp
 When it turns on, go back to the app that was open (instead of the grid)	Al encenderse, volver a la app que estaba abierta (en lugar de la cuadrícula)
 Passenger bubble: push its app to the main screen  ←	Burbuja del pasajero: enviar su app a la pantalla principal  ←
 Passenger bubble: bring the main screen's app over  →	Burbuja del pasajero: traer la app de la pantalla principal  →
+Restart an app when it is moved to the main screen (fixes apps drawing under the car's bars; it starts again from its first screen)	Reiniciar una app al moverla a la pantalla principal (evita que se dibuje bajo las barras del coche; empieza otra vez desde su primera pantalla)
 Bubble menu	Menú de la burbuja
 Close the bubble menu automatically	Cerrar el menú de la burbuja automáticamente
 Close it after	Cerrar tras
@@ -64,6 +65,7 @@ Close the previous app when another one is opened	Cerrar la app anterior al abri
 Also close music apps	Cerrar también las apps de música
 Protection	Protección
 Overload protection: close passenger apps if CPU or RAM is overloaded	Protección contra sobrecarga: cerrar las apps del pasajero si la CPU o la RAM están sobrecargadas
+Show the RAM and temperature status on the grid	Mostrar el estado de RAM y temperatura en la cuadrícula
 Right now:   	Ahora:   
 not available	no disponible
 RAM 	RAM 
@@ -108,6 +110,7 @@ Last attempt: 	Último intento:
 No attempt yet	Aún no se ha intentado
 Permissions granted through the car's ADB	Permisos concedidos mediante el ADB del coche
 Could not reach the car's ADB (port 5555)	No se pudo conectar con el ADB del coche (puerto 5555)
+Could not reach the car's ADB (port 5555). Trying again for about 2 minutes.	No se pudo conectar con el ADB del coche (puerto 5555). Reintentando durante unos 2 minutos.
 Allow the connection on the car's screen (Always allow), then try again	Permite la conexión en la pantalla del coche (Permitir siempre) y vuelve a intentarlo
 Could not grant the permissions	No se pudieron conceder los permisos
 All permissions are already granted	Todos los permisos ya están concedidos
@@ -188,5 +191,6 @@ Uninstalling…	Desinstalando…
 Uninstall this app?	¿Desinstalar esta app?
 Uninstall	Desinstalar
 The car's ADB is in wireless-debugging mode (TLS). Classic network ADB on port 5555 is needed.	El ADB del coche está en modo de depuración inalámbrica (TLS). Se necesita el ADB de red clásico en el puerto 5555.
-The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status.	El ADB del coche está apagado o no es accesible. Activa el ADB inalámbrico en la página de servicio del coche y pulsa «Volver a comprobar».
+The car's ADB is off or not reachable. Turn it on manually in the car's settings, then try again.	El ADB del coche está apagado o no se puede alcanzar. Actívalo a mano en los ajustes del coche y vuelve a intentarlo.
 needs ADB	requiere ADB
+turn ADB on in the car's settings	activa ADB en los ajustes del coche

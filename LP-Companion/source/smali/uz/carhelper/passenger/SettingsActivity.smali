@@ -34,6 +34,14 @@
 .field private bubbleAuto:Z
 .field private bubbleSecs:I
 .field private secsPill:Landroid/view/View;
+.field private secsVal:Landroid/widget/TextView;
+.field private secsMinus:Landroid/view/View;
+.field private secsPlus:Landroid/view/View;
+.field private hdr:Landroid/view/View;
+.field private showStatus:Z
+.field private dirty:Z
+.field private moveRestart:Z
+.field public static live:Luz/carhelper/passenger/SettingsActivity;
 .field private hidden:Ljava/util/HashSet;
 
 .method public constructor <init>()V
@@ -276,9 +284,12 @@
     return-object v0
 .end method
 
-# the next menu timer value: 3 -> 5 -> 8 -> 10 -> 15 -> 20 -> 30 -> 60 -> 3
+# the menu timer steps are 3 / 5 / 8 / 10 / 15 s. "+" goes to the next step up and stops at 15 (a value saved by an
+# older version, such as 20 or 30, is left as it is by "+" and snaps down to 15 with "-")
 .method private static nextSecs(I)I
     .locals 1
+    const/4 v0, 0x3
+    if-lt p0, v0, :r3
     const/4 v0, 0x5
     if-lt p0, v0, :r5
     const/16 v0, 0x8
@@ -287,12 +298,8 @@
     if-lt p0, v0, :r10
     const/16 v0, 0xf
     if-lt p0, v0, :r15
-    const/16 v0, 0x14
-    if-lt p0, v0, :r20
-    const/16 v0, 0x1e
-    if-lt p0, v0, :r30
-    const/16 v0, 0x3c
-    if-lt p0, v0, :r60
+    return p0
+    :r3
     const/4 v0, 0x3
     return v0
     :r5
@@ -307,15 +314,62 @@
     :r15
     const/16 v0, 0xf
     return v0
-    :r20
-    const/16 v0, 0x14
+.end method
+
+# the next step down: 15 -> 10 -> 8 -> 5 -> 3, stops at 3
+.method private static prevSecs(I)I
+    .locals 1
+    const/16 v0, 0xf
+    if-gt p0, v0, :p15
+    const/16 v0, 0xa
+    if-gt p0, v0, :p10
+    const/16 v0, 0x8
+    if-gt p0, v0, :p8
+    const/4 v0, 0x5
+    if-gt p0, v0, :p5
+    const/4 v0, 0x3
     return v0
-    :r30
-    const/16 v0, 0x1e
+    :p15
+    const/16 v0, 0xf
     return v0
-    :r60
-    const/16 v0, 0x3c
+    :p10
+    const/16 v0, 0xa
     return v0
+    :p8
+    const/16 v0, 0x8
+    return v0
+    :p5
+    const/4 v0, 0x5
+    return v0
+.end method
+
+# show the current timer value and dim "-" at 3 s and "+" at 15 s
+.method private refreshSecs()V
+    .locals 4
+    iget-object v0, p0, Luz/carhelper/passenger/SettingsActivity;->secsVal:Landroid/widget/TextView;
+    if-eqz v0, :end
+    iget v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-static {v1}, Luz/carhelper/passenger/SettingsActivity;->secsText(I)Ljava/lang/String;
+    move-result-object v2
+    invoke-virtual {v0, v2}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    iget-object v0, p0, Luz/carhelper/passenger/SettingsActivity;->secsMinus:Landroid/view/View;
+    if-eqz v0, :end
+    const/high16 v2, 0x3f800000
+    const/4 v3, 0x3
+    if-gt v1, v3, :minus_on
+    const v2, 0x3eb33333
+    :minus_on
+    invoke-virtual {v0, v2}, Landroid/view/View;->setAlpha(F)V
+    iget-object v0, p0, Luz/carhelper/passenger/SettingsActivity;->secsPlus:Landroid/view/View;
+    if-eqz v0, :end
+    const/high16 v2, 0x3f800000
+    const/16 v3, 0xf
+    if-lt v1, v3, :plus_on
+    const v2, 0x3eb33333
+    :plus_on
+    invoke-virtual {v0, v2}, Landroid/view/View;->setAlpha(F)V
+    :end
+    return-void
 .end method
 
 # "8 s"
@@ -424,6 +478,8 @@
 .method protected onCreate(Landroid/os/Bundle;)V
     .locals 14
     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+    # the open page, for Heal to refresh after a repair
+    sput-object p0, Luz/carhelper/passenger/SettingsActivity;->live:Luz/carhelper/passenger/SettingsActivity;
     invoke-static {p0}, Luz/carhelper/passenger/Lang;->init(Landroid/content/Context;)V
 
     # load current settings into memory
@@ -471,6 +527,11 @@
     invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
     iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
+    # restart an app when it is moved to the other screen: off by default (v3 = false here)
+    const-string v2, "moveRestart"
+    invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->moveRestart:Z
     # bubble menu auto-close: on by default, 8 s (v4 = true here)
     const-string v2, "bubbleAuto"
     invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
@@ -481,6 +542,11 @@
     invoke-interface {v5, v2, v4}, Landroid/content/SharedPreferences;->getInt(Ljava/lang/String;I)I
     move-result v2
     iput v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    # the RAM / temperature chip in the grid header: off by default (v3 = false here)
+    const-string v2, "showStatus"
+    invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
+    move-result v2
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->showStatus:Z
     const-string v2, "kid"
     invoke-interface {v5, v2, v3}, Landroid/content/SharedPreferences;->getBoolean(Ljava/lang/String;Z)Z
     move-result v2
@@ -507,12 +573,10 @@
     invoke-direct {v5, v2}, Ljava/util/HashSet;-><init>(Ljava/util/Collection;)V
     iput-object v5, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
 
-    # v0 = ScrollView on a navy gradient, v1 = page (centred, max 1200 px wide)
+    # v0 = ScrollView (the navy gradient is on the root added at :end, so the fixed top bar shares it), v1 = page
+    # (centred, max 1200 px wide)
     new-instance v0, Landroid/widget/ScrollView;
     invoke-direct {v0, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V
-    invoke-static {}, Luz/carhelper/passenger/Ui;->pageBg()Landroid/graphics/drawable/GradientDrawable;
-    move-result-object v2
-    invoke-virtual {v0, v2}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
     const/4 v2, 0x0
     invoke-virtual {v0, v2}, Landroid/view/View;->setVerticalScrollBarEnabled(Z)V
     new-instance v1, Landroid/widget/LinearLayout;
@@ -520,7 +584,7 @@
     const/4 v2, 0x1
     invoke-virtual {v1, v2}, Landroid/widget/LinearLayout;->setOrientation(I)V
     const/16 v2, 0x30
-    const/16 v3, 0x28
+    const/16 v3, 0x10
     const/16 v4, 0x48
     invoke-virtual {v1, v2, v3, v2, v4}, Landroid/widget/LinearLayout;->setPadding(IIII)V
     new-instance v2, Landroid/widget/FrameLayout$LayoutParams;
@@ -574,7 +638,8 @@
     const-string v3, "#save"
     sget v6, Luz/carhelper/passenger/Ui;->ACCENT:I
     invoke-direct {p0, v4, v2, v3, v6}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
-    invoke-virtual {v1, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    # the bar is not part of the scrolling page: it is put above the ScrollView at :end
+    iput-object v4, p0, Luz/carhelper/passenger/SettingsActivity;->hdr:Landroid/view/View;
 
     # Language: the row shows the language in use, a tap opens the picker (Uzbek, Russian, Spanish, English, Chinese)
     const-string v2, "Language"
@@ -635,14 +700,14 @@
     move-result-object v2
     check-cast v2, Landroid/app/NotificationManager;
     new-instance v3, Landroid/content/ComponentName;
-    const-class v4, Luz/carhelper/passenger/WheelListener;
+    const-class v4, Luz/carhelper/passenger/MediaListener;
     invoke-direct {v3, p0, v4}, Landroid/content/ComponentName;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
     invoke-virtual {v2, v3}, Landroid/app/NotificationManager;->isNotificationListenerAccessGranted(Landroid/content/ComponentName;)Z
     move-result v6
     const-string v2, "Now playing (notification access)"
     invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
     move-result-object v2
-    const-string v4, "adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.WheelListener 10"
+    const-string v4, "adb shell cmd notification allow_listener uz.carhelper.passenger/uz.carhelper.passenger.MediaListener 10"
     invoke-direct {p0, v8, v2, v6, v4}, Luz/carhelper/passenger/SettingsActivity;->healthRow(Landroid/widget/LinearLayout;Ljava/lang/String;ZLjava/lang/String;)V
     invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
 
@@ -837,6 +902,18 @@
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    # restart the app when it is moved (fixes apps that draw under the car's bars after a move)
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Restart an app when it is moved to the main screen (fixes apps drawing under the car's bars; it starts again from its first screen)"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "moveRestart"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->moveRestart:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
 
     # Bubble menu: closes itself after a few seconds (both bubbles); the button steps through 3 / 5 / 8 / 10 / 15 / 20 / 30 / 60 s
     const-string v2, "Bubble menu"
@@ -877,13 +954,39 @@
     const/high16 v7, 0x3f800000
     invoke-direct {v3, v6, v4, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
     invoke-virtual {v5, v2, v3}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    # [ - ]  value  [ + ]: steps 3 / 5 / 8 / 10 / 15 s; the three views are dimmed together while auto-close is off
+    new-instance v6, Landroid/widget/LinearLayout;
+    invoke-direct {v6, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/16 v2, 0x10
+    invoke-virtual {v6, v2}, Landroid/widget/LinearLayout;->setGravity(I)V
+    const-string v2, "−"
+    const-string v3, "#secsMinus"
+    const v4, 0x2effffff
+    invoke-direct {p0, v6, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    move-result-object v2
+    iput-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->secsMinus:Landroid/view/View;
     iget v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
     invoke-static {v2}, Luz/carhelper/passenger/SettingsActivity;->secsText(I)Ljava/lang/String;
     move-result-object v2
-    const-string v3, "#bubbleSecs"
+    const/high16 v3, 0x41d00000
+    const/4 v4, -0x1
+    const/4 v7, 0x1
+    invoke-static {p0, v2, v3, v4, v7}, Luz/carhelper/passenger/Ui;->text(Landroid/content/Context;Ljava/lang/CharSequence;FIZ)Landroid/widget/TextView;
+    move-result-object v2
+    const/16 v3, 0x8c
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setMinWidth(I)V
+    const/16 v3, 0x11
+    invoke-virtual {v2, v3}, Landroid/widget/TextView;->setGravity(I)V
+    iput-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->secsVal:Landroid/widget/TextView;
+    invoke-virtual {v6, v2}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+    const-string v2, "+"
+    const-string v3, "#secsPlus"
     const v4, 0x2effffff
-    invoke-direct {p0, v5, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
-    move-result-object v6
+    invoke-direct {p0, v6, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addPill(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/TextView;
+    move-result-object v2
+    iput-object v2, p0, Luz/carhelper/passenger/SettingsActivity;->secsPlus:Landroid/view/View;
+    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->refreshSecs()V
+    invoke-virtual {v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
     iput-object v6, p0, Luz/carhelper/passenger/SettingsActivity;->secsPill:Landroid/view/View;
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
     if-nez v2, :pill_on
@@ -939,6 +1042,18 @@
     invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
     move-result-object v5
     iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->overheat:Z
+    invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
+    invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
+    # the RAM / temperature chip in the grid header is only shown when this is on (off by default)
+    invoke-direct {p0, v8}, Luz/carhelper/passenger/SettingsActivity;->divider(Landroid/widget/LinearLayout;)V
+    const-string v2, "Show the RAM and temperature status on the grid"
+    invoke-static {v2}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v2
+    const-string v3, "showStatus"
+    const/4 v4, 0x0
+    invoke-direct {p0, v8, v2, v3, v4}, Luz/carhelper/passenger/SettingsActivity;->addSwitch(Landroid/widget/LinearLayout;Ljava/lang/String;Ljava/lang/String;I)Landroid/widget/Switch;
+    move-result-object v5
+    iget-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->showStatus:Z
     invoke-virtual {v5, v2}, Landroid/widget/Switch;->setChecked(Z)V
     invoke-virtual {v5, p0}, Landroid/widget/Switch;->setOnCheckedChangeListener(Landroid/widget/CompoundButton$OnCheckedChangeListener;)V
     # what the protection sees right now (the same numbers as the chip in the grid header)
@@ -1095,7 +1210,36 @@
     goto :loop
 
     :end
-    invoke-virtual {p0, v0}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
+    # root: the Settings title with Cancel / Save is fixed on top (max 1200 px wide, same as the page), only the page
+    # below it scrolls; the navy gradient is on the root so both share it
+    new-instance v2, Landroid/widget/LinearLayout;
+    invoke-direct {v2, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
+    const/4 v3, 0x1
+    invoke-virtual {v2, v3}, Landroid/widget/LinearLayout;->setOrientation(I)V
+    invoke-static {}, Luz/carhelper/passenger/Ui;->pageBg()Landroid/graphics/drawable/GradientDrawable;
+    move-result-object v3
+    invoke-virtual {v2, v3}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+    iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hdr:Landroid/view/View;
+    if-eqz v3, :no_hdr
+    const/16 v4, 0x30
+    const/16 v5, 0x28
+    const/16 v6, 0x10
+    invoke-virtual {v3, v4, v5, v4, v6}, Landroid/view/View;->setPadding(IIII)V
+    new-instance v4, Landroid/widget/LinearLayout$LayoutParams;
+    const/16 v5, 0x4b0
+    const/4 v6, -0x2
+    invoke-direct {v4, v5, v6}, Landroid/widget/LinearLayout$LayoutParams;-><init>(II)V
+    const/4 v5, 0x1
+    iput v5, v4, Landroid/widget/LinearLayout$LayoutParams;->gravity:I
+    invoke-virtual {v2, v3, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    :no_hdr
+    new-instance v4, Landroid/widget/LinearLayout$LayoutParams;
+    const/4 v5, -0x1
+    const/4 v6, 0x0
+    const/high16 v7, 0x3f800000
+    invoke-direct {v4, v5, v6, v7}, Landroid/widget/LinearLayout$LayoutParams;-><init>(IIF)V
+    invoke-virtual {v2, v0, v4}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
+    invoke-virtual {p0, v2}, Landroid/app/Activity;->setContentView(Landroid/view/View;)V
     # grey out Install / Uninstall while the car's adb cannot be reached (checked in the background)
     :try_start_gate
     invoke-static {p0, v0}, Luz/carhelper/passenger/apk/AdbGate;->apply(Landroid/app/Activity;Landroid/view/View;)V
@@ -1137,6 +1281,9 @@
 # switches and checkboxes only change the in-memory copy
 .method public onCheckedChanged(Landroid/widget/CompoundButton;Z)V
     .locals 2
+    # an unsaved change: the page is not reloaded behind the user's back
+    const/4 v1, 0x1
+    iput-boolean v1, p0, Luz/carhelper/passenger/SettingsActivity;->dirty:Z
     invoke-virtual {p1}, Landroid/view/View;->getTag()Ljava/lang/Object;
     move-result-object v0
     check-cast v0, Ljava/lang/String;
@@ -1193,6 +1340,14 @@
     return-void
     :not_heal
 
+    const-string v1, "showStatus"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_show_status
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->showStatus:Z
+    return-void
+    :not_show_status
+
     const-string v1, "bubbleAuto"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
@@ -1224,6 +1379,14 @@
     iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
     return-void
     :not_pass_from_main
+
+    const-string v1, "moveRestart"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_move_restart
+    iput-boolean p2, p0, Luz/carhelper/passenger/SettingsActivity;->moveRestart:Z
+    return-void
+    :not_move_restart
 
     const-string v1, "closeMusic"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -1302,12 +1465,18 @@
     const-string v2, "passFromMain"
     iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->passFromMain:Z
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "moveRestart"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->moveRestart:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     const-string v2, "bubbleAuto"
     iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleAuto:Z
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     const-string v2, "bubbleSecs"
     iget v3, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putInt(Ljava/lang/String;I)Landroid/content/SharedPreferences$Editor;
+    const-string v2, "showStatus"
+    iget-boolean v3, p0, Luz/carhelper/passenger/SettingsActivity;->showStatus:Z
+    invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putBoolean(Ljava/lang/String;Z)Landroid/content/SharedPreferences$Editor;
     const-string v2, "hidden"
     iget-object v3, p0, Luz/carhelper/passenger/SettingsActivity;->hidden:Ljava/util/HashSet;
     invoke-interface {v1, v2, v3}, Landroid/content/SharedPreferences$Editor;->putStringSet(Ljava/lang/String;Ljava/util/Set;)Landroid/content/SharedPreferences$Editor;
@@ -1321,6 +1490,33 @@
     :try_end_bs
     .catch Ljava/lang/Throwable; {:try_start_bs .. :try_end_bs} :catch_bs
     :catch_bs
+    return-void
+.end method
+
+.method protected onDestroy()V
+    .locals 1
+    sget-object v0, Luz/carhelper/passenger/SettingsActivity;->live:Luz/carhelper/passenger/SettingsActivity;
+    if-ne v0, p0, :other
+    const/4 v0, 0x0
+    sput-object v0, Luz/carhelper/passenger/SettingsActivity;->live:Luz/carhelper/passenger/SettingsActivity;
+    :other
+    invoke-super {p0}, Landroid/app/Activity;->onDestroy()V
+    return-void
+.end method
+
+# called (on the main thread, via SettingsRefresh) after Heal repaired something: reload the page so the Status rows
+# show it, unless the user has changed something on it that is not saved yet
+.method public static refresh()V
+    .locals 2
+    sget-object v0, Luz/carhelper/passenger/SettingsActivity;->live:Luz/carhelper/passenger/SettingsActivity;
+    if-eqz v0, :none
+    iget-boolean v1, v0, Luz/carhelper/passenger/SettingsActivity;->dirty:Z
+    if-nez v1, :none
+    invoke-virtual {v0}, Landroid/app/Activity;->isFinishing()Z
+    move-result v1
+    if-nez v1, :none
+    invoke-virtual {v0}, Landroid/app/Activity;->recreate()V
+    :none
     return-void
 .end method
 
@@ -1363,7 +1559,7 @@
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
     if-eqz v1, :not_adboff_click
-    const-string v1, "The car's ADB is off or not reachable. Turn on wireless ADB in the car's backend page, then tap Re-check status."
+    const-string v1, "The car's ADB is off or not reachable. Turn it on manually in the car's settings, then try again."
     invoke-static {v1}, Luz/carhelper/passenger/Lang;->t(Ljava/lang/String;)Ljava/lang/String;
     move-result-object v1
     const/4 v2, 0x1
@@ -1397,20 +1593,32 @@
     :catch_un
     return-void
     :not_uninstall_click
-    const-string v1, "#bubbleSecs"
+    const-string v1, "#secsMinus"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1
-    if-eqz v1, :not_bubble_secs
+    if-eqz v1, :not_secs_minus
+    iget v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    invoke-static {v1}, Luz/carhelper/passenger/SettingsActivity;->prevSecs(I)I
+    move-result v1
+    iput v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
+    const/4 v2, 0x1
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->dirty:Z
+    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->refreshSecs()V
+    return-void
+    :not_secs_minus
+    const-string v1, "#secsPlus"
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v1
+    if-eqz v1, :not_secs_plus
     iget v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
     invoke-static {v1}, Luz/carhelper/passenger/SettingsActivity;->nextSecs(I)I
     move-result v1
     iput v1, p0, Luz/carhelper/passenger/SettingsActivity;->bubbleSecs:I
-    invoke-static {v1}, Luz/carhelper/passenger/SettingsActivity;->secsText(I)Ljava/lang/String;
-    move-result-object v1
-    check-cast p1, Landroid/widget/TextView;
-    invoke-virtual {p1, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+    const/4 v2, 0x1
+    iput-boolean v2, p0, Luz/carhelper/passenger/SettingsActivity;->dirty:Z
+    invoke-direct {p0}, Luz/carhelper/passenger/SettingsActivity;->refreshSecs()V
     return-void
-    :not_bubble_secs
+    :not_secs_plus
     const-string v1, "#setpin"
     invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v1

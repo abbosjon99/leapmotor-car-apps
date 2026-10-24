@@ -39,5 +39,20 @@
     :try_end_1
     .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_1
     :catch_1
+    # keep trying after this: restart the bubbles if they stop, put Back back, open the grid once the passenger
+    # screen is on (Boot also logs which broadcast the car really sent: adb logcat -s LPBoot)
+    :try_start_2
+    invoke-virtual {p2}, Landroid/content/Intent;->getAction()Ljava/lang/String;
+    move-result-object v1
+    # a boot signal wants the grid opened; an update of the app (MY_PACKAGE_REPLACED) only restarts what the update
+    # stopped (bubbles, Back, notification access) and opens nothing
+    const-string v2, "android.intent.action.MY_PACKAGE_REPLACED"
+    invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v2
+    xor-int/lit8 v2, v2, 0x1
+    invoke-static {p1, v1, v2}, Luz/carhelper/passenger/boot/Boot;->kick(Landroid/content/Context;Ljava/lang/String;Z)V
+    :try_end_2
+    .catch Ljava/lang/Throwable; {:try_start_2 .. :try_end_2} :catch_2
+    :catch_2
     return-void
 .end method

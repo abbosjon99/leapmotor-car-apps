@@ -154,10 +154,14 @@
     invoke-virtual {v4, v5, v6}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V
 
     # RAM / temperature chip (what overload protection watches, coloured green / amber / red); not for the child
-    # on the passenger screen
+    # on the passenger screen, and only when Settings > Protection > "Show the RAM and temperature status" is on
     invoke-direct {p0}, Luz/carhelper/passenger/MainActivity;->kidActive()Z
     move-result v5
     if-nez v5, :no_health
+    const-string v5, "showStatus"
+    invoke-direct {p0, v5}, Luz/carhelper/passenger/MainActivity;->readBool(Ljava/lang/String;)Z
+    move-result v5
+    if-eqz v5, :no_health
     new-instance v5, Landroid/widget/TextView;
     invoke-direct {v5, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
     const/high16 v6, 0x41900000
@@ -1000,6 +1004,11 @@
     move-result v0
     if-nez v0, :refresh
     const-string v0, "hidden"
+    invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-nez v0, :refresh
+    # the status chip was switched on or off in Settings
+    const-string v0, "showStatus"
     invoke-virtual {v0, p2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v0
     if-nez v0, :refresh
